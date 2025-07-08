@@ -1,4 +1,26 @@
-.idea
+# Ignore Mac system files
+.DS_Store
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*.so
+
+# Ignore virtual environments
+venv/
+env/
+
+# Streamlit secrets
 .streamlit/secrets.toml
+
+# Environment variable files
 .env
-.gitignore
+
+# PyCharm / JetBrains IDE settings
+.idea/
+
+# Logs
+*.log
+
+# Ignore personal CSV/JSON datasets
+*.csv
