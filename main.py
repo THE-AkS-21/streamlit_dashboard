@@ -1,6 +1,7 @@
 import streamlit as st
 
-from pages import page1, page2, dashboard
+from app.pages import dashboard, page2, page1
+
 
 def login_screen():
     st.header("WELCOME TO THE BSC")
