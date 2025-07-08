@@ -1,6 +1,8 @@
 import streamlit as st
-from api.basic_api import add_numbers
-from utils.helper import greet_user
+
+from app.utils.basic_api import add_numbers
+from app.utils.helper import greet_user
+
 
 def show_first_page():
     # Title of the app

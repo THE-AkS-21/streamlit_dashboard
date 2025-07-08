@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+from dotenv import load_dotenv
+from app.config import AppConfig
 
 def show_dashboard():
     # Load CSV
