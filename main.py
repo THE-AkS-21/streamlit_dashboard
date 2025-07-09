@@ -1,7 +1,15 @@
 import streamlit as st
-
 from pages import dashboard, analytics, add, settings
+from app.utils.styles import load_css
 
+st.set_page_config(
+    page_title="Business Dashboard",
+    page_icon="📊",
+    layout="wide"
+)
+
+# Load custom CSS
+st.markdown(load_css(), unsafe_allow_html=True)
 
 def login_screen():
     st.header("WELCOME TO THE BSC")
@@ -15,7 +23,6 @@ else:
     pg = st.navigation([
         st.Page(dashboard.show_dashboard, title="Dashboard", icon="📊"),
         st.Page(analytics.show_analytics, title="Analytics", icon="📈"),
-        st.Page(add.show_add, title="Add Data", icon="➕"),
         st.Page(settings.show_settings, title="Settings", icon="⚙️"),
     ], position="top")
 
