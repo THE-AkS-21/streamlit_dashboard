@@ -1,7 +1,26 @@
-# app/utils/styles.py
 def load_css():
     return """
     <style>
+    .stButton>button {
+        width: 100%;
+    }
+
+    .chart-container {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .metric-container {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    /* Additional styles from your existing styles.py */
     .sidebar-hover {
         position: fixed;
         left: -300px;
@@ -18,14 +37,6 @@ def load_css():
         left: 0;
     }
 
-    .sidebar-hover:hover + .main-content {
-        filter: blur(5px);
-    }
-
-    .main-content {
-        transition: filter 0.3s ease;
-    }
-
     .nav-item {
         padding: 1rem;
         cursor: pointer;
@@ -34,17 +45,6 @@ def load_css():
 
     .nav-item:hover {
         background-color: #f0f2f6;
-    }
-
-    .stButton>button {
-        width: 100%;
-    }
-
-    .chart-container {
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .user-info {
