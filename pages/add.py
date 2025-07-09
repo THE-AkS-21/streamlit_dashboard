@@ -4,7 +4,7 @@ from app.utils.basic_api import add_numbers
 from app.utils.helper import greet_user
 
 
-def show_first_page():
+def show_add():
     # Title of the app
     st.title("ADD TWO NUMBERS")
 
