@@ -1,47 +1,103 @@
+from datetime import datetime
 import streamlit as st
-import pandas as pd
+from app.database.connection import db
+from app.database.queries.dashboard_queries import DashboardQueries
+from app.components.charts import ChartComponent
+from app.utils.formatters import Formatters
 
 def show_dashboard():
-    # Load CSV
-    df = pd.read_csv("business-price-indexes-march-2025.csv")
+    st.title("BSC Orders Dashboard")
 
-    # Convert Period to datetime (safe)
-    df["Period"] = pd.to_datetime(df["Period"], format='mixed', errors='coerce')  # invalid dates to NaT
+    with st.form(key='chart_form'):
+        sku = st.selectbox(
+            "Select SKU",
+            ["SHAVE_SENSITIVE_FOAM_264G"],
+            index=0
+        )
 
-    # Drop rows where Period couldn't be parsed
-    df = df.dropna(subset=["Period"])
+        col1, col2 = st.columns(2)
+        with col1:
+            start_date = st.date_input("Start Date", value=datetime(2024, 6, 1))
+        with col2:
+            end_date = st.date_input("End Date", value=datetime(2024, 6, 26))
 
-    # Extract available years
-    df["Year"] = df["Period"].dt.year
-    years = df["Year"].unique()
+        plot_button = st.form_submit_button(
+            label="Plot Data",
+            type="primary",
+            use_container_width=True
+        )
 
-    st.title("📊 Capital Goods Price Index Dashboard")
+    if plot_button:
+        try:
+            with st.spinner('Fetching and processing data...'):
+                orders_df = db.execute_query(
+                    DashboardQueries.MONTHLY_ORDERS,
+                    {
+                        'whsku': sku,
+                        'start_date': start_date,
+                        'end_date': end_date
+                    }
+                )
 
-    # If at least 2 years available, show slider
-    if len(years) >= 2:
-        min_year = int(df["Year"].min())
-        max_year = int(df["Year"].max())
+                if orders_df.empty:
+                    st.warning("No data found for the selected criteria.")
+                else:
+                    metrics = [
+                        {
+                            'label': 'Total Units',
+                            'value': Formatters.number(orders_df['value'].sum())
+                        },
+                        {
+                            'label': 'Average Daily Units',
+                            'value': Formatters.number(orders_df['value'].mean())
+                        },
+                        {
+                            'label': 'Days with Orders',
+                            'value': Formatters.number(len(orders_df))
+                        }
+                    ]
 
-        start_year, end_year = st.sidebar.slider("Select Year Range:",
-                                                 min_value=min_year,
-                                                 max_value=max_year,
-                                                 value=(min_year, max_year))
+                    st.subheader("📊 Dashboard Metrics")
+                    ChartComponent.metric_cards(metrics)
 
-        # Filter by selected year range
-        filtered_df = df[(df["Year"] >= start_year) & (df["Year"] <= end_year)]
+                    st.subheader(f"📈 Daily Orders Trend for {sku}")
+
+                    tab1, tab2 = st.tabs(["Interactive Chart", "Raw Data"])
+
+                    with tab1:
+                        ChartComponent.orders_chart(orders_df, key=f"{sku}_{start_date}_{end_date}")
+
+                        st.caption("""
+                        💡 **Chart Tips:**
+                        - Hover over the chart to see exact values
+                        - Click and drag to zoom
+                        - Double-click to reset zoom
+                        - Use mouse wheel to scroll through time
+                        """)
+
+                    with tab2:
+                        display_df = orders_df.copy()
+                        display_df.columns = ['Date', 'Units']
+                        st.dataframe(display_df.style.format({'Units': '{:,.0f}'}), use_container_width=True)
+
+                    csv = orders_df.to_csv(index=False)
+                    st.download_button(
+                        label="Download Data as CSV",
+                        data=csv,
+                        file_name=f'orders_data_{sku}_{start_date}_{end_date}.csv',
+                        mime='text/csv',
+                        use_container_width=True
+                    )
+
+        except Exception as e:
+            st.error(f"Error loading dashboard data: {str(e)}")
+
     else:
-        st.sidebar.warning("Not enough year data for range selection. Showing all data.")
-        filtered_df = df
+        st.info("""
+        👋 **Welcome to the BSC Orders Dashboard!**
 
-    # Show filtered data
-    st.subheader("Capital Goods Price Index Data")
-    st.dataframe(filtered_df[["Period", "Data_value"]])
-
-    # Line chart
-    st.subheader("📈 Price Index Trend")
-    if not filtered_df.empty:
-        st.line_chart(filtered_df.set_index("Period")["Data_value"])
-    else:
-        st.info("No data available for selected period.")
-
-    st.button("Log out", on_click=st.logout)
+        To get started:
+        1. Select your SKU from the dropdown
+        2. Choose your date range
+        3. Click the "Plot Data" button to generate the visualization
+        """)
