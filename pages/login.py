@@ -11,7 +11,7 @@ def show_login_page():
     # Check if already authenticated
     if st.session_state.get('authenticated', False):
         if session_manager.check_session_validity():
-            st.switch_page("pages/2_Dashboard.py")
+            st.switch_page("pages/dashboard.py")
             return
 
     st.title("🔐 Login")
