@@ -1,25 +1,21 @@
 import streamlit as st
+from app.utils.session import SessionManager
 
-from app.pages import dashboard, page2, page1
-
-
-def login_screen():
-    st.header("WELCOME TO THE BSC")
-    st.subheader("Please log in.")
-    if st.button("Log in with Google"):
-         st.login()
-
-if not st.user.is_logged_in:
-    login_screen()
-else:
-    pg = st.navigation([
-        st.Page(dashboard.show_dashboard, title="DASHBOARD", icon="📊"),
-        st.Page(page1.show_first_page, title="ADD 2 NUMBERS", icon="🏠"),
-        st.Page(page2.show_second_page, title="SECOND PAGE", icon="📊"),
-    ], position="top")
-
-    # Run the selected page
-    pg.run()
+st.set_page_config(
+    page_title="Analytics Dashboard",
+    page_icon="📊",
+    layout="wide"
+)
 
 
+def main():
+    SessionManager.init_session()
 
+    if st.session_state.get("authenticated", False):
+        st.switch_page("pages/2_Dashboard.py")
+    else:
+        st.switch_page("pages/1_Login.py")
+
+
+if __name__ == "__main__":
+    main()
