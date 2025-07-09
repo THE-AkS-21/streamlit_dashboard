@@ -1,7 +1,15 @@
 import streamlit as st
+from pages import dashboard, analytics, add, settings
+from app.utils.styles import load_css
 
-from app.pages import dashboard, page2, page1
+st.set_page_config(
+    page_title="Business Dashboard",
+    page_icon="📊",
+    layout="wide"
+)
 
+# Load custom CSS
+st.markdown(load_css(), unsafe_allow_html=True)
 
 def login_screen():
     st.header("WELCOME TO THE BSC")
@@ -13,13 +21,12 @@ if not st.user.is_logged_in:
     login_screen()
 else:
     pg = st.navigation([
-        st.Page(dashboard.show_dashboard, title="DASHBOARD", icon="📊"),
-        st.Page(page1.show_first_page, title="ADD 2 NUMBERS", icon="🏠"),
-        st.Page(page2.show_second_page, title="SECOND PAGE", icon="📊"),
+        st.Page(dashboard.show_dashboard, title="Dashboard", icon="📊"),
+        st.Page(analytics.show_analytics, title="Analytics", icon="📈"),
+        st.Page(settings.show_settings, title="Settings", icon="⚙️"),
     ], position="top")
 
     # Run the selected page
     pg.run()
-
 
 

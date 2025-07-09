@@ -1,6 +1,11 @@
 streamlit==1.46.1
-Authlib==1.6.0
 pandas==2.3.1
 SQLAlchemy==2.0.41
-psycopg2-binary==2.9.10
+plotly==5.18.0
 python-dotenv==1.1.1
+psycopg2-binary==2.9.10
+google-auth-oauthlib==1.0.0
+google-auth-httplib2==0.1.0
+google-api-python-client==2.86.0
+extra-streamlit-components==0.1.56
+streamlit-lightweight-charts==0.5.1

@@ -1,13 +1,32 @@
-# app/database/connection.py
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.config import DatabaseConfig
 
-def get_database_url(config: DatabaseConfig) -> str:
-    return f"postgresql://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
+from sqlalchemy import create_engine, text
+from contextlib import contextmanager
+import pandas as pd
+import streamlit as st
 
-def create_db_engine(config: DatabaseConfig):
-    return create_engine(get_database_url(config))
+class DatabaseConnection:
+    def __init__(self):
+        self.engine = create_engine(
+            f"postgresql://{st.secrets.postgres.user}:{st.secrets.postgres.password}@"
+            f"{st.secrets.postgres.host}:{st.secrets.postgres.port}/{st.secrets.postgres.dbname}"
+        )
 
-def get_session_maker(engine):
-    return sessionmaker(bind=engine)
+    @contextmanager
+    def get_connection(self):
+        conn = self.engine.connect()
+        try:
+            yield conn
+        finally:
+            conn.close()
+            self.engine.dispose()
+
+    def execute_query(self, query: str, params: dict = None) -> pd.DataFrame:
+        with self.get_connection() as conn:
+            return pd.read_sql_query(text(query), conn, params=params)
+
+    def execute_write_query(self, query: str, params: dict = None) -> None:
+        with self.get_connection() as conn:
+            conn.execute(text(query), params or {})
+            conn.commit()
+
+db = DatabaseConnection()
