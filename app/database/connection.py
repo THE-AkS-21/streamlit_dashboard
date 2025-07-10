@@ -4,12 +4,16 @@ from contextlib import contextmanager
 import pandas as pd
 import streamlit as st
 
+@st.cache_resource(show_spinner="Connecting to Database...")
+def get_engine():
+    return create_engine(
+        f"postgresql://{st.secrets.postgres.user}:{st.secrets.postgres.password}@"
+        f"{st.secrets.postgres.host}:{st.secrets.postgres.port}/{st.secrets.postgres.dbname}"
+    )
+
 class DatabaseConnection:
     def __init__(self):
-        self.engine = create_engine(
-            f"postgresql://{st.secrets.postgres.user}:{st.secrets.postgres.password}@"
-            f"{st.secrets.postgres.host}:{st.secrets.postgres.port}/{st.secrets.postgres.dbname}"
-        )
+        self.engine = get_engine()
 
     @contextmanager
     def get_connection(self):
