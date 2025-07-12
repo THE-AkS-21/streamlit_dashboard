@@ -1,41 +1,51 @@
 import streamlit as st
+from app.utils.icon_loader import load_icon
 
 def render_navbar():
-    st.markdown("""
+    st.markdown(f"""
         <style>
-        .custom-navbar {
+        .custom-navbar {{
             position: fixed;
             top: 0;
             left: 0;
-            height: 60px;
+            height: 50px;
             width: 100%;
             background-color: #E5E7EB;
-            border-bottom: 1px solid #D1D5DB;
             display: flex;
             align-items: center;
-            padding: 0 20px;
-            z-index: 1000;
-        }
-        .custom-navbar h1 {
+            padding: 0 14px;
+            
+        }}
+        .navbar-logo {{
+            width: 26px;
+            height: 26px;
+            margin-right: 8px;
+        }}
+        .navbar-title {{
+            font-size: 0.5rem;
+            font-weight: 500;
+            color: #00AEEF;
             margin: 0;
-            font-size: 1.5rem;
-            color: black;
+            padding: 0;
             flex: 1;
-        }
-        .hamburger {
-            font-size: 26px;
+            line-height: 1;
+            white-space: nowrap;
+        }}
+        .hamburger {{
+            font-size: 22px;
             cursor: pointer;
             display: none;
-        }
-        @media screen and (max-width: 768px) {
-            .hamburger {
+        }}
+        @media screen and (max-width: 768px) {{
+            .hamburger {{
                 display: block;
-            }
-        }
+            }}
+        }}
         </style>
 
         <div class="custom-navbar">
-            <h1>📊 BSC Dashboard</h1>
+            <img src="{load_icon('logo.png')}" class="navbar-logo">
+            <p class="navbar-title">Bombay Shaving Company</p>
             <div class="hamburger" onclick="document.querySelector('.custom-sidebar').classList.toggle('show')">☰</div>
         </div>
     """, unsafe_allow_html=True)

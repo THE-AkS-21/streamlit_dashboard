@@ -6,6 +6,7 @@ from app.components.charts import ChartComponent
 from app.utils.formatters import Formatters
 
 def show_dashboard():
+    st.markdown('<div class="custom-content">', unsafe_allow_html=True)
     st.markdown("## 📊 BSC Orders Dashboard")
 
     st.markdown("""
@@ -143,3 +144,6 @@ def show_dashboard():
         2. Pick a date range
         3. Click **Plot Data** to visualize
         """)
+
+    # Close content wrapper div
+    st.markdown('</div>', unsafe_allow_html=True)
