@@ -7,7 +7,7 @@ from app.utils.formatters import Formatters
 
 def show_dashboard():
     st.markdown('<div class="custom-content">', unsafe_allow_html=True)
-    st.markdown("## 📊 Bombay Shaving Company Dashboard")
+    st.markdown("## Bombay Shaving Company Dashboard")
 
     st.markdown("""
         <style>
@@ -40,7 +40,7 @@ def show_dashboard():
 
     with st.container():
         with st.form(key='chart_form'):
-            st.markdown("### 📦 Filter Parameters")
+            st.markdown("### Filter Parameters")
 
             col1, col2, col3 = st.columns([2, 2, 1])
             with col1:
@@ -53,7 +53,7 @@ def show_dashboard():
             st.markdown("<br>", unsafe_allow_html=True)
 
             plot_button = st.form_submit_button(
-                label="📊 Plot Data",
+                label="Plot Data",
                 type="primary",
                 use_container_width=True
             )
@@ -69,7 +69,7 @@ def show_dashboard():
                 if orders_df.empty:
                     st.warning("⚠️ No data found for the selected criteria.")
                 else:
-                    st.markdown("### 📈 Dashboard Metrics")
+                    st.markdown("### Dashboard Metrics")
 
                     col1, col2, col3 = st.columns(3)
                     metrics = [
@@ -87,9 +87,9 @@ def show_dashboard():
                                 </div>
                             """, unsafe_allow_html=True)
 
-                    st.markdown(f"### 📊 Daily Orders Trend for **{sku}**")
+                    st.markdown(f"### Daily Orders Trend for **{sku}**")
 
-                    tab1, tab2 = st.tabs(["📈 Interactive Chart", "📄 Raw Data"])
+                    tab1, tab2 = st.tabs(["Interactive Chart", "Raw Data"])
 
                     with tab1:
                         ChartComponent.orders_chart(orders_df, key=f"{sku}_{start_date}_{end_date}")
