@@ -24,18 +24,16 @@ class AppConfig:
 
 def init_page_config():
     st.set_page_config(
-        page_title="Custom Dashboard",
+        page_title="BSC Dashboard",
         page_icon="📊",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
 
-def hide_streamlit_style():
+def hide_streamlit_default():
     st.markdown("""
         <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            [data-testid="collapsedControl"] {display: none;}
+        #MainMenu, footer, header {visibility: hidden;}
+        [data-testid="collapsedControl"] {display: none;}
         </style>
     """, unsafe_allow_html=True)
