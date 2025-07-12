@@ -13,39 +13,51 @@ def render_navbar():
             background-color: #E5E7EB;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 14px;
-            
+            z-index: 1000;
         }}
         .navbar-logo {{
-            width: 26px;
-            height: 26px;
-            margin-right: 8px;
+            width: 22px;
+            height: 22px;
         }}
         .navbar-title {{
-            font-size: 0.5rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
             color: #00AEEF;
             margin: 0;
             padding: 0;
-            flex: 1;
             line-height: 1;
-            white-space: nowrap;
         }}
         .hamburger {{
-            font-size: 22px;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
             display: none;
         }}
+        /* Mobile-only adjustments */
         @media screen and (max-width: 768px) {{
             .hamburger {{
                 display: block;
+            }}
+
+            .navbar-left {{
+                display: none;
+            }}
+
+            .navbar-title {{
+                flex: 1;
+                text-align: center;
             }}
         }}
         </style>
 
         <div class="custom-navbar">
-            <img src="{load_icon('logo.png')}" class="navbar-logo">
-            <p class="navbar-title">Bombay Shaving Company</p>
-            <div class="hamburger" onclick="document.querySelector('.custom-sidebar').classList.toggle('show')">☰</div>
+            <img src="{load_icon('menu.png')}" class="hamburger" onclick="document.body.classList.toggle('sidebar-open')">
+            <div class="navbar-left">
+                <img src="{load_icon('logo.png')}" class="navbar-logo">
+                <p class="navbar-title">Bombay Shaving Company</p>
+            </div>
+    
         </div>
     """, unsafe_allow_html=True)
