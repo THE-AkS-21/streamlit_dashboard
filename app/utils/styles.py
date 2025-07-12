@@ -1,10 +1,18 @@
 def load_css():
     return """
     <style>
-    .stButton>button {
-        width: 100%;
+    h2 {
+        color: #2962FF;
     }
-
+    .stButton>button {
+        border-radius: 6px;
+        background-color: #2962FF;
+        color: white;
+        padding: 8px 20px;
+    }
+    .stButton>button:hover {
+        background-color: #0039cb;
+    }
     .chart-container {
         background: white;
         padding: 1rem;

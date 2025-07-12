@@ -1,7 +1,7 @@
 # config.py - Central configuration
 from dataclasses import dataclass
 from typing import Optional
-
+import streamlit as st
 
 @dataclass
 class PageConfig:
@@ -22,12 +22,20 @@ class AppConfig:
         # Load configuration from environment variables
         pass
 
-
 def init_page_config():
-    # Initialize Streamlit page configuration
-    pass
+    st.set_page_config(
+        page_title="Custom Dashboard",
+        page_icon="📊",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
 
-
-def hide_navigation():
-    # Hide navigation elements
-    pass
+def hide_streamlit_style():
+    st.markdown("""
+        <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            [data-testid="collapsedControl"] {display: none;}
+        </style>
+    """, unsafe_allow_html=True)
