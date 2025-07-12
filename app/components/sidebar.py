@@ -1,6 +1,7 @@
 import streamlit as st
 from app.utils.icon_loader import load_icon
 
+@st.cache_resource(show_spinner=False)
 def render_sidebar():
     st.markdown(f"""
         <style>
@@ -17,6 +18,11 @@ def render_sidebar():
             padding-top: 3px;
         }}
 
+        .custom-sidebar a {{
+            text-decoration: none !important;
+            color: inherit;
+        }}
+
         .custom-sidebar:hover {{
             width: 180px;
         }}
@@ -29,7 +35,6 @@ def render_sidebar():
             border-radius: 10px;
             color: #111827;
             font-weight: 500;
-            text-decoration: none;
             transition: background-color 0.25s, transform 0.2s;
         }}
 
@@ -37,12 +42,6 @@ def render_sidebar():
             background-color: #E0E7FF;
             transform: translateX(4px);
             border-left: 4px solid #00AEEF;
-            text-decoration: none;
-        }}
-
-        /* Prevent underline on all states */
-        .sidebar-item, .sidebar-item:visited, .sidebar-item:hover, .sidebar-item:active {{
-            text-decoration: none;
         }}
 
         .sidebar-icon {{
@@ -63,7 +62,7 @@ def render_sidebar():
             white-space: nowrap;
             font-size: 0.95rem;
             font-weight: 500;
-            color: #374151;
+            color: #60A5FA;
             margin-left: 12px;
             opacity: 0;
             transition: opacity 0.3s ease, color 0.3s ease;
@@ -105,15 +104,15 @@ def render_sidebar():
         <div class="custom-sidebar">
             <a href="/?page=Dashboard" target="_self" class="sidebar-item">
                 <img src="{load_icon('home.png')}" class="sidebar-icon">
-                <div class="sidebar-label">Home</div>
+                <span class="sidebar-label">Home</span>
             </a>
             <a href="/?page=Analytics" target="_self" class="sidebar-item">
                 <img src="{load_icon('analytics.png')}" class="sidebar-icon">
-                <div class="sidebar-label">Analytics</div>
+                <span class="sidebar-label">Analytics</span>
             </a>
             <a href="/?page=Settings" target="_self" class="sidebar-item">
                 <img src="{load_icon('settings.png')}" class="sidebar-icon">
-                <div class="sidebar-label">Settings</div>
+                <span class="sidebar-label">Settings</span>
             </a>
         </div>
     """, unsafe_allow_html=True)
