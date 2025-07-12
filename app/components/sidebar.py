@@ -2,9 +2,9 @@ import streamlit as st
 from app.utils.icon_loader import load_icon
 
 def render_sidebar():
-    st.markdown("""
+    st.markdown(f"""
         <style>
-        .custom-sidebar {
+        .custom-sidebar {{
             position: fixed;
             top: 60px;
             left: 0;
@@ -15,64 +15,74 @@ def render_sidebar():
             transition: width 0.3s;
             overflow-x: hidden;
             z-index: 900;
-        }
-        .custom-sidebar:hover {
+        }}
+        .custom-sidebar:hover {{
             width: 220px;
-        }
-        .custom-sidebar.show {
-            left: 0;
-        }
-        .sidebar-item {
+        }}
+        .sidebar-item {{
             display: flex;
             align-items: center;
             padding: 16px;
             cursor: pointer;
             color: black;
-        }
-        .sidebar-item:hover {
+        }}
+        .sidebar-item:hover {{
             background-color: #F3F4F6;
-        }
-        .sidebar-icon {
+        }}
+        .sidebar-icon {{
             width: 22px;
             height: 22px;
             margin-right: 12px;
-        }
-        .sidebar-label {
+        }}
+        .sidebar-label {{
             opacity: 0;
             transition: opacity 0.3s;
-        }
-        .custom-sidebar:hover .sidebar-label {
+            white-space: nowrap;
+        }}
+        .custom-sidebar:hover .sidebar-label {{
             opacity: 1;
-        }
-        @media screen and (max-width: 768px) {
-            .custom-sidebar {
+        }}
+        .custom-content {{
+            margin-top: 60px;
+            margin-left: 70px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }}
+        .custom-sidebar:hover ~ .custom-content {{
+            margin-left: 220px;
+        }}
+        @media screen and (max-width: 768px) {{
+            .custom-sidebar {{
                 left: -220px;
                 width: 220px;
-            }
-            .custom-sidebar.show {
+            }}
+            .custom-sidebar.show {{
                 left: 0;
-            }
-        }
+            }}
+            .custom-content {{
+                margin-left: 0;
+            }}
+        }}
         </style>
+
         <div class="custom-sidebar">
+            <a href="/?page=Dashboard" target="_self">
+                <div class="sidebar-item">
+                    <img src="{load_icon('home.svg')}" class="sidebar-icon">
+                    <div class="sidebar-label">Dashboard</div>
+                </div>
+            </a>
+            <a href="/?page=Analytics" target="_self">
+                <div class="sidebar-item">
+                    <img src="{load_icon('analytics.png')}" class="sidebar-icon">
+                    <div class="sidebar-label">Analytics</div>
+                </div>
+            </a>
+            <a href="/?page=Settings" target="_self">
+                <div class="sidebar-item">
+                    <img src="{load_icon('settings.png')}" class="sidebar-icon">
+                    <div class="sidebar-label">Settings</div>
+                </div>
+            </a>
+        </div>
     """, unsafe_allow_html=True)
-
-    pages = {
-        "Dashboard": "home.svg",
-        "Analytics": "analytics.png",
-        "Settings": "settings.png"
-    }
-
-    for page, icon_file in pages.items():
-        icon = load_icon(icon_file)
-        if st.button(f" {page}", key=page):
-            st.session_state["current_page"] = page
-
-        st.markdown(f"""
-            <div class="sidebar-item">
-                <img src="{icon}" class="sidebar-icon">
-                <div class="sidebar-label">{page}</div>
-            </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
