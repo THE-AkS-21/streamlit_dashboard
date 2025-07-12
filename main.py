@@ -2,17 +2,15 @@ import streamlit as st
 from app.components.layout import render_layout
 from app.pages import dashboard, analytics, settings
 from app.constants import pages
-from app.utils.global_styles import inject_global_css, remove_default_spacing, remove_streamlit_padding
-from app.utils.styles import load_css
+from app.utils.global_styles import remove_all_top_spacing
 from config import init_page_config, hide_streamlit_default
 
 init_page_config()
-load_css()
-inject_global_css()
-remove_default_spacing()
-remove_streamlit_padding()
+remove_all_top_spacing()
 hide_streamlit_default()
-render_layout()
+
+if __name__ == "__main__":
+    render_layout()
 
 current_page = st.session_state.get("current_page", pages.DASHBOARD)
 

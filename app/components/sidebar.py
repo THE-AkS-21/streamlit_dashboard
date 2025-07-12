@@ -3,47 +3,49 @@ from app.utils.icon_loader import load_icon
 
 @st.cache_resource(show_spinner=False)
 def render_sidebar():
+    """Render responsive sidebar with mobile toolbar integration"""
     st.markdown(f"""
         <style>
+        :root {{
+            --accent: #00AEEF;
+            --sidebar-bg: #F3F4F6;
+            --hover-bg: #D1D5DB;
+            --text-main: #111827;
+        }}
         .custom-sidebar {{
             position: fixed;
-            top: 50px;
+            top: 60px; /* ← 30px navbar + 30px toolbar */
             left: 0;
-            height: calc(100% - 50px);
+            height: calc(100% - 60px);
             width: 50px;
-            background-color: #E5E7EB;
-            transition: width 0.3s ease;
+            background-color: var(--sidebar-bg);
+            transition: width 0.3s ease, left 0.3s ease;
             overflow-x: hidden;
             z-index: 900;
             padding-top: 3px;
         }}
-
         .custom-sidebar a {{
             text-decoration: none !important;
             color: inherit;
         }}
-
         .custom-sidebar:hover {{
             width: 180px;
         }}
-
         .sidebar-item {{
             display: flex;
             align-items: center;
             padding: 5px 2px;
             margin: 6px 12px;
             border-radius: 10px;
-            color: #111827;
+            color: var(--text-main);
             font-weight: 500;
             transition: background-color 0.25s, transform 0.2s;
         }}
-
         .sidebar-item:hover {{
-            background-color: #E0E7FF;
+            background-color: var(--hover-bg);
             transform: translateX(4px);
-            border-left: 4px solid #00AEEF;
+            border-left: 4px solid var(--accent);
         }}
-
         .sidebar-icon {{
             width: 28px;
             height: 28px;
@@ -55,7 +57,6 @@ def render_sidebar():
             transition: all 0.3s ease;
             margin-right: 0;
         }}
-
         .sidebar-label {{
             display: inline-block;
             overflow: hidden;
@@ -67,26 +68,21 @@ def render_sidebar():
             opacity: 0;
             transition: opacity 0.3s ease, color 0.3s ease;
         }}
-
         .custom-sidebar:hover .sidebar-label {{
             opacity: 1;
         }}
-
         .sidebar-item:hover .sidebar-label {{
             color: #00AEEF;
         }}
-
         .custom-content {{
-            margin-top: 50px;
+            margin-top: 60px;
             margin-left: 70px;
             padding: 20px;
             transition: margin-left 0.3s ease;
         }}
-
         .custom-sidebar:hover ~ .custom-content {{
             margin-left: 220px;
         }}
-
         @media screen and (max-width: 768px) {{
             .custom-sidebar {{
                 left: -220px;

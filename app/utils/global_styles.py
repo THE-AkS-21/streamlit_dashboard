@@ -53,3 +53,39 @@ def remove_streamlit_padding():
         }
         </style>
     """, unsafe_allow_html=True)
+
+def remove_all_top_spacing():
+    st.markdown("""
+        <style>
+        html, body {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+        main {
+            padding-top: 0px !important;
+            margin-top: 0px !important;
+        }
+        section.main {
+            padding-top: 0px !important;
+            margin-top: 0px !important;
+        }
+        section.main > div.block-container {
+            padding-top: 0px !important;
+            margin-top: 0px !important;
+        }
+        [data-testid="stAppViewContainer"] {
+            padding-top: 0px !important;
+            margin-top: 0px !important;
+        }
+        [data-testid="stVerticalBlock"],
+        [data-testid="stHorizontalBlock"],
+        [data-testid="stMarkdownContainer"] {
+            padding-top: 0px !important;
+            margin-top: 0px !important;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            padding-top: 0px !important;
+            margin-top: 0px !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
