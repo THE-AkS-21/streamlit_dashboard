@@ -5,12 +5,10 @@ from app.components.sidebar import render_sidebar
 def render_layout():
     render_navbar()
     render_sidebar()
-
-    # Add a dynamic content area
     st.markdown("""
         <style>
         .custom-content {
-            margin-top: 60px;
+            margin-top: 50px;
             margin-left: 70px;
             padding: 20px;
             transition: margin-left 0.3s ease;

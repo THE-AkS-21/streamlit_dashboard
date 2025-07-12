@@ -9,21 +9,22 @@ def render_sidebar():
             top: 50px;
             left: 0;
             height: calc(100% - 50px);
-            width: 70px;
+            width: 50px;
             background-color: #E5E7EB;
             transition: width 0.3s ease;
             overflow-x: hidden;
             z-index: 900;
-            padding-top: 20px;
+            padding-top: 3px;
         }}
+
         .custom-sidebar:hover {{
-            width: 220px;
+            width: 180px;
         }}
 
         .sidebar-item {{
             display: flex;
             align-items: center;
-            padding: 12px 16px;
+            padding: 5px 2px;
             margin: 6px 12px;
             border-radius: 10px;
             color: #111827;
@@ -35,14 +36,25 @@ def render_sidebar():
         .sidebar-item:hover {{
             background-color: #E0E7FF;
             transform: translateX(4px);
-            border-left: 4px solid #2563EB;
+            border-left: 4px solid #00AEEF;
+            text-decoration: none;
+        }}
+
+        /* Prevent underline on all states */
+        .sidebar-item, .sidebar-item:visited, .sidebar-item:hover, .sidebar-item:active {{
+            text-decoration: none;
         }}
 
         .sidebar-icon {{
             width: 28px;
             height: 28px;
-            flex-shrink: 0;
+            flex: 0 0 auto;
+            min-width: 28px;
+            max-width: 28px;
+            min-height: 28px;
+            max-height: 28px;
             transition: all 0.3s ease;
+            margin-right: 0;
         }}
 
         .sidebar-label {{
@@ -54,11 +66,15 @@ def render_sidebar():
             color: #374151;
             margin-left: 12px;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, color 0.3s ease;
         }}
 
         .custom-sidebar:hover .sidebar-label {{
             opacity: 1;
+        }}
+
+        .sidebar-item:hover .sidebar-label {{
+            color: #00AEEF;
         }}
 
         .custom-content {{

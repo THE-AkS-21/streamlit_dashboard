@@ -2,6 +2,9 @@ import streamlit as st
 from app.utils.icon_loader import load_icon
 
 def render_navbar():
+    if "sidebar_open" not in st.session_state:
+        st.session_state.sidebar_open = False
+
     st.markdown(f"""
         <style>
         .custom-navbar {{
@@ -35,16 +38,13 @@ def render_navbar():
             cursor: pointer;
             display: none;
         }}
-        /* Mobile-only adjustments */
         @media screen and (max-width: 768px) {{
             .hamburger {{
                 display: block;
             }}
-
             .navbar-left {{
                 display: none;
             }}
-
             .navbar-title {{
                 flex: 1;
                 text-align: center;
@@ -53,11 +53,19 @@ def render_navbar():
         </style>
 
         <div class="custom-navbar">
-            <img src="{load_icon('menu.png')}" class="hamburger" onclick="document.body.classList.toggle('sidebar-open')">
+            <img src="{load_icon('menu.png')}" class="hamburger" onclick="window.parent.postMessage({{toggleSidebar: true}}, '*')">
             <div class="navbar-left">
                 <img src="{load_icon('logo.png')}" class="navbar-logo">
                 <p class="navbar-title">Bombay Shaving Company</p>
             </div>
-    
         </div>
+
+        <script>
+        window.addEventListener("message", (event) => {{
+            if (event.data.toggleSidebar) {{
+                const sidebar = document.querySelector('.custom-sidebar');
+                sidebar.classList.toggle('show');
+            }}
+        }});
+        </script>
     """, unsafe_allow_html=True)
