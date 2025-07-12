@@ -6,6 +6,10 @@ from app.database.queries.dashboard_queries import DashboardQueries
 from app.components.charts import ChartComponent
 from app.utils.formatters import Formatters
 
+@st.cache_data(ttl=3600, show_spinner="🔄 Loading filter metadata...")
+def get_dashboard_metadata():
+    return db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
+
 def show_dashboard():
     render_content_start()
     st.markdown("## Bombay Shaving Company Dashboard")
@@ -38,25 +42,50 @@ def show_dashboard():
         </style>
     """, unsafe_allow_html=True)
 
+    metadata_df = get_dashboard_metadata()
+
+    categories = sorted([c for c in metadata_df['category'].unique() if c is not None])
+    subcategories = sorted([sc for sc in metadata_df['subcategory'].unique() if sc is not None])
+    skus = sorted([s for s in metadata_df['sku'].unique() if s is not None])
+    last_date = metadata_df['last_date'].max()  # or .iloc[0] as it's same value repeated
+
     with st.container():
         with st.form(key='chart_form'):
             st.markdown("### Filter Parameters")
 
-            col1, col2, col3 = st.columns([2, 2, 1])
+            col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5])
+
             with col1:
-                sku = st.selectbox("Select SKU", ["SHAVE_SENSITIVE_FOAM_264G"], index=0)
+                category = st.selectbox("Category", categories)
+
             with col2:
-                start_date = st.date_input("Start Date", value=datetime(2024, 6, 1))
+                subcategory = st.selectbox("Subcategory", subcategories)
+
             with col3:
-                end_date = st.date_input("End Date", value=datetime(2024, 6, 26))
+                sku = st.selectbox("SKU", skus)
+
+            with col4:
+                start_date = st.date_input("Start Date", value=datetime(2024, 6, 1))
+
+            with col5:
+                end_date = st.date_input("End Date", value=last_date)
 
             st.markdown("<br>", unsafe_allow_html=True)
 
-            plot_button = st.form_submit_button(
-                label="Generate Report",
-                type="primary",
-                use_container_width=True
-            )
+            action_col1, action_col2 = st.columns([2, 1])
+
+            with action_col1:
+                plot_button = st.form_submit_button(
+                    label="Generate Report",
+                    type="primary",
+                    use_container_width=True
+                )
+
+            with action_col2:
+                if st.form_submit_button("Fetch", use_container_width=True):
+                    st.cache_data.clear()
+                    st.cache_resource.clear()
+
 
     if plot_button:
         try:
