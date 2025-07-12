@@ -6,8 +6,9 @@ from app.components.charts import ChartComponent
 from app.utils.formatters import Formatters
 
 def show_dashboard():
-    st.markdown('<div>', unsafe_allow_html=True)
-    st.markdown("## Bombay Shaving Company Dashboard")
+    st.markdown('<div class="custom-content">', unsafe_allow_html=True)
+    st.markdown("## 📊 Bombay Shaving Company Dashboard")
+
     st.markdown("""
         <style>
         .form-container {
@@ -43,11 +44,7 @@ def show_dashboard():
 
             col1, col2, col3 = st.columns([2, 2, 1])
             with col1:
-                sku = st.selectbox(
-                    "Select SKU",
-                    ["SHAVE_SENSITIVE_FOAM_264G"],
-                    index=0
-                )
+                sku = st.selectbox("Select SKU", ["SHAVE_SENSITIVE_FOAM_264G"], index=0)
             with col2:
                 start_date = st.date_input("Start Date", value=datetime(2024, 6, 1))
             with col3:
@@ -66,11 +63,7 @@ def show_dashboard():
             with st.spinner('📡 Fetching and processing data...'):
                 orders_df = db.execute_query(
                     DashboardQueries.MONTHLY_ORDERS,
-                    {
-                        'whsku': sku,
-                        'start_date': start_date,
-                        'end_date': end_date
-                    }
+                    {'whsku': sku, 'start_date': start_date, 'end_date': end_date}
                 )
 
                 if orders_df.empty:
@@ -80,18 +73,9 @@ def show_dashboard():
 
                     col1, col2, col3 = st.columns(3)
                     metrics = [
-                        {
-                            'label': 'Total Units',
-                            'value': Formatters.number(orders_df['value'].sum())
-                        },
-                        {
-                            'label': 'Average Daily Units',
-                            'value': Formatters.number(orders_df['value'].mean())
-                        },
-                        {
-                            'label': 'Days with Orders',
-                            'value': Formatters.number(len(orders_df))
-                        }
+                        {'label': 'Total Units', 'value': Formatters.number(orders_df['value'].sum())},
+                        {'label': 'Average Daily Units', 'value': Formatters.number(orders_df['value'].mean())},
+                        {'label': 'Days with Orders', 'value': Formatters.number(len(orders_df))}
                     ]
 
                     for i, col in enumerate([col1, col2, col3]):
@@ -144,5 +128,4 @@ def show_dashboard():
         3. Click **Plot Data** to visualize
         """)
 
-    # Close content wrapper div
     st.markdown('</div>', unsafe_allow_html=True)

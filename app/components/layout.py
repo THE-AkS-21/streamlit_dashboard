@@ -5,6 +5,7 @@ from app.components.sidebar import render_sidebar
 def render_layout():
     render_navbar()
     render_sidebar()
+
     st.markdown("""
         <style>
         .custom-content {

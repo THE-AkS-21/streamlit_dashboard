@@ -1,5 +1,5 @@
-# Centralized page name constants
+# Centralized page constants
 
-DASHBOARD = "dashboard"
-ANALYTICS = "analytics"
-SETTINGS = "settings"
+DASHBOARD = "Dashboard"
+ANALYTICS = "Analytics"
+SETTINGS = "Settings"

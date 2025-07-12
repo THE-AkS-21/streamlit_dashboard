@@ -1,6 +1,7 @@
 import streamlit as st
 from app.utils.icon_loader import load_icon
 
+@st.cache_resource(show_spinner=False)
 def render_navbar():
     if "sidebar_open" not in st.session_state:
         st.session_state.sidebar_open = False
@@ -38,6 +39,11 @@ def render_navbar():
             cursor: pointer;
             display: none;
         }}
+        .navbar-left {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
         @media screen and (max-width: 768px) {{
             .hamburger {{
                 display: block;
@@ -54,7 +60,7 @@ def render_navbar():
 
         <div class="custom-navbar">
             <img src="{load_icon('menu.png')}" class="hamburger" onclick="window.parent.postMessage({{toggleSidebar: true}}, '*')">
-            <div class="navbar-left">
+            <div class="navbar-left" style="display:flex; align-items:center; gap:10px;">
                 <img src="{load_icon('logo.png')}" class="navbar-logo">
                 <p class="navbar-title">Bombay Shaving Company</p>
             </div>
