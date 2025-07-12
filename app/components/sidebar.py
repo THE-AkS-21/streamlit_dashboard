@@ -6,9 +6,9 @@ def render_sidebar():
         <style>
         .custom-sidebar {{
             position: fixed;
-            top: 60px;
+            top: 50px;
             left: 0;
-            height: calc(100% - 60px);
+            height: calc(100% - 50px);
             width: 70px;
             background-color: #E5E7EB;
             transition: width 0.3s ease;
@@ -41,35 +41,28 @@ def render_sidebar():
         .sidebar-icon {{
             width: 28px;
             height: 28px;
-            margin-right: 0px;
             flex-shrink: 0;
             transition: all 0.3s ease;
         }}
 
-        .custom-sidebar:hover .sidebar-icon {{
-            margin-right: 14px;
-        }}
-
         .sidebar-label {{
-            opacity: 0;
-            transition: opacity 0.3s ease, margin 0.3s, color 0.3s;
+            display: inline-block;
+            overflow: hidden;
             white-space: nowrap;
             font-size: 0.95rem;
             font-weight: 500;
             color: #374151;
-            margin-left: 0;
-            letter-spacing: 0.3px;
-            padding-top: 2px;
+            margin-left: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }}
-        
+
         .custom-sidebar:hover .sidebar-label {{
             opacity: 1;
-            margin-left: 6px;
-            color: #1F2937;
         }}
 
         .custom-content {{
-            margin-top: 60px;
+            margin-top: 50px;
             margin-left: 70px;
             padding: 20px;
             transition: margin-left 0.3s ease;
@@ -96,7 +89,7 @@ def render_sidebar():
         <div class="custom-sidebar">
             <a href="/?page=Dashboard" target="_self" class="sidebar-item">
                 <img src="{load_icon('home.png')}" class="sidebar-icon">
-                <div class="sidebar-label">Dashboard</div>
+                <div class="sidebar-label">Home</div>
             </a>
             <a href="/?page=Analytics" target="_self" class="sidebar-item">
                 <img src="{load_icon('analytics.png')}" class="sidebar-icon">
