@@ -53,7 +53,7 @@ def show_dashboard():
             st.markdown("<br>", unsafe_allow_html=True)
 
             plot_button = st.form_submit_button(
-                label="Plot Data",
+                label="Generate Report",
                 type="primary",
                 use_container_width=True
             )
@@ -108,7 +108,7 @@ def show_dashboard():
                         st.dataframe(display_df.style.format({'Units': '{:,.0f}'}), use_container_width=True)
 
                     st.download_button(
-                        label="⬇️ Download CSV",
+                        label="📥 Download CSV Report",
                         data=orders_df.to_csv(index=False),
                         file_name=f'orders_data_{sku}_{start_date}_{end_date}.csv',
                         mime='text/csv',
