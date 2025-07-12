@@ -1,14 +1,14 @@
 from datetime import datetime
 import streamlit as st
+from app.components.content_area import render_content_end, render_content_start
 from app.database.connection import db
 from app.database.queries.dashboard_queries import DashboardQueries
 from app.components.charts import ChartComponent
 from app.utils.formatters import Formatters
 
 def show_dashboard():
-    st.markdown('<div class="custom-content">', unsafe_allow_html=True)
+    render_content_start()
     st.markdown("## Bombay Shaving Company Dashboard")
-
     st.markdown("""
         <style>
         .form-container {
@@ -127,5 +127,4 @@ def show_dashboard():
         2. Pick a date range
         3. Click **Plot Data** to visualize
         """)
-
-    st.markdown('</div>', unsafe_allow_html=True)
+    render_content_end()

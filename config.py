@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 import streamlit as st
+import os
 
 @dataclass
 class PageConfig:
@@ -15,9 +16,10 @@ class AppConfig:
     GOOGLE_CLIENT_SECRET: Optional[str] = None
 
 def init_page_config():
+    logo_path = os.path.join("app/assets/icons/logo.png")  # adjust if needed
     st.set_page_config(
         page_title="BSC Dashboard",
-        page_icon="📊",
+        page_icon=logo_path,
         layout="wide",
         initial_sidebar_state="collapsed"
     )
