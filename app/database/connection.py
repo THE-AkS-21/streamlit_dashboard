@@ -23,7 +23,7 @@ class DatabaseConnection:
         finally:
             conn.close()
             self.engine.dispose()
-
+    @st.cache_data(ttl=3600, show_spinner=False, allow_output_mutation=True, hash_funcs={pd.DataFrame: lambda _: None})
     def execute_query(self, query: str, params: dict = None) -> pd.DataFrame:
         with self.get_connection() as conn:
             return pd.read_sql_query(text(query), conn, params=params)
