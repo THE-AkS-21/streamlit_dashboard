@@ -1,55 +1,36 @@
 def load_css():
     return """
     <style>
-    .stButton>button {
-        width: 100%;
+    h2 {
+        color: #2962FF;
     }
-
+    .stButton>button {
+        border-radius: 6px;
+        background-color: #2962FF;
+        color: white;
+        padding: 8px 20px;
+        transition: background-color 0.25s ease;
+    }
+    .stButton>button:hover {
+        background-color: #0039cb;
+    }
     .chart-container {
         background: white;
         padding: 1rem;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     }
-
     .metric-container {
         background: white;
         padding: 1rem;
         border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
     }
-
-    /* Additional styles from your existing styles.py */
-    .sidebar-hover {
-        position: fixed;
-        left: -300px;
-        top: 0;
-        height: 100vh;
-        width: 300px;
-        background-color: white;
-        transition: all 0.3s ease;
-        z-index: 1000;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    }
-
-    .sidebar-hover:hover {
-        left: 0;
-    }
-
-    .nav-item {
-        padding: 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .nav-item:hover {
-        background-color: #f0f2f6;
-    }
-
-    .user-info {
-        padding: 1rem;
-        border-bottom: 1px solid #eee;
+    /* Clean general utilities if needed */
+    .text-muted {
+        color: #6B7280;
+        font-size: 0.85rem;
     }
     </style>
     """

@@ -1,32 +1,20 @@
 import streamlit as st
-from pages import dashboard, analytics, add, settings
-from app.utils.styles import load_css
+from app.components.layout import render_layout
+from app.pages import dashboard, analytics, settings
+from config import init_page_config, hide_streamlit_default
 
-st.set_page_config(
-    page_title="Business Dashboard",
-    page_icon="📊",
-    layout="wide"
-)
+init_page_config()
+hide_streamlit_default()
+render_layout()
 
-# Load custom CSS
-st.markdown(load_css(), unsafe_allow_html=True)
+current_page = st.session_state.get("current_page", "Dashboard")
 
-def login_screen():
-    st.header("WELCOME TO THE BSC")
-    st.subheader("Please log in.")
-    if st.button("Log in with Google"):
-         st.login()
+if current_page == "Dashboard":
+    dashboard.show_dashboard()
+elif current_page == "Analytics":
+    analytics.show_analytics()
+elif current_page == "Settings":
+    settings.show_settings()
 
-if not st.user.is_logged_in:
-    login_screen()
-else:
-    pg = st.navigation([
-        st.Page(dashboard.show_dashboard, title="Dashboard", icon="📊"),
-        st.Page(analytics.show_analytics, title="Analytics", icon="📈"),
-        st.Page(settings.show_settings, title="Settings", icon="⚙️"),
-    ], position="top")
-
-    # Run the selected page
-    pg.run()
-
-
+# Close the content wrapper div
+st.markdown('</div>', unsafe_allow_html=True)
