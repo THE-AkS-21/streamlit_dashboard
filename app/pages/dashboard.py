@@ -6,9 +6,8 @@ from app.components.charts import ChartComponent
 from app.utils.formatters import Formatters
 
 def show_dashboard():
-    st.markdown('<div class="custom-content">', unsafe_allow_html=True)
-    st.markdown("## 📊 BSC Orders Dashboard")
-
+    st.markdown('<div>', unsafe_allow_html=True)
+    st.markdown("## Bombay Shaving Company Dashboard")
     st.markdown("""
         <style>
         .form-container {
