@@ -139,20 +139,18 @@ def render_navbar():
         </div>
 
         <script>
-        document.addEventListener("DOMContentLoaded", function() {{
-            const hamburger = document.getElementById("hamburger-toggle");
-            const sidebar = document.querySelector(".custom-sidebar");
-            
-            if (hamburger && sidebar) {{
-                hamburger.addEventListener("click", function() {{
-                    sidebar.classList.toggle("show");
-                    // Update Streamlit session state
-                    window.parent.postMessage({{
-                        type: 'streamlit:setComponentValue',
-                        value: sidebar.classList.contains("show")
-                    }}, '*');
-                }});
-            }}
+        window.addEventListener("load", function() {{
+            setTimeout(function() {{
+                const hamburger = document.getElementById("hamburger-toggle");
+                const sidebar = document.getElementById("custom-sidebar");
+        
+                if (hamburger && sidebar) {{
+                    hamburger.addEventListener("click", function() {{
+                        sidebar.classList.toggle("show");
+                    }});
+                }}
+            }}, 0);
         }});
         </script>
+
 """, unsafe_allow_html=True)
