@@ -1,20 +1,49 @@
 import streamlit as st
 from app.components.layout import render_layout
 from app.pages import dashboard, analytics, settings
-from config import init_page_config, hide_streamlit_default
+from app.constants import pages
+from app.utils.global_css import apply_global_styles
+from config import init_page_config
 
+# Initialize config
 init_page_config()
-hide_streamlit_default()
-render_layout()
 
-current_page = st.session_state.get("current_page", "Dashboard")
+# Apply global styles
+apply_global_styles()
 
-if current_page == "Dashboard":
-    dashboard.show_dashboard()
-elif current_page == "Analytics":
-    analytics.show_analytics()
-elif current_page == "Settings":
-    settings.show_settings()
 
-# Close the content wrapper div
-st.markdown('</div>', unsafe_allow_html=True)
+def get_current_page():
+    """Get current page from URL parameters or session state"""
+    # Check URL parameters first
+    query_params = st.query_params
+    if 'page' in query_params:
+        page = query_params['page']
+        st.session_state.current_page = page
+        return page
+
+    # Fall back to session state
+    return st.session_state.get("current_page", pages.DASHBOARD)
+
+
+def main():
+    """Main application entry point"""
+    # Render layout (navbar + sidebar)
+    render_layout()
+
+    # Get current page
+    current_page = get_current_page()
+
+    # Route to appropriate page
+    if current_page == pages.DASHBOARD:
+        dashboard.show_dashboard()
+    elif current_page == pages.ANALYTICS:
+        analytics.show_analytics()
+    elif current_page == pages.SETTINGS:
+        settings.show_settings()
+    else:
+        # Default to dashboard if page not found
+        dashboard.show_dashboard()
+
+
+if __name__ == "__main__":
+    main()

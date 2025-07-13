@@ -25,3 +25,12 @@ class DashboardQueries:
     WHERE whsku = :whsku
     AND valuationdate::date BETWEEN CAST(:start_date AS DATE) AND CAST(:end_date AS DATE)
     """
+
+    GET_DASHBOARD_FILTER_METADATA = """
+    SELECT DISTINCT category, \
+    subcategory, \
+    whsku AS sku, \
+    MAX(valuationdate::date) OVER () AS last_date
+    FROM bsc.centraldsrdumpv2
+    ORDER BY category, subcategory, sku \
+    """
