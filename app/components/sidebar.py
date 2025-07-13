@@ -97,7 +97,7 @@ def render_sidebar():
         }}
         </style>
 
-        <div class="custom-sidebar">
+        <div class="custom-sidebar" id="custom-sidebar">
             <a href="/?page=Dashboard" target="_self" class="sidebar-item">
                 <img src="{load_icon('home.png')}" class="sidebar-icon">
                 <span class="sidebar-label">Home</span>
