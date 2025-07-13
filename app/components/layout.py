@@ -3,24 +3,23 @@ from app.components.navbar import render_navbar
 from app.components.sidebar import render_sidebar
 
 def render_layout():
+    query_params = st.query_params  # ✅ modern replacement
+    page = query_params.get("page", "Dashboard")  # note: no list wrapping now — single value or None
+
     render_navbar()
-    render_sidebar()
+    render_sidebar(page)
+
     st.markdown("""
-        <style>
-        .custom-content {
-            margin-top: 50px;
-            margin-left: 70px;
-            padding: 20px;
-            transition: margin-left 0.3s ease;
-        }
-        .custom-sidebar:hover ~ .custom-content {
-            margin-left: 220px;
-        }
-        @media screen and (max-width: 768px) {
-            .custom-content {
-                margin-left: 0;
+        <script>
+        function initHamburger() {
+            const hamburger = document.getElementById("hamburger-toggle");
+            const sidebar = document.getElementById("custom-sidebar");
+            if (hamburger && sidebar) {
+                hamburger.onclick = function() {
+                    sidebar.classList.toggle("show");
+                }
             }
         }
-        </style>
-        <div class="custom-content">
+        window.addEventListener("load", initHamburger);
+        </script>
     """, unsafe_allow_html=True)
