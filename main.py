@@ -1,5 +1,6 @@
 import streamlit as st
 from app.components.layout import render_layout
+from app.components.sidebar_toggle_script import render_sidebar_toggle_script
 from app.pages import dashboard, analytics, settings
 from app.constants import pages
 from app.utils.global_css import apply_global_styles
@@ -29,6 +30,8 @@ def main():
     """Main application entry point"""
     # Render layout (navbar + sidebar)
     render_layout()
+    # Sidebar JS functionality (called after both have rendered)
+    render_sidebar_toggle_script()
 
     # Get current page
     current_page = get_current_page()

@@ -7,110 +7,6 @@ def render_navbar():
         st.session_state.sidebar_open = False
 
     st.markdown(f"""
-        <style>
-        :root {{
-            --main-bg: #F9FAFB;
-            --accent: #00AEEF;
-            --sidebar-bg: #F3F4F6;
-            --hover-bg: #E0E7FF;
-            --text-main: #111827;
-            --text-secondary: #374151;
-        }}
-        .custom-navbar {{
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 30px;
-            width: 100%;
-            background-color: var(--sidebar-bg);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 14px;
-            z-index: 1000;
-        }}
-        .navbar-logo {{
-            width: 22px;
-            height: 22px;
-            border-radius: 20%;
-            object-fit: cover;
-        }}
-        .navbar-title {{
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--accent);
-            margin: 0;
-        }}
-        .hamburger {{
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            display: none;
-        }}
-        .navbar-left {{
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }}
-        /* TOOLBAR STYLES */
-        .toolbar {{
-            position: fixed;
-            top: 30px;
-            left: 0;
-            height: 30px;
-            width: 100%;
-            background-color: var(--sidebar-bg);
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            gap: 8px;
-            z-index: 999;
-            
-        }}
-        .toolbar-dropdown {{
-            appearance: none;
-            height: 25px;
-            background-color: var(--sidebar-bg);
-            border-radius: none;
-            padding: 2px 10px;
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            transition: all 0.25s ease;
-            cursor: pointer;
-            box-shadow: none;
-        }}
-        .toolbar-dropdown:hover {{
-            background-color: var(--hover-bg);
-            color: var(--text-main);
-            box-shadow: 0 0 6px rgba(0,174,239,0.3);
-            transform: scale(1.03);
-        }}
-        .toolbar-dropdown:focus {{
-            outline: none;
-            border: none;
-            box-shadow: 0 0 0 2px rgba(0,174,239,0.4);
-        }}
-        option {{
-            background: var(--sidebar-bg);
-            color: var(--text-main);
-        }}
-        @media screen and (max-width: 768px) {{
-            .hamburger {{
-                display: block;
-            }}
-            .navbar-left {{
-                display: none;
-            }}
-            .navbar-title {{
-                flex: 1;
-                text-align: center;
-            }}
-            .toolbar {{
-                display: none;
-            }}
-        }}
-        </style>
-
         <div class="custom-navbar">
             <img src="{load_icon('menu.png')}" class="hamburger" id="hamburger-toggle">
             <div class="navbar-left" style="display:flex; align-items:center; gap:10px;">
@@ -158,12 +54,21 @@ def render_navbar():
                 const sidebar = document.getElementById("custom-sidebar");
         
                 if (hamburger && sidebar) {{
-                    hamburger.addEventListener("click", function() {{
+                    hamburger.addEventListener("click", function(event) {{
+                        event.stopPropagation();
                         sidebar.classList.toggle("show");
+                    }});
+        
+                    // Close sidebar on clicking anywhere outside
+                    document.addEventListener("click", function(event) {{
+                        if (window.innerWidth <= 768) {{
+                            if (!sidebar.contains(event.target) && event.target !== hamburger) {{
+                                sidebar.classList.remove("show");
+                            }}
+                        }}
                     }});
                 }}
             }}, 0);
         }});
         </script>
-
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
