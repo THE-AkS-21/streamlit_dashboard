@@ -32,6 +32,8 @@ def render_navbar():
         .navbar-logo {{
             width: 22px;
             height: 22px;
+            border-radius: 20%;
+            object-fit: cover;
         }}
         .navbar-title {{
             font-size: 0.85rem;

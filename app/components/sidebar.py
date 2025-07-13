@@ -85,7 +85,7 @@ def render_sidebar(page):
             transition: margin-left 0.3s ease;
         }}
         .custom-sidebar:hover ~ .custom-content {{
-            margin-left: 220px;
+            margin-left: 180px;
         }}
         .sidebar-item.current-page {{
             background-color: var(--hover-bg);
