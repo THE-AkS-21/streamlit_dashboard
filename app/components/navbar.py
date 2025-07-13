@@ -69,18 +69,29 @@ def render_navbar():
             appearance: none;
             height: 25px;
             background-color: var(--sidebar-bg);
-            border-radius: 5px;
-            padding: 2px 8px;
+            border-radius: none;
+            padding: 2px 10px;
             font-size: 0.72rem;
             color: var(--text-secondary);
             transition: all 0.25s ease;
             cursor: pointer;
+            box-shadow: none;
         }}
         .toolbar-dropdown:hover {{
             background-color: var(--hover-bg);
             color: var(--text-main);
+            box-shadow: 0 0 6px rgba(0,174,239,0.3);
+            transform: scale(1.03);
         }}
-        
+        .toolbar-dropdown:focus {{
+            outline: none;
+            border: none;
+            box-shadow: 0 0 0 2px rgba(0,174,239,0.4);
+        }}
+        option {{
+            background: var(--sidebar-bg);
+            color: var(--text-main);
+        }}
         @media screen and (max-width: 768px) {{
             .hamburger {{
                 display: block;
