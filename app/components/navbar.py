@@ -7,7 +7,7 @@ def render_navbar():
         st.session_state.sidebar_open = False
 
     st.markdown(f"""
-        <div class="custom-navbar">
+        <div class="custom-navbar" >
             <img src="{load_icon('menu.png')}" class="hamburger" id="hamburger-toggle">
             <div class="navbar-left" style="display:flex; align-items:center; gap:10px;">
                 <img src="{load_icon('logo.png')}" class="navbar-logo">

@@ -15,9 +15,6 @@ def apply_global_styles():
         --animation-speed: {config.animation_speed}s;
     }}
 
-    s;
-    }}
-
     /* ===== General Reset (Only for markdown blocks) ===== */
     header, footer {{
         visibility: hidden;
@@ -52,23 +49,27 @@ def apply_global_styles():
         padding: 0 14px;
         z-index: 1000;
     }}
+
     .navbar-left {{
         display: flex;
         align-items: center;
         gap: 8px;
     }}
+
     .navbar-logo {{
         width: 22px;
         height: 22px;
         border-radius: 20%;
         object-fit: cover;
     }}
+
     .navbar-title {{
         font-size: 0.85rem;
         font-weight: 600;
         color: var(--accent);
         margin: 0;
     }}
+
     .hamburger {{
         width: 24px;
         height: 24px;
@@ -90,6 +91,7 @@ def apply_global_styles():
         gap: 8px;
         z-index: 999;
     }}
+
     .toolbar-btn, .toolbar-dropdown {{
         background: transparent;
         border: none;
@@ -99,6 +101,7 @@ def apply_global_styles():
         padding: 2px 10px;
         transition: all var(--animation-speed) ease;
     }}
+
     .toolbar-btn:hover, .toolbar-dropdown:hover {{
         background: var(--hover-bg);
         color: var(--text-main);
@@ -123,16 +126,20 @@ def apply_global_styles():
         flex-direction: column;
         align-items: stretch;
     }}
+
     .custom-sidebar a {{
         text-decoration: none !important;
         color: inherit;
     }}
+
     .custom-sidebar:hover {{
         width: 180px;
     }}
+
     .custom-sidebar.show {{
         width: 180px;
     }}
+
     .sidebar-item {{
         display: flex;
         align-items: center;
@@ -144,11 +151,13 @@ def apply_global_styles():
         gap: 5px;
         transition: background-color var(--animation-speed), transform var(--animation-speed);
     }}
+
     .sidebar-item:hover {{
         background: var(--hover-bg);
         transform: translateX(3px);
         border-left: 4px solid var(--accent);
     }}
+
     .sidebar-icon {{
         width: 28px;
         height: 28px;
@@ -161,6 +170,7 @@ def apply_global_styles():
         transition: all var(--animation-speed) ease;
         margin-right: 0;
     }}
+
     .sidebar-label {{
         display: inline-block;
         overflow: hidden;
@@ -172,13 +182,16 @@ def apply_global_styles():
         opacity: 0;
         transition: opacity var(--animation-speed), color var(--animation-speed);
     }}
+
     .custom-sidebar:hover .sidebar-label {{
         opacity: 1;
     }}
+
     .sidebar-item:hover .sidebar-label,
     .sidebar-item.current-page .sidebar-label {{
         color: var(--accent);
     }}
+
     .sidebar-item.current-page {{
         background: var(--hover-bg);
         border-left: 4px solid var(--accent);
@@ -192,6 +205,7 @@ def apply_global_styles():
         padding: 30px;
         transition: margin-left var(--animation-speed) ease;
     }}
+
     @media screen and (min-width: 770px) {{
         #app-container .custom-sidebar:hover + .custom-content {{
             margin-left: 200px;
@@ -207,33 +221,16 @@ def apply_global_styles():
         margin-bottom: 1rem;
         text-align: center;
     }}
+
     .metric-label {{
         font-size: 0.8rem;
         color: var(--text-secondary);
     }}
+
     .metric-value {{
         font-size: 1.4rem;
         font-weight: 600;
         color: var(--text-main);
-    }}
-    .tab-close-btn {{
-        background: #F3F4F6;
-        border: none;
-        padding: 6px 10px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        transition: background var(--animation-speed) ease;
-    }}
-    .tab-close-btn:hover {{
-        background: var(--hover-bg);
-    }}
-    
-    .tab-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
     }}
 
     /* ===== Buttons ===== */
@@ -244,6 +241,7 @@ def apply_global_styles():
         padding: 8px 20px;
         transition: background-color var(--animation-speed) ease;
     }}
+
     .stButton>button:hover {{
         background-color: #0039cb;
     }}
@@ -292,7 +290,7 @@ def apply_global_styles():
             padding: 30px;
             transition: left var(--animation-speed) ease;
         }}
-        .custom-sidebar.show ~ .custom-content {{
+        .custom-sidebar.show + .custom-content {{
             margin-left: 180px;
         }}
         .custom-sidebar .sidebar-label {{

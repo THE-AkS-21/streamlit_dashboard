@@ -1,6 +1,5 @@
 import streamlit as st
 
-from app.components.content_area import render_sidebar_content_sync_script
 from app.components.layout import render_layout
 from app.components.sidebar_toggle_script import render_sidebar_toggle_script
 from app.config import init_page_config
@@ -22,17 +21,20 @@ def get_current_page():
         return page
     return st.session_state.get("current_page", pages.DASHBOARD)
 
-
 def main():
     """Main application entry point"""
-    # Render layout (navbar + sidebar)
-    render_layout()
-    render_sidebar_toggle_script()
+    st.markdown(
+        """<div id="app-container" style="margin: 0; padding: 0;">""",
+        unsafe_allow_html=True
+    )
 
-    # Open content wrapper inside app-container
-    st.markdown("""<div class="custom-content" style="margin: 0; padding: 0;">""", unsafe_allow_html=True)
+    render_layout()  # renders navbar + sidebar
 
-    # render_sidebar_content_sync_script()
+    # Open content wrapper once here
+    st.markdown(
+        """<div class="custom-content" style="margin: 0; padding: 0;">""",
+        unsafe_allow_html=True
+    )
 
     # Get current page and render respective page content inside custom-content
     current_page = get_current_page()

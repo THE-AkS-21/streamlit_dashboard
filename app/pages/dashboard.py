@@ -15,7 +15,6 @@ def get_dashboard_metadata():
 
 def show_dashboard():
     apply_global_styles()
-    st.markdown('<div class="custom-content">', unsafe_allow_html=True)
     st.markdown("## Bombay Shaving Company Dashboard")
 
     # Initialize session state
@@ -177,5 +176,4 @@ def show_dashboard():
             - Click **Fetch**, **Generate Report** or **Edit Orders**
         """)
 
-    st.markdown('</div>', unsafe_allow_html=True)
 
