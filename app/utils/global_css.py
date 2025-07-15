@@ -15,9 +15,6 @@ def apply_global_styles():
         --animation-speed: {config.animation_speed}s;
     }}
 
-    s;
-    }}
-
     /* ===== General Reset (Only for markdown blocks) ===== */
     header, footer {{
         visibility: hidden;
@@ -52,23 +49,27 @@ def apply_global_styles():
         padding: 0 14px;
         z-index: 1000;
     }}
+
     .navbar-left {{
         display: flex;
         align-items: center;
         gap: 8px;
     }}
+
     .navbar-logo {{
         width: 22px;
         height: 22px;
         border-radius: 20%;
         object-fit: cover;
     }}
+
     .navbar-title {{
         font-size: 0.85rem;
         font-weight: 600;
         color: var(--accent);
         margin: 0;
     }}
+
     .hamburger {{
         width: 24px;
         height: 24px;
@@ -90,6 +91,7 @@ def apply_global_styles():
         gap: 8px;
         z-index: 999;
     }}
+
     .toolbar-btn, .toolbar-dropdown {{
         background: transparent;
         border: none;
@@ -99,6 +101,7 @@ def apply_global_styles():
         padding: 2px 10px;
         transition: all var(--animation-speed) ease;
     }}
+
     .toolbar-btn:hover, .toolbar-dropdown:hover {{
         background: var(--hover-bg);
         color: var(--text-main);
@@ -123,16 +126,20 @@ def apply_global_styles():
         flex-direction: column;
         align-items: stretch;
     }}
+
     .custom-sidebar a {{
         text-decoration: none !important;
         color: inherit;
     }}
+
     .custom-sidebar:hover {{
         width: 180px;
     }}
+
     .custom-sidebar.show {{
         width: 180px;
     }}
+
     .sidebar-item {{
         display: flex;
         align-items: center;
@@ -144,11 +151,13 @@ def apply_global_styles():
         gap: 5px;
         transition: background-color var(--animation-speed), transform var(--animation-speed);
     }}
+
     .sidebar-item:hover {{
         background: var(--hover-bg);
         transform: translateX(3px);
         border-left: 4px solid var(--accent);
     }}
+
     .sidebar-icon {{
         width: 28px;
         height: 28px;
@@ -161,6 +170,7 @@ def apply_global_styles():
         transition: all var(--animation-speed) ease;
         margin-right: 0;
     }}
+
     .sidebar-label {{
         display: inline-block;
         overflow: hidden;
@@ -172,13 +182,16 @@ def apply_global_styles():
         opacity: 0;
         transition: opacity var(--animation-speed), color var(--animation-speed);
     }}
+
     .custom-sidebar:hover .sidebar-label {{
         opacity: 1;
     }}
+
     .sidebar-item:hover .sidebar-label,
     .sidebar-item.current-page .sidebar-label {{
         color: var(--accent);
     }}
+
     .sidebar-item.current-page {{
         background: var(--hover-bg);
         border-left: 4px solid var(--accent);
@@ -192,6 +205,7 @@ def apply_global_styles():
         padding: 30px;
         transition: margin-left var(--animation-speed) ease;
     }}
+
     @media screen and (min-width: 770px) {{
         #app-container .custom-sidebar:hover + .custom-content {{
             margin-left: 200px;
@@ -207,45 +221,75 @@ def apply_global_styles():
         margin-bottom: 1rem;
         text-align: center;
     }}
+
     .metric-label {{
         font-size: 0.8rem;
         color: var(--text-secondary);
     }}
+
     .metric-value {{
         font-size: 1.4rem;
         font-weight: 600;
         color: var(--text-main);
     }}
-    .tab-close-btn {{
-        background: #F3F4F6;
-        border: none;
-        padding: 6px 10px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        transition: background var(--animation-speed) ease;
-    }}
-    .tab-close-btn:hover {{
-        background: var(--hover-bg);
-    }}
-    
-    .tab-header {{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-    }}
 
     /* ===== Buttons ===== */
+    /* All Streamlit buttons */
     .stButton>button {{
         border-radius: 6px;
-        background-color: #2962FF;
-        color: white;
+        background-color: #f1f5f9; /* light grey */
+        color: #111827; /* dark text */
         padding: 8px 20px;
-        transition: background-color var(--animation-speed) ease;
+        border: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
     }}
+    
+    /* On hover - BSC blue */
     .stButton>button:hover {{
-        background-color: #0039cb;
+        background-color: #2962FF;
+        color: #ffffff;
+        border-color: #2962FF;
+        transform: scale(0.98);
+    }}
+    
+    /* On click effect */
+    .stButton>button:active {{
+        transform: scale(0.96);
+    }}
+    
+    /* Logout button wrapper */
+    .sidebar-logout {{
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        padding: 0 8px;
+    }}
+    
+    /* Logout button specific style */
+    .logout-btn {{
+        width: 100%;
+        background: #ffffff;
+        color: #EF4444;
+        border: 1px solid #EF4444;
+        padding: 8px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }}
+    
+    /* Logout button hover state */
+    .logout-btn:hover {{
+        background: #EF4444;
+        color: #ffffff;
+        border-color: #EF4444;
+        transform: scale(0.98);
+    }}
+    
+    /* On click effect */
+    .logout-btn:active {{
+        transform: scale(0.96);
     }}
 
     /* ===== Headings ===== */
@@ -258,6 +302,80 @@ def apply_global_styles():
         color: #6B7280;
         font-size: 0.85rem;
     }}
+    
+    /* Container to center content */
+    .settings-container {{
+        max-width: 480px;
+        margin: 60px auto;
+        text-align: center;
+    }}
+
+    /* Page title */
+    .page-title {{
+        font-size: 1.75rem;
+        margin-bottom: 24px;
+        color: #111827;
+    }}
+    
+    /* Profile card container */
+    .profile-card {{
+        background: #f9fafb;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 24px;
+    }}
+    
+    /* Profile info items */
+    .profile-item {{
+        font-size: 0.95rem;
+        padding: 8px 0;
+        border-bottom: 1px solid #e5e7eb;
+        color: #374151;
+    }}
+    
+    .profile-item:last-child {{
+        border-bottom: none;
+    }}
+    
+    /* Center table content */
+    div[data-testid="stDataFrameContainer"] table td,
+    div[data-testid="stDataFrameContainer"] table th {{
+        text-align: center !important;
+        vertical-align: middle;
+    }}
+    
+    /* Analytics container padding */
+    .analytics-container {{
+        margin-top: 30px;
+        height: 100%;
+        width: 100%;
+    }}
+    
+    /* Sign out button — inherits your .stButton styling */
+    div[data-testid="stButton"][key="signout_btn"] button {{
+        width: 100%;
+        background: #ffffff;
+        color: #EF4444;
+        border: 1px solid #EF4444;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }}
+    
+    div[data-testid="stButton"][key="signout_btn"] button:hover {{
+        background: #EF4444;
+        color: #ffffff;
+        border-color: #EF4444;
+        transform: scale(0.98);
+    }}
+    
+    div[data-testid="stButton"][key="signout_btn"] button:active {{
+        transform: scale(0.96);
+    }}
+
 
     /* ===== Mobile Styles ===== */
     @media screen and (max-width: 768px) {{
@@ -292,7 +410,7 @@ def apply_global_styles():
             padding: 30px;
             transition: left var(--animation-speed) ease;
         }}
-        .custom-sidebar.show ~ .custom-content {{
+        .custom-sidebar.show + .custom-content {{
             margin-left: 180px;
         }}
         .custom-sidebar .sidebar-label {{
