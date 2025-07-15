@@ -245,6 +245,28 @@ def apply_global_styles():
     .stButton>button:hover {{
         background-color: #0039cb;
     }}
+    
+    /* Logout button */
+    .sidebar-logout {{
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        padding: 0 8px;
+    }}
+    .logout-btn {{
+        width: 100%;
+        background: #F87171;
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: background var(--animation-speed) ease;
+    }}
+    .logout-btn:hover {{
+        background: #EF4444;
+    }}
 
     /* ===== Headings ===== */
     h2 {{
