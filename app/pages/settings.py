@@ -1,13 +1,14 @@
 import streamlit as st
 
 def show_settings():
-    # Page container
+    # Page container inside custom-content
     st.markdown(
-        """<div class="settings-container" style="margin: 0; padding: 0;">""",
+        """<div class="custom-content"><div class="settings-container">""",
         unsafe_allow_html=True
     )
+
     # Title
-    st.markdown('<h2 class="page-title">⚙️ Settings</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="page-title">Settings</h2>', unsafe_allow_html=True)
 
     # Profile card
     st.markdown("""
@@ -22,11 +23,11 @@ def show_settings():
     # Button container
     st.markdown('<div class="button-container">', unsafe_allow_html=True)
 
-    # Logout button
     if st.button("🔒 Sign out", key="signout_btn"):
         st.cache_data.clear()
         st.cache_resource.clear()
         st.session_state.clear()
         st.rerun()
 
-    st.markdown('</div></div>', unsafe_allow_html=True)  # Close button-container and settings-container
+    # Close button-container, settings-container and custom-content
+    st.markdown('</div></div></div>', unsafe_allow_html=True)

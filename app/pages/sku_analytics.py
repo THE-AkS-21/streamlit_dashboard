@@ -1,13 +1,14 @@
 import streamlit as st
 from datetime import date
 from app.database.connection import db
-from app.database.queries.analytics_queries import AnalyticsQueries
+from app.database.queries.sku_analytics_queries import SkuAnalyticsQueries
 from app.utils.global_css import apply_global_styles
 
-def show_analytics():
+def show_sku_analytics():
     apply_global_styles()
 
-    st.markdown('<h2 class="page-title">Platform P&L Analytics</h2>', unsafe_allow_html=True)
+    # Page title
+    st.markdown('<h2 class="page-title">SKU Channel Analytics</h2>', unsafe_allow_html=True)
 
     # ───── Date filters ─────
     col1, col2 = st.columns(2)
@@ -35,7 +36,7 @@ def show_analytics():
         "page_no": page_no
     }
 
-    query = AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION
+    query = SkuAnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION
     data_df = db.execute_query(query, params)
 
     if data_df.empty:
@@ -45,6 +46,7 @@ def show_analytics():
     # ───── Data Table Display ─────
     st.markdown('<div class="analytics-container">', unsafe_allow_html=True)
 
+    # Optional: Style it centrally if needed (already styled via CSS, but you can also do it in Python)
     styled_df = data_df.style.set_properties(
         **{
             "text-align": "center"

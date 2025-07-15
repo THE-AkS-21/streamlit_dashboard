@@ -37,9 +37,9 @@ def show_dashboard():
             end_date = col5.date_input("End Date", value=last_date)
 
             action_col1, action_col2, action_col3 = st.columns([2, 1, 1])
-            plot_button = action_col1.form_submit_button("📊 Generate Report", use_container_width=True)
-            fetch_button = action_col2.form_submit_button("📡 Fetch", use_container_width=True)
-            edit_button = action_col3.form_submit_button("✏️ Edit Orders", use_container_width=True)
+            plot_button = action_col1.form_submit_button("Generate Report", use_container_width=True)
+            fetch_button = action_col2.form_submit_button("Fetch", use_container_width=True)
+            edit_button = action_col3.form_submit_button("Edit Orders", use_container_width=True)
 
     query_params = {"start_date": start_date, "end_date": end_date}
     if sku != "None":
@@ -123,21 +123,15 @@ def show_dashboard():
                             </div>
                         """, unsafe_allow_html=True)
 
-                # Chart + Data Tabs
-                chart_tab, data_tab = st.tabs(["📈 Interactive Chart", "📄 Raw Data"])
-                with chart_tab:
-                    ChartComponent.orders_chart(orders_df, key=f"{tname}_chart")
-                    st.caption("""
-                        💡 **Chart Tips:**
-                        - Hover for values
-                        - Click & drag to zoom
-                        - Double-click to reset
-                        - Scroll to navigate timeline
-                    """)
-                with data_tab:
-                    display_df = orders_df.copy()
-                    display_df.columns = ['Date', 'Units']
-                    st.dataframe(display_df.style.format({'Units': '{:,.0f}'}), use_container_width=True)
+                # Chart
+                ChartComponent.orders_chart(orders_df, key=f"{tname}_chart")
+                st.caption("""
+                    💡 **Chart Tips:**
+                    - Hover for values
+                    - Click & drag to zoom
+                    - Double-click to reset
+                    - Scroll to navigate timeline
+                """)
 
                 st.download_button(
                     label="📥 Download CSV Report",
