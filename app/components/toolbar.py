@@ -1,6 +1,6 @@
 import streamlit as st
 
-@st.cache_resource(show_spinner=False)
+# @st.cache_resource(show_spinner=False)
 def render_toolbar(page):
 
     #"""Render toolbar dynamically based on current page"""

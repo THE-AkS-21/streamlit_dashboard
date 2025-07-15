@@ -1,12 +1,20 @@
 import streamlit as st
 
 def render_content_start():
-    st.markdown("""<div class="custom-content" style="margin: 0; padding: 0;">""", unsafe_allow_html=True)
+    """Begin the custom content area wrapper"""
+    st.markdown(
+        """<div class="custom-content" style="margin: 0; padding: 0;">""",
+        unsafe_allow_html=True
+    )
+
 
 def render_content_end():
+    """End the custom content area wrapper"""
     st.markdown("</div>", unsafe_allow_html=True)
 
+
 def render_sidebar_content_sync_script():
+    """Inject JS to dynamically sync sidebar state with content margin"""
     st.markdown("""
     <script>
     window.addEventListener("load", function() {
@@ -14,21 +22,24 @@ def render_sidebar_content_sync_script():
         const content = document.querySelector(".custom-content");
 
         function adjustContentMargin() {
+            if (!content || !sidebar) return;
+
             if (window.innerWidth > 768) {
                 if (sidebar.classList.contains("show") || sidebar.matches(":hover")) {
                     content.style.marginLeft = "180px";
                 } else {
                     content.style.marginLeft = "70px";
                 }
+            } else {
+                // On mobile, margin is handled by media query CSS
+                content.style.marginLeft = "0";
             }
         }
 
         if (sidebar && content) {
-            // Adjust on sidebar hover
             sidebar.addEventListener("mouseenter", adjustContentMargin);
             sidebar.addEventListener("mouseleave", adjustContentMargin);
 
-            // Adjust on sidebar class toggle (hamburger)
             const hamburger = document.getElementById("hamburger-toggle");
             if (hamburger) {
                 hamburger.addEventListener("click", function(event) {
@@ -38,8 +49,9 @@ def render_sidebar_content_sync_script():
                 });
             }
 
-            // Initial adjustment
+            // Adjust margin on initial load and window resize
             adjustContentMargin();
+            window.addEventListener("resize", adjustContentMargin);
         }
     });
     </script>
