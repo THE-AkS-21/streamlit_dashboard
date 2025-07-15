@@ -4,28 +4,40 @@ def render_sidebar_toggle_script():
     st.markdown("""
     <script>
     window.addEventListener("load", function() {
-        setTimeout(function() {
-            const hamburger = document.getElementById("hamburger-toggle");
-            const sidebar = document.getElementById("custom-sidebar");
+        const sidebar = document.getElementById("custom-sidebar");
+        const content = document.getElementById("custom-content");
+        const hamburger = document.getElementById("hamburger-toggle");
 
-            if (hamburger && sidebar) {
-                console.log("Hamburger click listener attached");
-                hamburger.addEventListener("click", function(event) {
-                    event.stopPropagation();
-                    sidebar.classList.toggle("show");
-                });
-
-                document.addEventListener("click", function(event) {
-                    if (window.innerWidth <= 768) {
-                        if (!sidebar.contains(event.target) && event.target !== hamburger) {
-                            sidebar.classList.remove("show");
-                        }
-                    }
-                });
-            } else {
-                console.log("Missing sidebar or hamburger", hamburger, sidebar);
+        function adjustContentMargin() {
+            if (window.innerWidth > 768) {
+                if (sidebar.classList.contains("show") || sidebar.matches(":hover")) {
+                    content.style.marginLeft = "200px";
+                } else {
+                    content.style.marginLeft = "70px";
+                }
             }
-        }, 0);
+        }
+
+        // Hover adjustment (desktop only)
+        if (window.innerWidth > 768 && sidebar && content) {
+            sidebar.addEventListener("mouseenter", adjustContentMargin);
+            sidebar.addEventListener("mouseleave", adjustContentMargin);
+        }
+
+        // Hamburger click
+        if (hamburger && sidebar && content) {
+            hamburger.addEventListener("click", function(event) {
+                event.stopPropagation();
+                sidebar.classList.toggle("show");
+                adjustContentMargin();
+            });
+        }
+
+        // Window resize — keep margins in sync
+        window.addEventListener("resize", adjustContentMargin);
+
+        // Initial state sync
+        adjustContentMargin();
     });
     </script>
     """, unsafe_allow_html=True)

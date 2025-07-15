@@ -14,7 +14,7 @@ def render_navbar():
                 <p class="navbar-title">Bombay Shaving Company</p>
             </div>
         </div>
-        
+
         <!-- TOOLBAR -->
         <div class="toolbar">
             <select class="toolbar-dropdown" id="file-dropdown">
@@ -46,29 +46,4 @@ def render_navbar():
                 <option>Extensions</option>
             </select>
         </div>
-
-        <script>
-        window.addEventListener("load", function() {{
-            setTimeout(function() {{
-                const hamburger = document.getElementById("hamburger-toggle");
-                const sidebar = document.getElementById("custom-sidebar");
-        
-                if (hamburger && sidebar) {{
-                    hamburger.addEventListener("click", function(event) {{
-                        event.stopPropagation();
-                        sidebar.classList.toggle("show");
-                    }});
-        
-                    // Close sidebar on clicking anywhere outside
-                    document.addEventListener("click", function(event) {{
-                        if (window.innerWidth <= 768) {{
-                            if (!sidebar.contains(event.target) && event.target !== hamburger) {{
-                                sidebar.classList.remove("show");
-                            }}
-                        }}
-                    }});
-                }}
-            }}, 0);
-        }});
-        </script>
     """, unsafe_allow_html=True)

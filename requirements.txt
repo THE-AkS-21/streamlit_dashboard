@@ -8,4 +8,4 @@ google-auth-oauthlib==1.0.0
 google-auth-httplib2==0.1.0
 google-api-python-client==2.86.0
 extra-streamlit-components==0.1.56
-streamlit-lightweight-charts==0.5.1
+streamlit-lightweight-charts==0.7.20

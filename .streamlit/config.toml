@@ -18,3 +18,5 @@ showSidebarNavigation = false
 [browser]
 gatherUsageStats = false
 serverAddress = "localhost"
+server.headless = true
+

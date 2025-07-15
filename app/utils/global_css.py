@@ -1,34 +1,45 @@
 import streamlit as st
+from app.config import config
 
 def apply_global_styles():
-    st.markdown("""
+    st.markdown(f"""
     <style>
-    :root {
+
+    :root {{
         --main-bg: #F9FAFB;
         --accent: #00AEEF;
         --sidebar-bg: #F3F4F6;
         --hover-bg: #E0E7FF;
         --text-main: #111827;
         --text-secondary: #374151;
-    }
+        --animation-speed: {config.animation_speed}s;
+    }}
 
-    html, body, main, section.main, section.main > div.block-container,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stVerticalBlock"],
-    [data-testid="stHorizontalBlock"],
-    [data-testid="stMarkdownContainer"] {
+    s;
+    }}
+
+    /* ===== General Reset (Only for markdown blocks) ===== */
+    header, footer {{
+        visibility: hidden;
+        height: 0;
+    }}
+    h1, h2, h3, h4, h5, h6 {{
+        margin: 0 !important;
+    }}
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stMarkdownHeadingContainer"] {{
         margin: 0 !important;
         padding: 0 !important;
-    }
-    h1, h2, h3, h4, h5, h6 {
-        margin: 0 !important;
-    }
-    [data-testid="stMarkdownHeadingContainer"] a {
+    }}
+    section.main {{
+        padding-top: 0 !important;
+    }}
+    [data-testid="stMarkdownHeadingContainer"] a {{
         display: none !important;
-    }
+    }}
 
     /* ===== Navbar ===== */
-    .custom-navbar {
+    .custom-navbar {{
         position: fixed;
         top: 0;
         left: 0;
@@ -40,77 +51,33 @@ def apply_global_styles():
         justify-content: space-between;
         padding: 0 14px;
         z-index: 1000;
-    }
-    .navbar-left {
+    }}
+    .navbar-left {{
         display: flex;
         align-items: center;
         gap: 8px;
-    }
-    .navbar-logo {
+    }}
+    .navbar-logo {{
         width: 22px;
         height: 22px;
         border-radius: 20%;
         object-fit: cover;
-    }
-    .navbar-title {
+    }}
+    .navbar-title {{
         font-size: 0.85rem;
         font-weight: 600;
         color: var(--accent);
         margin: 0;
-    }
-    .hamburger {
+    }}
+    .hamburger {{
         width: 24px;
         height: 24px;
         cursor: pointer;
         display: none;
-    }
-    @media screen and (max-width: 768px) {
-      .hamburger {
-        display: block;
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 1200;
-      }
-    
-      .custom-navbar {
-        background: transparent;
-        height: 0;
-        width: 0;
-        overflow: hidden;
-        position: static;
-      }
-    
-      .toolbar {
-        display: none;
-      }
-    
-      .custom-sidebar {
-        top: 0;
-        left: -180px;
-        width: 180px;
-      }
-    
-      .custom-sidebar.show {
-        left: 0;
-      }
-    
-      .custom-content {
-        margin-left: 0;
-      }
-    
-      .custom-sidebar .sidebar-label {
-        opacity: 1;
-      }
-    
-      #mobile-toolbar-items {
-        display: block;
-        margin-top: 10px;
-      }
-    }
+    }}
 
     /* ===== Toolbar ===== */
-    .toolbar {
+    .toolbar {{
         position: fixed;
         top: 30px;
         left: 0;
@@ -122,166 +89,220 @@ def apply_global_styles():
         padding: 0 12px;
         gap: 8px;
         z-index: 999;
-    }
-    .toolbar-btn, .toolbar-dropdown {
+    }}
+    .toolbar-btn, .toolbar-dropdown {{
         background: transparent;
         border: none;
         color: var(--text-secondary);
         font-size: 0.72rem;
         cursor: pointer;
         padding: 2px 10px;
-        transition: all 0.25s ease;
-    }
-    .toolbar-btn:hover, .toolbar-dropdown:hover {
+        transition: all var(--animation-speed) ease;
+    }}
+    .toolbar-btn:hover, .toolbar-dropdown:hover {{
         background: var(--hover-bg);
         color: var(--text-main);
         border-radius: 4px;
         transform: scale(1.05);
         box-shadow: 0 0 5px rgba(0, 174, 239, 0.15);
-    }
+    }}
 
     /* ===== Sidebar ===== */
-    .custom-sidebar {
+    .custom-sidebar {{
         position: fixed;
         top: 60px;
         left: 0;
         height: calc(100% - 60px);
         width: 50px;
         background: var(--sidebar-bg);
-        transition: width 0.3s ease;
+        transition: width var(--animation-speed) ease;
         overflow-x: hidden;
         z-index: 900;
         padding-top: 3px;
         display: flex;
         flex-direction: column;
         align-items: stretch;
-    }
-    .custom-sidebar a {
+    }}
+    .custom-sidebar a {{
         text-decoration: none !important;
         color: inherit;
-    }
-    .custom-sidebar:hover {
+    }}
+    .custom-sidebar:hover {{
         width: 180px;
-    }
-    .sidebar-item {
+    }}
+    .custom-sidebar.show {{
+        width: 180px;
+    }}
+    .sidebar-item {{
         display: flex;
         align-items: center;
-        padding: 2px 2px;
-        margin: 5px 2px;
+        padding: 3px 1px;
+        margin: 3px 12px;
         border-radius: 10px;
         color: var(--text-main);
         font-weight: 500;
-        transition: background-color 0.25s, transform 0.2s;
         gap: 5px;
-    }
-    .sidebar-item:hover {
+        transition: background-color var(--animation-speed), transform var(--animation-speed);
+    }}
+    .sidebar-item:hover {{
         background: var(--hover-bg);
         transform: translateX(3px);
         border-left: 4px solid var(--accent);
-    }
-    .sidebar-icon {
+    }}
+    .sidebar-icon {{
         width: 28px;
         height: 28px;
-        min-width: 28px;
-        min-height: 28px;
         object-fit: contain;
         flex-shrink: 0;
-    }
-    .sidebar-label {
+        min-width: 28px;
+        max-width: 28px;
+        min-height: 28px;
+        max-height: 28px;
+        transition: all var(--animation-speed) ease;
+        margin-right: 0;
+    }}
+    .sidebar-label {{
+        display: inline-block;
+        overflow: hidden;
         white-space: nowrap;
         font-size: 0.95rem;
         font-weight: 500;
         color: #60A5FA;
+        margin-left: 12px;
         opacity: 0;
-        transition: opacity 0.3s ease, color 0.3s ease;
-    }
-    .custom-sidebar:hover .sidebar-label {
+        transition: opacity var(--animation-speed), color var(--animation-speed);
+    }}
+    .custom-sidebar:hover .sidebar-label {{
         opacity: 1;
-    }
-    .sidebar-item:hover .sidebar-label {
+    }}
+    .sidebar-item:hover .sidebar-label,
+    .sidebar-item.current-page .sidebar-label {{
         color: var(--accent);
-    }
-    .sidebar-item.current-page {
+    }}
+    .sidebar-item.current-page {{
         background: var(--hover-bg);
         border-left: 4px solid var(--accent);
         font-weight: 600;
-    }
-    .sidebar-item.current-page .sidebar-label {
-        color: var(--accent);
-    }
-    @media screen and (max-width: 768px) {
-      .hamburger {
-        display: block;
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 1200;
-      }
-    
-      .custom-navbar {
-        background: transparent;
-        height: 0;
-        width: 0;
-        overflow: hidden;
-        position: static;
-      }
-    
-      .toolbar {
-        display: none;
-      }
-    
-      .custom-sidebar {
-        top: 0;
-        left: -180px;
-        width: 180px;
-        transition: left 0.3s ease;
-      }
-    
-      .custom-sidebar.show {
-        left: 0;
-      }
-    
-      .custom-content {
-        margin-left: 0;
-      }
-    
-      .custom-sidebar .sidebar-label {
-        opacity: 1;
-      }
-    
-      #mobile-toolbar-items {
-        display: block;
-        margin-top: 10px;
-      }
-    }
+    }}
 
-    /* ===== Content ===== */
-    .custom-content {
-        margin-top: 60px;
+    /* ===== Content Area ===== */
+    .custom-content {{
+        left: 50px;
         margin-left: 70px;
-        padding: 20px;
-        transition: margin-left 0.3s ease;
-    }
-    .custom-sidebar:hover ~ .custom-content {
-        margin-left: 180px;
-    }
+        padding: 30px;
+        transition: margin-left var(--animation-speed) ease;
+    }}
+    @media screen and (min-width: 770px) {{
+        #app-container .custom-sidebar:hover + .custom-content {{
+            margin-left: 200px;
+        }}
+    }}
 
-    /* ===== Mobile Responsive ===== */
-    @media screen and (max-width: 768px) {
-        .hamburger { display: block; }
-        .navbar-left, .toolbar { display: none; }
-        .custom-navbar { justify-content: flex-start; }
-        .custom-sidebar {
+    /* ===== Metric Cards ===== */
+    .metric-card {{
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
+        text-align: center;
+    }}
+    .metric-label {{
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }}
+    .metric-value {{
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }}
+    .tab-close-btn {{
+        background: #F3F4F6;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background var(--animation-speed) ease;
+    }}
+    .tab-close-btn:hover {{
+        background: var(--hover-bg);
+    }}
+    
+    .tab-header {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }}
+
+    /* ===== Buttons ===== */
+    .stButton>button {{
+        border-radius: 6px;
+        background-color: #2962FF;
+        color: white;
+        padding: 8px 20px;
+        transition: background-color var(--animation-speed) ease;
+    }}
+    .stButton>button:hover {{
+        background-color: #0039cb;
+    }}
+
+    /* ===== Headings ===== */
+    h2 {{
+        color: #2962FF;
+    }}
+
+    /* ===== Text Utilities ===== */
+    .text-muted {{
+        color: #6B7280;
+        font-size: 0.85rem;
+    }}
+
+    /* ===== Mobile Styles ===== */
+    @media screen and (max-width: 768px) {{
+        .hamburger {{
+            display: block;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1200;
+        }}
+        .navbar-left, .toolbar {{
+            display: none;
+        }}
+        .custom-navbar {{
+            background: transparent;
+            height: 0;
+            width: 0;
+            overflow: hidden;
+            position: static;
+        }}
+        .custom-sidebar {{
             top: 30px;
+            left: -180px;
             width: 180px;
-        }
-        .custom-sidebar.show {
+            transition: left var(--animation-speed) ease;
+        }}
+        .custom-sidebar.show {{
             left: 0;
-        }
-        .custom-content { margin-left: 0; }
-        .custom-sidebar .sidebar-label { opacity: 1; }
-        #mobile-toolbar-items { display: block; margin-top: 10px; }
-    }
+        }}
+        .custom-content {{
+            margin: 50px 50px;
+            padding: 30px;
+            transition: left var(--animation-speed) ease;
+        }}
+        .custom-sidebar.show ~ .custom-content {{
+            margin-left: 180px;
+        }}
+        .custom-sidebar .sidebar-label {{
+            opacity: 1;
+        }}
+        #mobile-toolbar-items {{
+            display: block;
+            margin-top: 10px;
+        }}
+    }}
 
     </style>
     """, unsafe_allow_html=True)
