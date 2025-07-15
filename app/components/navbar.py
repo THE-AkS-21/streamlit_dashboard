@@ -1,7 +1,7 @@
 import streamlit as st
 from app.utils.icon_loader import load_icon
 
-@st.cache_resource(show_spinner=False)
+# @st.cache_resource(show_spinner=False)
 def render_navbar():
     if "sidebar_open" not in st.session_state:
         st.session_state.sidebar_open = False

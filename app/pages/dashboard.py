@@ -12,7 +12,6 @@ from app.utils.global_css import apply_global_styles
 def get_dashboard_metadata():
     return db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
 
-
 def show_dashboard():
     apply_global_styles()
     st.markdown("## Bombay Shaving Company Dashboard")
@@ -101,7 +100,7 @@ def show_dashboard():
                 # Top header: tab name + close button in one row
                 col1, col2 = st.columns([10, 1])
                 with col1:
-                    st.markdown(f"### 📊 {tname}")
+                    st.markdown(f"### {tname}")
                 with col2:
                     if st.button("❌", key=f"close_{tname}", use_container_width=True):
                         st.session_state.report_tabs.remove(tname)

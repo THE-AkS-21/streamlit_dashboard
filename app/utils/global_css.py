@@ -234,38 +234,62 @@ def apply_global_styles():
     }}
 
     /* ===== Buttons ===== */
+    /* All Streamlit buttons */
     .stButton>button {{
         border-radius: 6px;
-        background-color: #2962FF;
-        color: white;
+        background-color: #f1f5f9; /* light grey */
+        color: #111827; /* dark text */
         padding: 8px 20px;
-        transition: background-color var(--animation-speed) ease;
-    }}
-
-    .stButton>button:hover {{
-        background-color: #0039cb;
+        border: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
     }}
     
-    /* Logout button */
+    /* On hover - BSC blue */
+    .stButton>button:hover {{
+        background-color: #2962FF;
+        color: #ffffff;
+        border-color: #2962FF;
+        transform: scale(0.98);
+    }}
+    
+    /* On click effect */
+    .stButton>button:active {{
+        transform: scale(0.96);
+    }}
+    
+    /* Logout button wrapper */
     .sidebar-logout {{
         position: absolute;
         bottom: 20px;
         width: 100%;
         padding: 0 8px;
     }}
+    
+    /* Logout button specific style */
     .logout-btn {{
         width: 100%;
-        background: #F87171;
-        color: white;
-        border: none;
-        padding: 6px 10px;
+        background: #ffffff;
+        color: #EF4444;
+        border: 1px solid #EF4444;
+        padding: 8px 10px;
         border-radius: 6px;
         font-size: 0.75rem;
         cursor: pointer;
-        transition: background var(--animation-speed) ease;
+        transition: all 0.2s ease;
     }}
+    
+    /* Logout button hover state */
     .logout-btn:hover {{
         background: #EF4444;
+        color: #ffffff;
+        border-color: #EF4444;
+        transform: scale(0.98);
+    }}
+    
+    /* On click effect */
+    .logout-btn:active {{
+        transform: scale(0.96);
     }}
 
     /* ===== Headings ===== */
@@ -278,6 +302,78 @@ def apply_global_styles():
         color: #6B7280;
         font-size: 0.85rem;
     }}
+    
+    /* Container to center content */
+    .settings-container {{
+        max-width: 480px;
+        margin: 60px auto;
+        text-align: center;
+    }}
+
+    /* Page title */
+    .page-title {{
+        font-size: 1.75rem;
+        margin-bottom: 24px;
+        color: #111827;
+    }}
+    
+    /* Profile card container */
+    .profile-card {{
+        background: #f9fafb;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 24px;
+    }}
+    
+    /* Profile info items */
+    .profile-item {{
+        font-size: 0.95rem;
+        padding: 8px 0;
+        border-bottom: 1px solid #e5e7eb;
+        color: #374151;
+    }}
+    
+    .profile-item:last-child {{
+        border-bottom: none;
+    }}
+    
+    /* Center table content */
+    div[data-testid="stDataFrameContainer"] table td,
+    div[data-testid="stDataFrameContainer"] table th {{
+        text-align: center !important;
+        vertical-align: middle;
+    }}
+    
+    /* Analytics container padding */
+    .analytics-container {{
+        margin-top: 30px;
+    }}
+    
+    /* Sign out button — inherits your .stButton styling */
+    div[data-testid="stButton"][key="signout_btn"] button {{
+        width: 100%;
+        background: #ffffff;
+        color: #EF4444;
+        border: 1px solid #EF4444;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }}
+    
+    div[data-testid="stButton"][key="signout_btn"] button:hover {{
+        background: #EF4444;
+        color: #ffffff;
+        border-color: #EF4444;
+        transform: scale(0.98);
+    }}
+    
+    div[data-testid="stButton"][key="signout_btn"] button:active {{
+        transform: scale(0.96);
+    }}
+
 
     /* ===== Mobile Styles ===== */
     @media screen and (max-width: 768px) {{

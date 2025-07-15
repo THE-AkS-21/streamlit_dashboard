@@ -1,6 +1,62 @@
-# pages/analytics.py
 import streamlit as st
-def show_analytics():
-    st.title("Analytics")
+from datetime import date
+from app.database.connection import db
+from app.database.queries.analytics_queries import AnalyticsQueries
+from app.utils.global_css import apply_global_styles
 
-    st.button("Log out", on_click=st.logout)
+def show_analytics():
+    apply_global_styles()
+
+    st.markdown('<h2 class="page-title">Platform P&L Analytics</h2>', unsafe_allow_html=True)
+
+    # ───── Date filters ─────
+    col1, col2 = st.columns(2)
+    with col1:
+        start_date = st.date_input("Start Date", value=date(2025, 1, 1))
+    with col2:
+        end_date = st.date_input("End Date", value=date(2025, 4, 1))
+
+    if start_date > end_date:
+        st.error("❌ Start date cannot be after end date.")
+        return
+
+    # ───── Pagination controls ─────
+    col3, col4 = st.columns(2)
+    with col3:
+        limit = st.selectbox("Rows per Page", [10, 20, 30, 50], index=1)
+    with col4:
+        page_no = st.number_input("Page No", min_value=1, value=1, step=1)
+
+    # ───── Data Fetch ─────
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "limit": limit,
+        "page_no": page_no
+    }
+
+    query = AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION
+    data_df = db.execute_query(query, params)
+
+    if data_df.empty:
+        st.warning("⚠️ No records found for the selected range and page.")
+        return
+
+    # ───── Data Table Display ─────
+    st.markdown('<div class="analytics-container">', unsafe_allow_html=True)
+
+    styled_df = data_df.style.set_properties(
+        **{
+            "text-align": "center"
+        }
+    )
+
+    st.data_editor(
+        data_df,
+        hide_index=True,
+        use_container_width=True,
+        column_config={col: {"width": "160px"} for col in data_df.columns},
+        key=f"editor_{page_no}"
+    )
+
+    st.markdown('</div>', unsafe_allow_html=True)
