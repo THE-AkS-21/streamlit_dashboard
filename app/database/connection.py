@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 import pandas as pd
 import streamlit as st
@@ -14,6 +15,7 @@ def get_engine():
 class DatabaseConnection:
     def __init__(self):
         self.engine = get_engine()
+        self.Session = sessionmaker(bind=self.engine)
 
     @contextmanager
     def get_connection(self):
@@ -24,19 +26,17 @@ class DatabaseConnection:
             conn.close()
 
     def execute_query(self, query: str, params: dict = None) -> pd.DataFrame:
-        """Wrapper to run cached query"""
         with self.get_connection() as conn:
             return run_cached_query(conn, query, params)
 
     def execute_write_query(self, query: str, params: dict = None) -> None:
-        """Run non-cached write operations"""
-        with self.get_connection() as conn:
-            conn.execute(text(query), params or {})
-            conn.commit()
+        with self.Session() as session:
+            session.execute(text(query), params or {})
+            session.commit()
 
-# Cache data queries — no 'self' involved
 @st.cache_data(ttl=3600)
 def run_cached_query(_conn, query: str, params: dict = None) -> pd.DataFrame:
+    params = params or {}
     return pd.read_sql_query(text(query), _conn, params=params)
 
 # Single instance

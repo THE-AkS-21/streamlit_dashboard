@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: bsc_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: bombay_shaving_company
+      POSTGRES_USER: bsc
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    container_name: bsc_dashboard
+    ports:
+      - "8501:8501"
+    depends_on:
+      - db
+    environment:
+      - STREAMLIT_SERVER_HEADLESS=true
+    volumes:
+      - .:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

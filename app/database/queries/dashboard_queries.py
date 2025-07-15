@@ -1,5 +1,5 @@
 class DashboardQueries:
-    MONTHLY_ORDERS = """
+    MONTHLY_ORDERS_WITH_SKU = """
     WITH daily_orders AS (
         SELECT 
             valuationdate::date as order_date,
@@ -16,6 +16,29 @@ class DashboardQueries:
     ORDER BY time ASC
     """
 
+    MONTHLY_ORDERS_NO_SKU = """
+    WITH daily_orders AS (
+        SELECT 
+            valuationdate::date as order_date,
+            SUM(units) as total_units
+        FROM bsc.centraldsrdumpv2 
+        WHERE valuationdate::date BETWEEN CAST(:start_date AS DATE) AND CAST(:end_date AS DATE)
+        GROUP BY valuationdate::date
+    )
+    SELECT 
+        order_date as time,
+        total_units as value
+    FROM daily_orders
+    ORDER BY time ASC
+    """
+
+    UPDATE_ORDER_VALUE = """
+    UPDATE bsc.centraldsrdumpv2
+    SET units = :value
+    WHERE valuationdate::date = :orderdate
+    AND whsku = :whsku
+    """
+
     DAILY_METRICS = """
     SELECT 
         SUM(units) as total_units,
@@ -27,10 +50,10 @@ class DashboardQueries:
     """
 
     GET_DASHBOARD_FILTER_METADATA = """
-    SELECT DISTINCT category, \
-    subcategory, \
-    whsku AS sku, \
-    MAX(valuationdate::date) OVER () AS last_date
+    SELECT DISTINCT category, 
+        subcategory, 
+        whsku AS sku, 
+        MAX(valuationdate::date) OVER () AS last_date
     FROM bsc.centraldsrdumpv2
-    ORDER BY category, subcategory, sku \
+    ORDER BY category, subcategory, sku
     """
