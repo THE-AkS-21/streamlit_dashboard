@@ -1,25 +1,21 @@
 import streamlit as st
+
+from app.components.content_area import render_sidebar_content_sync_script
 from app.components.navbar import render_navbar
 from app.components.sidebar import render_sidebar
+from app.components.sidebar_toggle_script import render_sidebar_toggle_script
+from app.utils.global_css import apply_global_styles
+
 
 def render_layout():
-    query_params = st.query_params  # ✅ modern replacement
-    page = query_params.get("page", "Dashboard")  # note: no list wrapping now — single value or None
+    apply_global_styles()
+    render_sidebar_toggle_script()
+    render_sidebar_content_sync_script()
 
+    query_params = st.query_params
+    page = query_params.get("page", "Dashboard")
+
+    # Open app container
+    st.markdown("""<div id="app-container">""", unsafe_allow_html=True)
     render_navbar()
     render_sidebar(page)
-
-    st.markdown("""
-        <script>
-        function initHamburger() {
-            const hamburger = document.getElementById("hamburger-toggle");
-            const sidebar = document.getElementById("custom-sidebar");
-            if (hamburger && sidebar) {
-                hamburger.onclick = function() {
-                    sidebar.classList.toggle("show");
-                }
-            }
-        }
-        window.addEventListener("load", initHamburger);
-        </script>
-    """, unsafe_allow_html=True)

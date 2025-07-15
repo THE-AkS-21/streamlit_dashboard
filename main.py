@@ -1,27 +1,25 @@
 import streamlit as st
+
+from app.components.content_area import render_sidebar_content_sync_script
 from app.components.layout import render_layout
+from app.components.sidebar_toggle_script import render_sidebar_toggle_script
+from app.config import init_page_config
 from app.pages import dashboard, analytics, settings
 from app.constants import pages
 from app.utils.global_css import apply_global_styles
-from config import init_page_config
 
 # Initialize config
 init_page_config()
-
 # Apply global styles
 apply_global_styles()
 
-
 def get_current_page():
     """Get current page from URL parameters or session state"""
-    # Check URL parameters first
     query_params = st.query_params
     if 'page' in query_params:
         page = query_params['page']
         st.session_state.current_page = page
         return page
-
-    # Fall back to session state
     return st.session_state.get("current_page", pages.DASHBOARD)
 
 
@@ -29,11 +27,16 @@ def main():
     """Main application entry point"""
     # Render layout (navbar + sidebar)
     render_layout()
+    render_sidebar_toggle_script()
 
-    # Get current page
+    # Open content wrapper inside app-container
+    st.markdown("""<div class="custom-content" style="margin: 0; padding: 0;">""", unsafe_allow_html=True)
+
+    # render_sidebar_content_sync_script()
+
+    # Get current page and render respective page content inside custom-content
     current_page = get_current_page()
 
-    # Route to appropriate page
     if current_page == pages.DASHBOARD:
         dashboard.show_dashboard()
     elif current_page == pages.ANALYTICS:
@@ -41,8 +44,11 @@ def main():
     elif current_page == pages.SETTINGS:
         settings.show_settings()
     else:
-        # Default to dashboard if page not found
         dashboard.show_dashboard()
+
+    # Close content and app-container
+    st.markdown("</div>", unsafe_allow_html=True)  # .custom-content
+    st.markdown("</div>", unsafe_allow_html=True)  # #app-container
 
 
 if __name__ == "__main__":
