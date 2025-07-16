@@ -2,7 +2,6 @@ import streamlit as st
 from datetime import date
 import time
 
-from app.components.export_controls import export_controls
 from app.database.connection import db
 from app.database.queries.sku_analytics_queries import SkuAnalyticsQueries
 from app.utils.global_css import apply_global_styles
@@ -23,7 +22,7 @@ def show_sku_analytics():
     apply_global_styles()
     st.markdown('<h2 class="page-title">SKU Channel Analytics</h2>', unsafe_allow_html=True)
 
-    col1, col2, col3, col4, col5 = st.columns([0.5, 0.5, 0.5, 0.5, 0.5])
+    col1, col2, col3, col4, col5 = st.columns([0.5] * 5)
 
     with col1:
         start_date = st.date_input("Start Date", value=date(2025, 1, 1))
@@ -60,14 +59,12 @@ def show_sku_analytics():
     else:
         data_df = get_cached_sku_data(start_date, end_date, limit, page_no)
 
-    st.markdown("---")
-
-    st.markdown('<div class="analytics-container" style="margin-top: 0px;">', unsafe_allow_html=True)
+    # st.markdown("---")
+    st.markdown('<div class="analytics-container">', unsafe_allow_html=True)
 
     if data_df.empty:
         st.warning("⚠️ No records found for the selected range and page.")
     else:
         render_aggrid(data_df, page_size=limit)
-        st.markdown("---")
 
     st.markdown('</div>', unsafe_allow_html=True)

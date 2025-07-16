@@ -470,7 +470,6 @@ def apply_global_styles():
     
     /* Analytics container padding */
     .analytics-container {{
-        margin-top: 30px;
         height: 100%;
         width: 100%;
     }}
