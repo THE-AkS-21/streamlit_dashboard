@@ -14,6 +14,129 @@ def apply_global_styles():
         --text-secondary: #374151;
         --animation-speed: {config.animation_speed}s;
     }}
+    /* Reset + Layout Fixes */
+    header, footer {{ visibility: hidden; height: 0; }}
+    section.main {{ padding-top: 0 !important; }}
+    
+    .filter-export-container {{
+        background-color: #fafafa;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #d3d3d3;
+        margin-bottom: 1rem;
+    }}
+    .dropdown-box {{
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }}
+    .dropdown-button {{
+        width: 100%;
+        padding: 8px 12px;
+        background-color: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        text-align: left;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }}
+    .dropdown-content {{
+        display: block;
+        position: absolute;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 10px;
+        margin-top: 4px;
+        z-index: 999;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+    }}
+    .dropdown-checkbox {{
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+    }}
+    .dropdown-search {{
+        width: 100%;
+        padding: 6px 8px;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+    }}
+    .dropdown-box {{
+        background-color: #ffffff;
+        border: 1px solid #d3d3d3;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.3s ease;
+        opacity: 0;
+    }}    
+    .dropdown-box.open {{
+        max-height: 500px;
+        opacity: 1;
+        padding: 12px 14px;
+    }}    
+    .dropdown-box.closed {{
+        max-height: 0;
+        opacity: 0;
+        padding: 0px;
+    }}
+
+    /* Grid Customizations */
+    .ag-theme-alpine .ag-header-cell, 
+    .ag-theme-alpine .ag-cell {{
+        text-align: center;
+    }}
+    .ag-theme-alpine .ag-header-cell-label {{
+        justify-content: center;
+    }}
+
+    /* Filter Export Container */
+    .filter-export-container {{
+        background-color: #fafafa;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #d3d3d3;
+        margin-bottom: 1.25rem;
+    }}
+
+    /* Column Filter Styling */
+    .stMultiSelect>label {{
+        font-weight: 500;
+    }}
+    .stCheckbox>div {{
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }}
+
+    /* Button Style Override */
+    .stButton>button {{
+        border-radius: 6px;
+        background-color: #f1f5f9;
+        color: #111827;
+        padding: 8px 20px;
+        border: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }}
+    .stButton>button:hover {{
+        background-color: #2962FF;
+        color: white;
+        border-color: #2962FF;
+        transform: scale(0.98);
+    }}
+    h2 {{
+        color: #2962FF;
+        font-weight: 600;
+    }}
 
     /* ===== General Reset (Only for markdown blocks) ===== */
     header, footer {{
