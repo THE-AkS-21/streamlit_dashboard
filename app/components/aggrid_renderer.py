@@ -55,6 +55,8 @@ def render_aggrid(data_df: pd.DataFrame):
         fit_columns_on_grid_load=True
     )
 
-    # Optionally return selected rows
-    selected_rows = grid_response["selected_rows"]
-    # return selected_rows if needed
+    selected_rows_df = pd.DataFrame(grid_response["selected_rows"]) if grid_response["selected_rows"] else pd.DataFrame()
+    return {
+        "full_data": data_df,
+        "selected_rows": selected_rows_df
+    }
