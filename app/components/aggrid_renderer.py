@@ -4,8 +4,9 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 from app.components.export_controls import export_controls
 
 
-def render_aggrid(data_df: pd.DataFrame, page_size: int = 50):
+def render_aggrid(data_df: pd.DataFrame):
     data_df = data_df.copy()
+    page_size: int = 50
 
     # Add Serial Number
     if "S.No" not in data_df.columns:
@@ -31,6 +32,8 @@ def render_aggrid(data_df: pd.DataFrame, page_size: int = 50):
 
     # ✅ Enable Sidebar (columns & filters)
     gb.configure_side_bar()
+    # ✅ Enable Sidebar (row grouping)
+    gb.configure_default_column(groupable=True)
 
     # ✅ Enable Floating Filters
     gb.configure_grid_options(floatingFilter=True)

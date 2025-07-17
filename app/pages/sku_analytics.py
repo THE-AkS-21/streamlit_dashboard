@@ -101,6 +101,6 @@ def show_sku_analytics():
     if data_df.empty:
         st.warning("⚠️ No records found for the selected range and page.")
     else:
-        render_aggrid(data_df, page_size=limit)
+        render_aggrid(data_df)
 
     st.markdown('</div>', unsafe_allow_html=True)
