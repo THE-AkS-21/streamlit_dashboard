@@ -57,3 +57,7 @@ class DashboardQueries:
     FROM bsc.centraldsrdumpv2
     ORDER BY category, subcategory, sku
     """
+
+    GET_DASHBOARD_DATA = """
+    SELECT * FROM bsc.centraldsrdumpv2
+    """
