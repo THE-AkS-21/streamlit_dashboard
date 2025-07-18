@@ -1,12 +1,6 @@
 import streamlit as st
 
 def show_settings():
-    # Page container inside custom-content
-    st.markdown(
-        """<div class="custom-content"><div class="settings-container">""",
-        unsafe_allow_html=True
-    )
-
     # Title
     st.markdown('<h2 class="page-title">Settings</h2>', unsafe_allow_html=True)
 

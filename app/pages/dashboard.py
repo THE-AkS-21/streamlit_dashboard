@@ -73,11 +73,11 @@ def render_report_tabs():
             ]
             ChartComponent.metric_cards(metrics)
 
-            st.markdown("#### Custom Chart Preview")
+            st.markdown("#### Chart")
 
             chart_type = st.selectbox(
                 "Select Chart Type",
-                ["Line", "Bar", "Area", "Scatter", "Pie", "Box", "Histogram", "Sunburst"],
+                ["Histogram+Area","Line", "Bar", "Area", "Scatter", "Pie", "Box", "Histogram", "Sunburst"],
                 key=f"{tab_name}_chart_type"
             )
             df = orders_df.copy()
@@ -93,11 +93,16 @@ def render_report_tabs():
             if df.empty:
                 st.warning("No valid data available for chart.")
             else:
-                ChartComponent(df).render_dynamic_chart(
-                    x_axis="time",
-                    y_axis="value",
-                    chart_type=chart_type
-                )
+                chart_component = ChartComponent(df)
+
+                if chart_type == "Histogram+Area":
+                    chart_component.asp_units_offtake_chart()
+                else:
+                    chart_component.render_dynamic_chart(
+                        x_axis="time",
+                        y_axis="value",
+                        chart_type=chart_type
+                    )
 
             st.download_button(
                 label="📥 Download CSV Report",

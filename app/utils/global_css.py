@@ -16,7 +16,12 @@ def apply_global_styles():
     }}
     /* Reset + Layout Fixes */
     header, footer {{ visibility: hidden; height: 0; }}
-    section.main {{ padding-top: 0 !important; }}
+    section.main {{ padding-top: 0 !important;}}
+    section.main, .block-container {{
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }}
+
     
     .filter-export-container {{
         background-color: #fafafa;
@@ -323,9 +328,10 @@ def apply_global_styles():
 
     /* ===== Content Area ===== */
     .custom-content {{
+        border: 2px dashed red;
         left: 50px;
         margin-left: 70px;
-        padding: 30px;
+        padding: 10px;
         transition: margin-left var(--animation-speed) ease;
     }}
 

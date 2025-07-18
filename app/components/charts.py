@@ -164,6 +164,75 @@ class ChartComponent:
         fig.update_traces(textinfo="label+percent+value", hovertemplate="SKU: %{label}<br>Units: %{value}<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
 
+    # ------------------- 🔹 Combined ASP (Bar), Units & Offtake (Area) Lightweight Chart -------------------
+
+    def asp_units_offtake_chart(self, key="asp_units_offtake_chart") -> None:
+        """
+        Combines a Histogram and Area chart to visualize Units and Offtake (if available) over time per SKU.
+        """
+        if not {"valuationdate", "units", "whsku"}.issubset(self.df.columns):
+            st.warning("Required columns (valuationdate, units, whsku) not found.")
+            return
+
+        df = self.df.copy()
+        df["valuationdate"] = pd.to_datetime(df["valuationdate"], errors="coerce")
+        df["units"] = pd.to_numeric(df["units"], errors="coerce")
+
+        if "offtake" in df.columns:
+            df["offtake"] = pd.to_numeric(df["offtake"], errors="coerce")
+
+        df = df.dropna(subset=["valuationdate", "units", "whsku"])
+
+        # Filter by SKU selection
+        unique_skus = sorted(df["whsku"].dropna().unique())
+        selected_skus = st.multiselect("Select SKUs to display", unique_skus, default=unique_skus[:5],
+                                       key=f"{key}_skus")
+
+        if not selected_skus:
+            st.warning("Please select at least one SKU.")
+            return
+
+        df = df[df["whsku"].isin(selected_skus)]
+
+        # Aggregate units/offtake per day
+        agg_df = df.groupby(["valuationdate", "whsku"]).agg(
+            {"units": "sum", "offtake": "sum" if "offtake" in df.columns else "first"}).reset_index()
+
+        fig = px.histogram(
+            agg_df,
+            x="valuationdate",
+            y="units",
+            color="whsku",
+            barmode="stack",
+            nbins=30,
+            title="Units Sold (Histogram) + Offtake (Area if present)"
+        )
+
+        fig.update_traces(opacity=0.7, marker_line_width=0)
+
+        if "offtake" in agg_df.columns and not agg_df["offtake"].isna().all():
+            for sku in selected_skus:
+                sku_df = agg_df[agg_df["whsku"] == sku]
+                fig.add_scatter(
+                    x=sku_df["valuationdate"],
+                    y=sku_df["offtake"],
+                    mode="lines+markers",
+                    name=f"{sku} Offtake",
+                    yaxis="y2"
+                )
+
+            fig.update_layout(
+                yaxis2=dict(
+                    title="Offtake",
+                    overlaying="y",
+                    side="right",
+                    showgrid=False
+                )
+            )
+
+        fig.update_layout(xaxis_title="Date", yaxis_title="Units")
+        st.plotly_chart(fig, use_container_width=True)
+
     # ------------------- 🔹 SUNBURST CHART -------------------
     def sunburst_chart(self) -> None:
         chart_data, error = self.prepare_chart_data("Sunburst")

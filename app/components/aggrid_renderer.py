@@ -35,8 +35,15 @@ def render_aggrid(data_df: pd.DataFrame):
     # ✅ Enable Sidebar (row grouping)
     gb.configure_default_column(groupable=True)
 
+
+
     # ✅ Enable Floating Filters
     gb.configure_grid_options(floatingFilter=True)
+
+    # # ✅ Enable Basic grouping
+    # gb.configure_column("Category", rowGroup=True)
+    # gb.configure_column("SubCategory", rowGroup=True)
+    # gb.configure_column("whsku", rowGroup=True)
 
     # ✅ Enable Row Selection
     gb.configure_selection("multiple", use_checkbox=True)
@@ -52,7 +59,7 @@ def render_aggrid(data_df: pd.DataFrame):
         height=600,
         allow_unsafe_jscode=True,
         enable_enterprise_modules=True,
-        fit_columns_on_grid_load=True
+        fit_columns_on_grid_load=False
     )
 
     selected_rows_df = pd.DataFrame(grid_response["selected_rows"]) if grid_response["selected_rows"] else pd.DataFrame()
