@@ -2,7 +2,7 @@ import streamlit as st
 
 from app.components.layout import render_layout
 from app.config import init_page_config
-from app.pages import dashboard, analytics, settings, sku_analytics
+from app.pages import dashboard, analytics, settings, sku_analytics, upload, pnl_analytics
 from app.constants import pages
 from app.utils.global_css import apply_global_styles
 
@@ -42,8 +42,12 @@ def main():
         dashboard.show_dashboard()
     elif current_page == pages.ANALYTICS:
         analytics.show_analytics()
+    elif current_page == pages.PNL_ANALYTICS:
+        pnl_analytics.show_pnl_analytics()
     elif current_page == pages.SKU_ANALYTICS:
         sku_analytics.show_sku_analytics()
+    elif current_page == pages.UPLOAD:
+        upload.show_upload()
     elif current_page == pages.SETTINGS:
         settings.show_settings()
     else:

@@ -1,4 +1,6 @@
 DASHBOARD = "Dashboard"
 ANALYTICS = "Analytics"
+PNL_ANALYTICS = "pnl_analytics"
 SETTINGS = "Settings"
 SKU_ANALYTICS = "sku_analytics"
+UPLOAD = "Upload"
