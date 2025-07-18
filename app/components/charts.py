@@ -233,6 +233,39 @@ class ChartComponent:
         fig.update_layout(xaxis_title="Date", yaxis_title="Units")
         st.plotly_chart(fig, use_container_width=True)
 
+    # ------------------- 🔹 Multi Metrix Chart -------------------
+
+    def multi_metric_time_series(self, x_axis="valuationdate", key="multi_metric_chart"):
+        if x_axis not in self.df.columns:
+            st.warning(f"'{x_axis}' column not found in selected rows.")
+            return
+
+        df = self.df.copy()
+        df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
+        df = df.dropna(subset=[x_axis])
+
+        # Auto-detect numeric columns (excluding common non-metrics)
+        numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
+        numeric_cols = [col for col in numeric_cols if col.lower() not in ["s.no", "id"]]
+
+        if not numeric_cols:
+            st.warning("No numeric columns to plot from selected rows.")
+            return
+
+        # Summarize only selected rows per valuationdate
+        agg_df = df.groupby(x_axis)[numeric_cols].sum().reset_index()
+
+        # Plot
+        fig = px.line(agg_df, x=x_axis, y=numeric_cols, markers=True)
+        fig.update_layout(
+            title="Selected Metrics Over Time",
+            xaxis_title="Valuation Date",
+            yaxis_title="Aggregated Values",
+            legend_title="Metric"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
     # ------------------- 🔹 SUNBURST CHART -------------------
     def sunburst_chart(self) -> None:
         chart_data, error = self.prepare_chart_data("Sunburst")
