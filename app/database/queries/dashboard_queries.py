@@ -61,7 +61,7 @@ class DashboardQueries:
     GET_DASHBOARD_CHART_DATA = """
     SELECT *
     FROM bsc.centraldsrdumpv2
-    WHERE valuationdate BETWEEN :start_date AND :end_date
+    WHERE valuationdate::date BETWEEN CAST(:start_date AS DATE) AND CAST(:end_date AS DATE)
     """
 
 

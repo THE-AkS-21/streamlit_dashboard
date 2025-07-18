@@ -2,6 +2,7 @@ from datetime import datetime
 import streamlit as st
 import pandas as pd
 
+from app.components.aggrid_renderer import render_aggrid
 from app.database.connection import db
 from app.database.queries.dashboard_queries import DashboardQueries
 from app.components.charts import ChartComponent
@@ -11,6 +12,15 @@ from app.utils.global_css import apply_global_styles
 @st.cache_data(ttl=3600, show_spinner="🔄 Loading filter metadata...")
 def get_dashboard_metadata():
     return db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
+
+@st.cache_data(ttl=3600)
+def get_all_data(start_date, end_date):
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+    query = DashboardQueries.GET_DASHBOARD_CHART_DATA
+    return db.execute_query(query, params)
 
 
 def render_filter_form(metadata_df):
@@ -45,7 +55,7 @@ def run_dashboard_query(sku, start_date, end_date):
     return query, params, db.execute_query(query, params)
 
 
-def render_report_tabs():
+def render_report_tabs(start_date, end_date):
     tabs = st.tabs(st.session_state.report_tabs)
 
     for i, tab_name in enumerate(st.session_state.report_tabs):
@@ -72,6 +82,15 @@ def render_report_tabs():
                 {"label": "Days", "value": Formatters.number(len(orders_df))},
             ]
             ChartComponent.metric_cards(metrics)
+
+            st.markdown("#### Ag-Grid")
+
+            data_df = get_all_data(start_date, end_date)
+
+            if data_df.empty:
+                st.warning("⚠️ No records found for the selected range and page.")
+            else:
+                render_aggrid(data_df)
 
             st.markdown("#### Chart")
 
@@ -152,7 +171,7 @@ def show_dashboard():
             st.error("❌ No data found to generate report.")
 
     if st.session_state.report_tabs:
-        render_report_tabs()
+        render_report_tabs(start_date, end_date)
 
     if edit_btn:
         _, _, orders_df = run_dashboard_query(sku, start_date, end_date)
