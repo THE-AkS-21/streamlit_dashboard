@@ -1,33 +1,81 @@
 import streamlit as st
 from datetime import date
+import time
+
+from app.components.aggrid_renderer import render_aggrid
+from app.components.export_controls import export_controls
 from app.database.connection import db
 from app.database.queries.analytics_queries import AnalyticsQueries
+from app.database.queries.sku_analytics_queries import SkuAnalyticsQueries
 from app.utils.global_css import apply_global_styles
+
+
+@st.cache_data(ttl=3600)
+def get_cached_platform_pnl(start_date, end_date, limit, page_no):
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "limit": limit,
+        "page_no": page_no
+    }
+    return db.execute_query(AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION, params)
+
+
+@st.cache_data(ttl=3600)
+def get_cached_sku_pnl(start_date, end_date, limit, page_no):
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "limit": limit,
+        "page_no": page_no
+    }
+    return db.execute_query(SkuAnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION, params)
+
 
 def show_analytics():
     apply_global_styles()
 
-    st.markdown('<h2 class="page-title">Platform P&L Analytics</h2>', unsafe_allow_html=True)
+    data_df = None  # Initialize empty
+    query = None
 
-    # ───── Date filters ─────
-    col1, col2 = st.columns(2)
-    with col1:
-        start_date = st.date_input("Start Date", value=date(2025, 1, 1))
-    with col2:
-        end_date = st.date_input("End Date", value=date(2025, 4, 1))
+    # ───── Filter + Control Layout ─────
+    with st.container():
+        col0, col1, col2, col3, col4, col5, col6 = st.columns([1.5, 1, 1, 1, 1, 1, 1])
 
+        with col0:
+            table_option = st.selectbox("Select Table", ["Platform PnL", "SKU Channel PnL"])
+
+        with col1:
+            start_date = st.date_input("Start Date", value=date(2025, 1, 1))
+
+        with col2:
+            end_date = st.date_input("End Date", value=date(2025, 4, 1))
+
+        with col3:
+            limit = st.number_input("Rows per Page", min_value=1, value=50, step=1)
+
+        with col4:
+            page_no = st.number_input("Page No", min_value=1, value=1, step=1)
+
+        with col5:
+            build_button = st.button("Build", key="build_btn", help="Build data")
+
+        with col6:
+            fetch_button = st.button("Fetch", key="fetch_btn", help="Update data")
+
+    # ───── Date Validation ─────
     if start_date > end_date:
         st.error("❌ Start date cannot be after end date.")
         return
 
-    # ───── Pagination controls ─────
-    col3, col4 = st.columns(2)
-    with col3:
-        limit = st.selectbox("Rows per Page", [5, 20, 30, 50], index=1)
-    with col4:
-        page_no = st.number_input("Page No", min_value=1, value=1, step=1)
+    # ───── Query Mapping ─────
+    if table_option == "Platform PnL":
+        cached_fn = get_cached_platform_pnl
+        query = AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION
+    else:
+        cached_fn = get_cached_sku_pnl
+        query = SkuAnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION
 
-    # ───── Data Fetch ─────
     params = {
         "start_date": start_date,
         "end_date": end_date,
@@ -35,28 +83,56 @@ def show_analytics():
         "page_no": page_no
     }
 
-    query = AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION
-    data_df = db.execute_query(query, params)
+    # ───── Fetch or Build ─────
+    if fetch_button:
+        start_time = time.time()
+        data_df = db.execute_query(query, params)
+        duration = time.time() - start_time
+        st.success(f"✅ Fresh data fetched in {duration:.2f} seconds")
+    elif build_button:
+        data_df = cached_fn(start_date, end_date, limit, page_no)
 
-    if data_df.empty:
-        st.warning("⚠️ No records found for the selected range and page.")
-        return
+    # ───── Display Table + Export ─────
+    if data_df is not None:
+        st.markdown('<div class="analytics-container">', unsafe_allow_html=True)
 
-    # ───── Data Table Display ─────
-    st.markdown('<div class="analytics-container">', unsafe_allow_html=True)
+        if data_df.empty:
+            st.warning("⚠️ No records found for the selected range and page.")
+        else:
+            render_aggrid(data_df)
 
-    styled_df = data_df.style.set_properties(
-        **{
-            "text-align": "center"
-        }
-    )
+            # ───── Export + Download Controls ─────
+            with st.container():
+                col_export, col_download = st.columns([1.5, 1])
 
-    st.data_editor(
-        data_df,
-        hide_index=True,
-        use_container_width=True,
-        column_config={col: {"width": "160px"} for col in data_df.columns},
-        key=f"editor_{page_no}"
-    )
+                with col_export:
+                    export_type = st.selectbox(
+                        "Export As",
+                        options=["None", "CSV", "Excel", "PDF", "PNG"],
+                        key="export_type_dropdown"
+                    )
 
-    st.markdown('</div>', unsafe_allow_html=True)
+                with col_download:
+                    st.markdown("""<div style="margin-top: 10px;"></div>""", unsafe_allow_html=True)
+                    export_btn = st.button("EXPORT", key="download_btn", help="Export file")
+
+                if export_btn and export_type != "None":
+                    file_prefix = "platform_pnl_export" if table_option == "Platform PnL" else "sku_analytics_export"
+                    filename, content, mime, download_html = export_controls(
+                        data_df,
+                        file_prefix=file_prefix,
+                        export_type=export_type
+                    )
+
+                    if export_type != "PNG":
+                        st.download_button(
+                            label=f"Download {export_type}",
+                            data=content,
+                            file_name=filename,
+                            mime=mime,
+                            use_container_width=True
+                        )
+                    else:
+                        st.markdown(download_html, unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)

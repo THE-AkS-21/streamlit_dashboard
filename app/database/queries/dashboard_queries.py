@@ -57,3 +57,14 @@ class DashboardQueries:
     FROM bsc.centraldsrdumpv2
     ORDER BY category, subcategory, sku
     """
+
+    GET_DASHBOARD_CHART_DATA = """
+                               SELECT valuationdate::date AS valuationdate, whsku AS sku, \
+                                      category, \
+                                      subcategory, \
+                                      units, \
+                                      offtake
+                               FROM bsc.centraldsrdumpv2
+                               WHERE valuationdate BETWEEN %(start_date)s AND %(end_date)s {sku_filter}
+                               ORDER BY valuationdate ASC \
+                               """
