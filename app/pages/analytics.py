@@ -40,7 +40,7 @@ def show_analytics():
 
     # ───── Filter + Control Layout ─────
     with st.container():
-        col0, col1, col2, col3, col4, col5, col6 = st.columns([1.5, 1, 1, 1, 1, 1, 1])
+        col0, col1, col2, col3, col4, col5, col6, col7 = st.columns([1.5, 1, 1, 0.7, 0.7, 1, 1.2, 1])
 
         with col0:
             table_option = st.selectbox("Select Table", ["Platform PnL", "SKU Channel PnL"])
@@ -58,10 +58,19 @@ def show_analytics():
             page_no = st.number_input("Page No", min_value=1, value=1, step=1)
 
         with col5:
-            build_button = st.button("Build", key="build_btn", help="Build data")
+            export_type = st.selectbox(
+                "Export As",
+                options=["None", "CSV", "Excel", "PDF", "PNG"],
+                key="export_type_dropdown"
+            )
 
         with col6:
-            fetch_button = st.button("Fetch", key="fetch_btn", help="Update data")
+            st.markdown("""<div style="margin-top: 10px;"></div>""", unsafe_allow_html=True)
+            export_btn = st.button("Download", key="download_btn", help="Export file")
+
+        with col7:
+            st.markdown("""<div style="margin-top: 10px;"></div>""", unsafe_allow_html=True)
+            fetch_button = st.button("Fetch", key="fetch_btn", help="Reload data without cache")
 
     # ───── Date Validation ─────
     if start_date > end_date:
@@ -89,50 +98,15 @@ def show_analytics():
         data_df = db.execute_query(query, params)
         duration = time.time() - start_time
         st.success(f"✅ Fresh data fetched in {duration:.2f} seconds")
-    elif build_button:
+    else:
         data_df = cached_fn(start_date, end_date, limit, page_no)
 
-    # ───── Display Table + Export ─────
-    if data_df is not None:
+        # ───── Render Grid ─────
         st.markdown('<div class="analytics-container">', unsafe_allow_html=True)
 
         if data_df.empty:
             st.warning("⚠️ No records found for the selected range and page.")
         else:
             render_aggrid(data_df)
-
-            # ───── Export + Download Controls ─────
-            with st.container():
-                col_export, col_download = st.columns([1.5, 1])
-
-                with col_export:
-                    export_type = st.selectbox(
-                        "Export As",
-                        options=["None", "CSV", "Excel", "PDF", "PNG"],
-                        key="export_type_dropdown"
-                    )
-
-                with col_download:
-                    st.markdown("""<div style="margin-top: 10px;"></div>""", unsafe_allow_html=True)
-                    export_btn = st.button("EXPORT", key="download_btn", help="Export file")
-
-                if export_btn and export_type != "None":
-                    file_prefix = "platform_pnl_export" if table_option == "Platform PnL" else "sku_analytics_export"
-                    filename, content, mime, download_html = export_controls(
-                        data_df,
-                        file_prefix=file_prefix,
-                        export_type=export_type
-                    )
-
-                    if export_type != "PNG":
-                        st.download_button(
-                            label=f"Download {export_type}",
-                            data=content,
-                            file_name=filename,
-                            mime=mime,
-                            use_container_width=True
-                        )
-                    else:
-                        st.markdown(download_html, unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
