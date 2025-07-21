@@ -84,6 +84,8 @@ def show_analytics():
     elif table_option == "Channel X SKU Summary":
         cached_fn = get_cached_sku_pnl
         query = SkuAnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION
+    else:
+        st.error("❌ CURRENTLY NO DATA")
 
     params = {
         "start_date": start_date,
