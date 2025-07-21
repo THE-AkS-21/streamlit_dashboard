@@ -15,13 +15,10 @@ def get_dashboard_metadata():
 
 @st.cache_data(ttl=3600)
 def get_all_data(start_date, end_date):
-    params = {
-        "start_date": start_date,
-        "end_date": end_date,
-    }
-    query = DashboardQueries.GET_DASHBOARD_CHART_DATA
-    return db.execute_query(query, params)
-
+    return db.execute_query(
+        DashboardQueries.GET_DASHBOARD_CHART_DATA,
+        {"start_date": start_date, "end_date": end_date}
+    )
 
 def render_filter_form(metadata_df):
     categories = sorted(filter(None, metadata_df['category'].unique()))
@@ -45,15 +42,12 @@ def render_filter_form(metadata_df):
 
     return category, subcategory, sku, start_date, end_date, plot_button, fetch_button, edit_button
 
-
 def run_dashboard_query(sku, start_date, end_date):
     query = DashboardQueries.MONTHLY_ORDERS_WITH_SKU if sku != "None" else DashboardQueries.MONTHLY_ORDERS_NO_SKU
     params = {"start_date": start_date, "end_date": end_date}
     if sku != "None":
         params["whsku"] = sku
-
     return query, params, db.execute_query(query, params)
-
 
 def render_report_tabs(start_date, end_date):
     tabs = st.tabs(st.session_state.report_tabs)
@@ -64,6 +58,7 @@ def render_report_tabs(start_date, end_date):
             continue
 
         with tabs[i]:
+            # ─── Header and Close Button ───
             col1, col2 = st.columns([10, 1])
             with col1:
                 st.markdown(f"### {tab_name}")
@@ -73,10 +68,12 @@ def render_report_tabs(start_date, end_date):
                     st.session_state.report_data.pop(tab_name)
                     st.rerun()
 
+            # ─── Ensure 'value' Column ───
             if "value" not in orders_df.columns:
                 orders_df["value"] = orders_df.get("units", 0)
 
-            metrics = [
+            # ─── Metric Cards ───
+            ChartComponent.metric_cards([
                 {"label": "Total Units", "value": Formatters.number(orders_df["value"].sum())},
                 {"label": "Avg Daily Units", "value": Formatters.number(orders_df["value"].mean())},
                 {"label": "Days", "value": Formatters.number(len(orders_df))},
@@ -123,14 +120,14 @@ def render_report_tabs(start_date, end_date):
                         chart_type=chart_type
                     )
 
-            st.download_button(
-                label="📥 Download CSV Report",
-                data=df.to_csv(index=False),
-                file_name=f"orders_data_{tab_name}.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-
+                # ─── Download CSV ───
+                st.download_button(
+                    label="📥 Download CSV Report",
+                    data=df.to_csv(index=False),
+                    file_name=f"{tab_name}_{selected_column}_chart.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
 
 def show_dashboard():
     apply_global_styles()
@@ -162,7 +159,7 @@ def show_dashboard():
         query, params, orders_df = run_dashboard_query(sku, start_date, end_date)
 
         if not orders_df.empty:
-            tab_name = f"{sku if sku != 'None' else 'All SKUs'} | {start_date} → {end_date} | #{len(st.session_state.report_tabs)+1}"
+            tab_name = f"{sku if sku != 'None' else 'All SKUs'} | {start_date} → {end_date} | #{len(st.session_state.report_tabs) + 1}"
             st.session_state.report_tabs.append(tab_name)
             st.session_state.report_data[tab_name] = orders_df
             st.session_state["last_query"] = (query, params)
