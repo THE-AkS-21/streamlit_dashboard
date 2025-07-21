@@ -42,12 +42,6 @@ def main():
         dashboard.show_dashboard()
     elif current_page == pages.ANALYTICS:
         analytics.show_analytics()
-    elif current_page == pages.PNL_ANALYTICS:
-        pnl_analytics.show_pnl_analytics()
-    elif current_page == pages.SKU_ANALYTICS:
-        sku_analytics.show_sku_analytics()
-    elif current_page == pages.UPLOAD:
-        upload.show_upload()
     elif current_page == pages.SETTINGS:
         settings.show_settings()
     else:

@@ -17,14 +17,6 @@ def render_sidebar(page):
                 <img src="{load_icon('analytics.png')}" class="sidebar-icon">
                 <span class="sidebar-label">Analytics</span>
             </a>
-            <a href="/?page=pnl_analytics" target="_self" class="sidebar-item {'current-page' if page == 'pnl_analytics' else ''}">
-                <img src="{load_icon('analytics.png')}" class="sidebar-icon">
-                <span class="sidebar-label">PNL Analytics</span>
-            </a>
-            <a href="/?page=sku_analytics" target="_self" class="sidebar-item {'current-page' if page == 'sku_analytics' else ''}">
-                <img src="{load_icon('box.png')}" class="sidebar-icon">
-                <span class="sidebar-label">SKU Analytics</span>
-            </a>
             <a href="/?page=Upload" target="_self" class="sidebar-item {'current-page' if page == 'Upload' else ''}">
                 <img src="{load_icon('box.png')}" class="sidebar-icon">
                 <span class="sidebar-label">Import</span>
