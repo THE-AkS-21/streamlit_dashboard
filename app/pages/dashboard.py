@@ -8,10 +8,16 @@ from app.database.queries.dashboard_queries import DashboardQueries
 from app.components.charts import ChartComponent
 from app.utils.formatters import Formatters
 from app.utils.global_css import apply_global_styles
+from app.utils.loader import show_loader
+
+CHART_TYPES = ["Line", "Bar", "Area", "Scatter", "Pie", "Box", "Histogram", "Sunburst", "Histogram+Area", "Selected Time Series"]
 
 @st.cache_data(ttl=3600, show_spinner="🔄 Loading filter metadata...")
 def get_dashboard_metadata():
-    return db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
+    loader = show_loader("Loading filter metadata...")
+    data = db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
+    loader.empty()
+    return data
 
 @st.cache_data(ttl=3600)
 def get_all_data(start_date, end_date):
@@ -58,73 +64,104 @@ def render_report_tabs(start_date, end_date):
             continue
 
         with tabs[i]:
-            # ─── Header and Close Button ───
+            # ─── Header ───
             col1, col2 = st.columns([10, 1])
-            with col1:
-                st.markdown(f"### {tab_name}")
-            with col2:
-                if st.button("❌", key=f"close_{tab_name}", use_container_width=True):
-                    st.session_state.report_tabs.remove(tab_name)
-                    st.session_state.report_data.pop(tab_name)
-                    st.rerun()
+            col1.markdown(f"### {tab_name}")
+            if col2.button("❌", key=f"close_{tab_name}", use_container_width=True):
+                st.session_state.report_tabs.remove(tab_name)
+                st.session_state.report_data.pop(tab_name)
+                st.rerun()
 
-            # ─── Ensure 'value' Column ───
+            # ─── Metric Cards ───
             if "value" not in orders_df.columns:
                 orders_df["value"] = orders_df.get("units", 0)
 
-            # ─── Metric Cards ───
             ChartComponent.metric_cards([
                 {"label": "Total Units", "value": Formatters.number(orders_df["value"].sum())},
                 {"label": "Avg Daily Units", "value": Formatters.number(orders_df["value"].mean())},
-                {"label": "Days", "value": Formatters.number(len(orders_df))},
-            ]
-            ChartComponent.metric_cards(metrics)
+                {"label": "Days", "value": Formatters.number(len(orders_df))}
+            ])
 
-            st.markdown("#### Ag-Grid")
-
+            # ─── AG-Grid ───
+            st.markdown("#### AG-Grid")
             data_df = get_all_data(start_date, end_date)
-
             if data_df.empty:
                 st.warning("⚠️ No records found for the selected range and page.")
-            else:
-                render_aggrid(data_df)
+                continue
 
-            st.markdown("#### Chart")
+            render_aggrid(data_df)
 
-            chart_type = st.selectbox(
-                "Select Chart Type",
-                ["Histogram+Area","Line", "Bar", "Area", "Scatter", "Pie", "Box", "Histogram", "Sunburst"],
-                key=f"{tab_name}_chart_type"
-            )
-            df = orders_df.copy()
+            # ─── Chart Inputs ───
+            numeric_columns = [col for col in data_df.columns if pd.api.types.is_numeric_dtype(data_df[col])]
 
-            # Coerce datetime and numeric values
-            if "time" in df.columns:
-                df["time"] = pd.to_datetime(df["time"], errors="coerce")
-            if "value" in df.columns:
-                df["value"] = pd.to_numeric(df["value"], errors="coerce")
+            col_a, col_b, col_c, col_d = st.columns([3, 2, 1, 2])
+            with col_a:
+                selected_columns = st.multiselect(
+                    "Select Columns",
+                    options=numeric_columns,
+                    default=[],
+                    key=f"{tab_name}_select_columns"
+                )
 
-            df = df.dropna(subset=["time", "value"])
+            with col_b:
+                chart_type = st.selectbox(
+                    "Chart Type",
+                    CHART_TYPES,
+                    key=f"{tab_name}_chart_type"
+                )
 
-            if df.empty:
-                st.warning("No valid data available for chart.")
-            else:
+            with col_c:
+                st.markdown("###")  # vertical align
+                plot_clicked = st.button("Plot", key=f"plot_chart_btn_{tab_name}", use_container_width=True)
+
+            with col_d:
+                st.markdown("###")
+                download_placeholder = st.empty()
+
+            # ─── Handle Chart ───
+            if plot_clicked:
+                st.markdown("#### Chart")
+
+                if not selected_columns:
+                    st.warning("⚠️ Please select at least one numeric column to plot.")
+                    st.stop()
+
+                # ─── Prepare Chart Data ───
+                valuation_dates = pd.to_datetime(data_df.get("valuationdate"), errors="coerce")
+                df = pd.DataFrame({"valuationdate": valuation_dates})
+
+                for col in selected_columns:
+                    df[col] = pd.to_numeric(data_df.get(col, []), errors="coerce")
+
+                df.dropna(subset=["valuationdate"] + selected_columns, inplace=True)
+
+                if df.empty:
+                    st.warning("⚠️ Data is empty or invalid after cleanup.")
+                    st.stop()
+
+                st.session_state[f"{tab_name}_chart_df"] = df
+                st.session_state[f"{tab_name}_chart_rendered"] = True
+
                 chart_component = ChartComponent(df)
 
-                if chart_type == "Histogram+Area":
-                    chart_component.asp_units_offtake_chart()
+                if chart_type in ["Histogram+Area", "Selected Time Series"]:
+                    chart_component.multi_metric_time_series(
+                        x_axis="valuationdate",
+                        key=f"{tab_name}_multi_metric"
+                    )
                 else:
-                    chart_component.render_dynamic_chart(
-                        x_axis="time",
+                    melted_df = df.melt(id_vars=["valuationdate"], var_name="metric", value_name="value")
+                    ChartComponent(melted_df).render_dynamic_chart(
+                        x_axis="valuationdate",
                         y_axis="value",
                         chart_type=chart_type
                     )
 
                 # ─── Download CSV ───
-                st.download_button(
-                    label="📥 Download CSV Report",
+                download_placeholder.download_button(
+                    label="📥 Download CSV",
                     data=df.to_csv(index=False),
-                    file_name=f"{tab_name}_{selected_column}_chart.csv",
+                    file_name=f"{tab_name}_chart_data.csv",
                     mime="text/csv",
                     use_container_width=True
                 )

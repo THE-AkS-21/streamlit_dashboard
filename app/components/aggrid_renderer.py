@@ -7,9 +7,9 @@ def render_aggrid(data_df: pd.DataFrame):
     data_df = data_df.copy()
     page_size = 50
 
-    # ───── Add Serial Number ─────
-    if "S.No" not in data_df.columns:
-        data_df.insert(0, "S.No", range(1, len(data_df) + 1))
+    # # ───── Add Serial Number ─────
+    # if "S.No" not in data_df.columns:
+    #     data_df.insert(0, "S.No", range(1, len(data_df) + 1))
 
     # ───── Configure AG Grid ─────
     gb = GridOptionsBuilder.from_dataframe(data_df)
@@ -31,7 +31,7 @@ def render_aggrid(data_df: pd.DataFrame):
     gb.configure_default_column(groupable=True)
     gb.configure_grid_options(floatingFilter=True)
     # ✅ Enable Row Selection
-    gb.configure_selection("multiple", use_checkbox=True)
+    # gb.configure_selection("multiple", use_checkbox=True)
     # ✅ Enable Pagination
     gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
 

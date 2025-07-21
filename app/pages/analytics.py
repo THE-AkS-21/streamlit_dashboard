@@ -43,7 +43,7 @@ def show_analytics():
         col0, col1, col2, col3, col4, col5, col6, col7 = st.columns([1.5, 1, 1, 0.7, 0.7, 1, 1.2, 1])
 
         with col0:
-            table_option = st.selectbox("Select Table", ["Platform PnL", "SKU Channel PnL"])
+            table_option = st.selectbox("Select Table", ["Platform Summary", "Channel X SKU Summary", "Category Summary", "Category X Monthly Analysis", "Platform X Monthly Analysis", "Platform X Channel Summary", "Platform X Corresponding PNL"])
 
         with col1:
             start_date = st.date_input("Start Date", value=date(2025, 1, 1))
@@ -78,10 +78,10 @@ def show_analytics():
         return
 
     # ───── Query Mapping ─────
-    if table_option == "Platform PnL":
+    if table_option == "Platform Summary":
         cached_fn = get_cached_platform_pnl
         query = AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION
-    else:
+    elif table_option == "Channel X SKU Summary":
         cached_fn = get_cached_sku_pnl
         query = SkuAnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION
 
