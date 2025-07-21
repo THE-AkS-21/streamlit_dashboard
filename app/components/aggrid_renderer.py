@@ -1,25 +1,20 @@
 import streamlit as st
 import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder
-from app.components.export_controls import export_controls
 
 
 def render_aggrid(data_df: pd.DataFrame):
     data_df = data_df.copy()
-    page_size: int = 50
+    page_size = 50
 
-    # Add Serial Number
+    # ───── Add Serial Number ─────
     if "S.No" not in data_df.columns:
         data_df.insert(0, "S.No", range(1, len(data_df) + 1))
 
-    # All Columns
-    all_columns = list(data_df.columns)
-
-    # ───── AG Grid Setup ─────
+    # ───── Configure AG Grid ─────
     gb = GridOptionsBuilder.from_dataframe(data_df)
 
-    # Configure all columns
-    for col in all_columns:
+    for col in data_df.columns:
         gb.configure_column(
             col,
             headerName=col,
@@ -34,36 +29,54 @@ def render_aggrid(data_df: pd.DataFrame):
     gb.configure_side_bar()
     # ✅ Enable Sidebar (row grouping)
     gb.configure_default_column(groupable=True)
-
-
-
-    # ✅ Enable Floating Filters
     gb.configure_grid_options(floatingFilter=True)
-
-    # # ✅ Enable Basic grouping
-    # gb.configure_column("Category", rowGroup=True)
-    # gb.configure_column("SubCategory", rowGroup=True)
-    # gb.configure_column("whsku", rowGroup=True)
-
     # ✅ Enable Row Selection
     gb.configure_selection("multiple", use_checkbox=True)
-
     # ✅ Enable Pagination
     gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
 
-    # Render Grid
+    # ───── Render AG Grid ─────
     grid_response = AgGrid(
         data_df,
         gridOptions=gb.build(),
-        theme="alpine",  # Or "material" | "balham" | "streamlit"
+        theme="alpine",
         height=600,
         allow_unsafe_jscode=True,
         enable_enterprise_modules=True,
-        fit_columns_on_grid_load=False
+        fit_columns_on_grid_load=False,
     )
 
-    selected_rows_df = pd.DataFrame(grid_response["selected_rows"]) if grid_response["selected_rows"] else pd.DataFrame()
+    # ───── Extract Visible Columns ─────
+    column_state = grid_response.get("column_state", [])
+    visible_columns = set()
+
+    if column_state:
+        for col in column_state:
+            col_id = col.get("colId")
+            if col_id and not col.get("hide", False):
+                visible_columns.add(col_id)
+
+    # Fallback to all columns if none are marked visible
+    if not visible_columns:
+        visible_columns = set(data_df.columns)
+
+    # ───── Prepare Selected Column Data ─────
+    selected_column_data = {
+        col: data_df[col].tolist()
+        for col in visible_columns if col in data_df.columns
+    }
+
+    selected_rows_df = pd.DataFrame(grid_response["selected_rows"]) if grid_response[
+        "selected_rows"] else pd.DataFrame()
+
+    # ✅ This will actually print the data for each selected column
+    # Example: {'netsales': [123, 456, ...], 'discountactual': [12, 15, ...], ...}
+    print("Selected Column Data (with values):")
+    for col, values in selected_column_data.items():
+        print(f"{col}: {values[:5]}...")  # Only printing first 5 values for readability
+
     return {
         "full_data": data_df,
-        "selected_rows": selected_rows_df
+        "selected_rows": selected_rows_df,
+        "selected_column_data": selected_column_data
     }
