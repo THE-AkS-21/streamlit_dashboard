@@ -1,8 +1,11 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from streamlit_lightweight_charts import renderLightweightCharts
 from typing import List, Dict, Any
+
+from app.utils.formatters import Formatters
 
 
 class ChartComponent:
@@ -237,31 +240,52 @@ class ChartComponent:
 
     def multi_metric_time_series(self, x_axis="valuationdate", key="multi_metric_chart"):
         if x_axis not in self.df.columns:
-            st.warning(f"'{x_axis}' column not found in selected rows.")
+            st.warning(f"'{x_axis}' column not found in selected columns.")
             return
 
-        df = self.df.copy()
-        df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
-        df = df.dropna(subset=[x_axis])
+        # Ensure x-axis is datetime
+        self.df[x_axis] = pd.to_datetime(self.df[x_axis], errors="coerce")
+        self.df = self.df.dropna(subset=[x_axis])
 
-        # Auto-detect numeric columns (excluding common non-metrics)
-        numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
+        # Filter numeric columns
+        numeric_cols = self.df.select_dtypes(include=["number"]).columns.tolist()
         numeric_cols = [col for col in numeric_cols if col.lower() not in ["s.no", "id"]]
 
         if not numeric_cols:
-            st.warning("No numeric columns to plot from selected rows.")
+            st.warning("No numeric columns found in visible columns for plotting.")
             return
 
-        # Summarize only selected rows per valuationdate
-        agg_df = df.groupby(x_axis)[numeric_cols].sum().reset_index()
+        # Aggregate data
+        agg_df = self.df.groupby(x_axis)[numeric_cols].sum().reset_index()
 
-        # Plot
-        fig = px.line(agg_df, x=x_axis, y=numeric_cols, markers=True)
+        # Build area chart using go.Figure
+        fig = go.Figure()
+
+        for col in numeric_cols:
+            hover_text = [
+                f"{x.strftime('%Y-%m-%d')}<br>{col}: {Formatters.format_indian_number(y)}"
+                for x, y in zip(agg_df[x_axis], agg_df[col])
+            ]
+
+            fig.add_trace(go.Scatter(
+                x=agg_df[x_axis],
+                y=agg_df[col],
+                mode="lines",
+                stackgroup="one",
+                name=col,
+                line_shape="spline",
+                hoverinfo="text",
+                text=hover_text,
+                fill="tonexty"
+            ))
+
         fig.update_layout(
-            title="Selected Metrics Over Time",
+            title="Stacked Area Chart: Selected Metrics Over Time",
             xaxis_title="Valuation Date",
-            yaxis_title="Aggregated Values",
-            legend_title="Metric"
+            yaxis_title="Aggregated Metric Values",
+            legend_title="Metric",
+            hovermode="x unified",
+            template="plotly_white"
         )
 
         st.plotly_chart(fig, use_container_width=True)
