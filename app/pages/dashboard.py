@@ -12,7 +12,7 @@ from app.utils.loader import show_loader
 
 CHART_TYPES = ["Line", "Bar", "Area", "Scatter", "Pie", "Box", "Histogram", "Sunburst", "Histogram+Area", "Selected Time Series"]
 
-@st.cache_data(ttl=3600, show_spinner="🔄 Loading filter metadata...")
+@st.cache_data(ttl=3600)
 def get_dashboard_metadata():
     loader = show_loader("Loading filter metadata...")
     data = db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
@@ -21,12 +21,13 @@ def get_dashboard_metadata():
 
 @st.cache_data(ttl=3600)
 def get_all_data(start_date, end_date):
-    return db.execute_query(
-        DashboardQueries.GET_DASHBOARD_CHART_DATA,
-        {"start_date": start_date, "end_date": end_date}
-    )
+    loader = show_loader("Loading data...")
+    data =  db.execute_query( DashboardQueries.GET_DASHBOARD_CHART_DATA,{"start_date": start_date, "end_date": end_date} )
+    loader.empty()
+    return data
 
 def render_filter_form(metadata_df):
+    loader = show_loader("Loading filter form...")
     categories = sorted(filter(None, metadata_df['category'].unique()))
     subcategories = sorted(filter(None, metadata_df['subcategory'].unique()))
     skus = sorted(filter(None, metadata_df['sku'].unique()))
@@ -45,7 +46,7 @@ def render_filter_form(metadata_df):
         plot_button = action_col1.form_submit_button("Generate Report", use_container_width=True)
         fetch_button = action_col2.form_submit_button("Fetch", use_container_width=True)
         edit_button = action_col3.form_submit_button("Edit Orders", use_container_width=True)
-
+    loader.empty()
     return category, subcategory, sku, start_date, end_date, plot_button, fetch_button, edit_button
 
 def run_dashboard_query(sku, start_date, end_date):

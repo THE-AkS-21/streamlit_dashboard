@@ -1,45 +1,48 @@
 import streamlit as st
 from datetime import date
 import time
-
 from app.components.aggrid_renderer import render_aggrid
 from app.components.export_controls import export_controls
 from app.database.connection import db
 from app.database.queries.analytics_queries import AnalyticsQueries
-from app.database.queries.sku_analytics_queries import SkuAnalyticsQueries
 from app.utils.global_css import apply_global_styles
-
+from app.utils.loader import show_loader
 
 @st.cache_data(ttl=3600)
 def get_cached_platform_pnl(start_date, end_date, limit, page_no):
-    params = {
+    loader = show_loader("Loading data...")
+    data =  db.execute_query(AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION, {
         "start_date": start_date,
         "end_date": end_date,
         "limit": limit,
         "page_no": page_no
-    }
-    return db.execute_query(AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION, params)
-
+    })
+    loader.empty()
+    return data
 
 @st.cache_data(ttl=3600)
 def get_cached_sku_pnl(start_date, end_date, limit, page_no):
-    params = {
+    loader = show_loader("Loading data...")
+    data = db.execute_query(AnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION, {
         "start_date": start_date,
         "end_date": end_date,
         "limit": limit,
         "page_no": page_no
-    }
-    return db.execute_query(AnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION, params)
+    })
+    loader.empty()
+    return data
 
 @st.cache_data(ttl=3600)
 def get_cached_pnl_pagination(start_date, end_date, limit, page_no):
-    params = {
+    loader = show_loader("Loading data...")
+    data = db.execute_query(AnalyticsQueries.FETCH_CATEGORY_PNL_PAGINATION, {
         "start_date": start_date,
         "end_date": end_date,
         "limit": limit,
         "page_no": page_no
-    }
-    return db.execute_query(AnalyticsQueries.FETCH_CATEGORY_PNL_PAGINATION, params)
+    })
+    loader.empty()
+    return data
 
 def show_analytics():
     apply_global_styles()
@@ -48,6 +51,7 @@ def show_analytics():
     query = None
 
     # ───── Filter + Control Layout ─────
+    loader = show_loader("Loading Filters...")
     with st.container():
         col0, col1, col2, col3, col4, col5, col6, col7 = st.columns([1.5, 1, 1, 0.7, 0.7, 1, 1.2, 1])
 
@@ -80,7 +84,7 @@ def show_analytics():
         with col7:
             st.markdown("""<div style="margin-top: 10px;"></div>""", unsafe_allow_html=True)
             fetch_button = st.button("Fetch", key="fetch_btn", help="Reload data without cache")
-
+    loader.empty()
     # ───── Date Validation ─────
     if start_date > end_date:
         st.error("❌ Start date cannot be after end date.")
@@ -122,6 +126,8 @@ def show_analytics():
         if data_df.empty:
             st.warning("⚠️ No records found for the selected range and page.")
         else:
+            loader = show_loader("Loading Grid...")
             render_aggrid(data_df)
+            loader.empty()
 
         st.markdown('</div>', unsafe_allow_html=True)
