@@ -29,8 +29,17 @@ def get_cached_sku_pnl(start_date, end_date, limit, page_no):
         "limit": limit,
         "page_no": page_no
     }
-    return db.execute_query(SkuAnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION, params)
+    return db.execute_query(AnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION, params)
 
+@st.cache_data(ttl=3600)
+def get_cached_pnl_pagination(start_date, end_date, limit, page_no):
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "limit": limit,
+        "page_no": page_no
+    }
+    return db.execute_query(AnalyticsQueries.FETCH_CATEGORY_PNL_PAGINATION, params)
 
 def show_analytics():
     apply_global_styles()
@@ -83,9 +92,13 @@ def show_analytics():
         query = AnalyticsQueries.FETCH_PLATFORM_PNL_PAGINATION
     elif table_option == "Channel X SKU Summary":
         cached_fn = get_cached_sku_pnl
-        query = SkuAnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION
+        query = AnalyticsQueries.FETCH_SKU_CHANNEL_PNL_PAGINATION
+    elif table_option == "Category Summary":
+        cached_fn = get_cached_pnl_pagination
+        query = AnalyticsQueries.FETCH_CATEGORY_PNL_PAGINATION
     else:
         st.error("❌ CURRENTLY NO DATA")
+        return  # 🔥 This avoids unbound 'cached_fn' or 'query'
 
     params = {
         "start_date": start_date,
