@@ -1,35 +1,47 @@
 import streamlit as st
 import time
 
-def show_loader(message="Loading...", delay=0.5):
+def show_loader(message="Loading...", duration=0.5):
     placeholder = st.empty()
 
-    with placeholder.container():
-        st.markdown(f"""
+    modern_loader_html = f"""
+    <div style="
+        padding: 1.2rem 1.5rem;
+        background: linear-gradient(135deg, #ffffff, #f6f8fb);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: 500;
+        color: #333;
+    ">
+        <div style="margin-bottom: 10px; font-size: 1rem;"> {message}
+        </div>
+        <div style="
+            width: 100%;
+            height: 14px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        ">
             <div style="
-                padding: 0.8rem;
-                background-color: #f0f2f6;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            ">
-                <span class="loader" style="width: 16px; height: 16px; border: 2px solid #ccc; border-top: 2px solid #0366d6; border-radius: 50%; display: inline-block; animation: spin 0.6s linear infinite;"></span>
-                <span>{message}</span>
-            </div>
+                height: 100%;
+                width: 100%;
+                background: linear-gradient(90deg, #4facfe, #00f2fe);
+                animation: load-bar {duration}s linear forwards;
+                transform: translateX(-100%);
+            "></div>
+        </div>
+    </div>
 
-            <style>
-                @keyframes spin {{
-                    0% {{ transform: rotate(0deg); }}
-                    100% {{ transform: rotate(360deg); }}
-                }}
-            </style>
-        """, unsafe_allow_html=True)
+    <style>
+        @keyframes load-bar {{
+            0% {{ transform: translateX(-100%); }}
+            100% {{ transform: translateX(0%); }}
+        }}
+    </style>
+    """
 
-    # Optional delay to simulate loading
-    if delay:
-        time.sleep(delay)
-
-    return placeholder  # Return placeholder so caller can clear it later
+    placeholder.markdown(modern_loader_html, unsafe_allow_html=True)
+    time.sleep(duration)
+    return placeholder  # Clear with placeholder.empty()
