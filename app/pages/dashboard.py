@@ -10,7 +10,7 @@ from app.utils.formatters import Formatters
 from app.utils.global_css import apply_global_styles
 from app.utils.loader import show_loader
 
-CHART_TYPES = ["Line", "Bar", "Area", "Scatter", "Pie", "Box", "Histogram", "Sunburst", "Histogram+Area", "Selected Time Series"]
+CHART_TYPES = ["Area"]
 
 @st.cache_data(ttl=3600)
 def get_dashboard_metadata():
@@ -42,12 +42,12 @@ def render_filter_form(metadata_df):
         start_date = col4.date_input("Start Date", value=datetime(2024, 6, 1))
         end_date = col5.date_input("End Date", value=last_date)
 
-        action_col1, action_col2, action_col3 = st.columns([2, 1, 1])
-        plot_button = action_col1.form_submit_button("Generate Report", use_container_width=True)
-        fetch_button = action_col2.form_submit_button("Fetch", use_container_width=True)
-        edit_button = action_col3.form_submit_button("Edit Orders", use_container_width=True)
+        # action_col1, action_col2, action_col3 = st.columns([2, 1, 1])
+        # plot_button = action_col1.form_submit_button("Generate Report", use_container_width=True)
+        # fetch_button = action_col2.form_submit_button("Fetch", use_container_width=True)
+        # edit_button = action_col3.form_submit_button("Edit Orders", use_container_width=True)
     loader.empty()
-    return category, subcategory, sku, start_date, end_date, plot_button, fetch_button, edit_button
+    return category, subcategory, sku, start_date, end_date, fetch_button
 
 def run_dashboard_query(sku, start_date, end_date):
     query = DashboardQueries.MONTHLY_ORDERS_WITH_SKU if sku != "None" else DashboardQueries.MONTHLY_ORDERS_NO_SKU
@@ -100,7 +100,7 @@ def render_report_tabs(start_date, end_date):
                 selected_columns = st.multiselect(
                     "Select Columns",
                     options=numeric_columns,
-                    default=[],
+                    default=["asp","units","offtake"],
                     key=f"{tab_name}_select_columns"
                 )
 
@@ -145,7 +145,7 @@ def render_report_tabs(start_date, end_date):
 
                 chart_component = ChartComponent(df)
 
-                if chart_type in ["Histogram+Area", "Selected Time Series"]:
+                if chart_type in ["Area"]:
                     chart_component.multi_metric_time_series(
                         x_axis="valuationdate",
                         key=f"{tab_name}_multi_metric"
@@ -178,61 +178,15 @@ def show_dashboard():
     metadata_df = get_dashboard_metadata()
     category, subcategory, sku, start_date, end_date, plot_btn, fetch_btn, edit_btn = render_filter_form(metadata_df)
 
+    # Generate a dynamic tab name
+    tab_name = f"{'Central DSR'} | {start_date} → {end_date}"
+
+    # Store data (replace or update)
+    st.session_state.report_tabs = [tab_name]
+
+    # Render the chart immediately
+    render_report_tabs(start_date, end_date)
+
     if fetch_btn:
-        st.cache_data.clear()
-        query, params, refreshed_df = run_dashboard_query(sku, start_date, end_date)
+        get_all_data(start_date, end_date)
 
-        if not refreshed_df.empty:
-            if st.session_state["last_query"]:
-                for tab in st.session_state.report_tabs:
-                    st.session_state.report_data[tab] = refreshed_df
-                st.success("✅ Data refreshed for all reports.")
-            else:
-                st.success("✅ Data fetched. No reports yet.")
-            st.rerun()
-        else:
-            st.error("❌ No data found for the current filters.")
-
-    if plot_btn:
-        query, params, orders_df = run_dashboard_query(sku, start_date, end_date)
-
-        if not orders_df.empty:
-            tab_name = f"{sku if sku != 'None' else 'All SKUs'} | {start_date} → {end_date} | #{len(st.session_state.report_tabs) + 1}"
-            st.session_state.report_tabs.append(tab_name)
-            st.session_state.report_data[tab_name] = orders_df
-            st.session_state["last_query"] = (query, params)
-            st.rerun()
-        else:
-            st.error("❌ No data found to generate report.")
-
-    if st.session_state.report_tabs:
-        render_report_tabs(start_date, end_date)
-
-    if edit_btn:
-        _, _, orders_df = run_dashboard_query(sku, start_date, end_date)
-
-        if not orders_df.empty:
-            st.markdown("### Edit Orders Data")
-            edited_df = st.data_editor(orders_df, num_rows="dynamic", use_container_width=True)
-
-            if st.button("Save Changes", use_container_width=True):
-                try:
-                    for _, row in edited_df.iterrows():
-                        db.execute_query(
-                            DashboardQueries.UPDATE_ORDER_VALUE,
-                            {
-                                "orderdate": row["time"],
-                                "whsku": sku if sku != "None" else row.get("sku"),
-                                "value": row["value"],
-                            }
-                        )
-                    st.success("✅ Changes saved successfully!")
-                except Exception as e:
-                    st.error(f"❌ Error saving changes: `{str(e)}`")
-
-    if not any([fetch_btn, plot_btn, edit_btn]):
-        st.info("""
-            👋 **Welcome to the BSC Orders Dashboard!**
-            - Select filters  
-            - Click **Fetch**, **Generate Report**, or **Edit Orders**
-        """)
