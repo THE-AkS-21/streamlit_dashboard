@@ -164,7 +164,9 @@ def render_aggrid(data_df: pd.DataFrame):
     grid_options = gb.build()
 
     # Add Icon Set
-    grid_options['parts'] = ['iconSetAlpine']
+    grid_options['parts'] = "iconSetAlpine"
+    grid_options['deltaRowDataMode'] = True
+    grid_options["animateRows"] = True
 
     # ───── Render AG Grid ─────
     grid_response = AgGrid(

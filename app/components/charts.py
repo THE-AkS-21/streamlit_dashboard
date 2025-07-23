@@ -4,9 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from streamlit_lightweight_charts import renderLightweightCharts
 from typing import List, Dict, Any
-
 from app.utils.formatters import Formatters
-
 
 class ChartComponent:
     def __init__(self, df: pd.DataFrame):
@@ -238,57 +236,77 @@ class ChartComponent:
 
     # ------------------- 🔹 Multi Metrix Chart -------------------
 
-    def multi_metric_time_series(self, x_axis="valuationdate", key="multi_metric_chart"):
-        if x_axis not in self.df.columns:
-            st.warning(f"'{x_axis}' column not found in selected columns.")
+    def multi_metric_time_series(self, x_axis: str = "valuationdate", key: str = "multi_metric_chart") -> None:
+
+        df = self.df.copy()
+
+        # Validate x_axis
+        if x_axis not in df.columns:
+            st.warning(f"'{x_axis}' column not found in data.")
             return
 
-        # Ensure x-axis is datetime
-        self.df[x_axis] = pd.to_datetime(self.df[x_axis], errors="coerce")
-        self.df = self.df.dropna(subset=[x_axis])
+        # Ensure x_axis is datetime
+        df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
+        df.dropna(subset=[x_axis], inplace=True)
 
-        # Filter numeric columns
-        numeric_cols = self.df.select_dtypes(include=["number"]).columns.tolist()
-        numeric_cols = [col for col in numeric_cols if col.lower() not in ["s.no", "id"]]
+        # Select numeric columns (excluding IDs and serials)
+        numeric_cols = df.select_dtypes(include=["number"]).columns
+        numeric_cols = [col for col in numeric_cols if col.lower() not in {"s.no", "id"}]
 
-        if not numeric_cols:
-            st.warning("No numeric columns found in visible columns for plotting.")
+        if len(numeric_cols) < 2:
+            st.warning("Need at least 2 numeric columns for a dual-axis time series chart.")
             return
 
-        # Aggregate data
-        agg_df = self.df.groupby(x_axis)[numeric_cols].sum().reset_index()
+        # Aggregate data by x_axis
+        agg_df = df.groupby(x_axis, as_index=False)[numeric_cols].sum()
 
-        # Build area chart using go.Figure
+        # Choose primary and secondary Y-axis columns
+        primary_y, secondary_y = numeric_cols[:2]
+
+        # Build figure
         fig = go.Figure()
 
-        for col in numeric_cols:
-            hover_text = [
-                f"{x.strftime('%Y-%m-%d')}<br>{col}: {Formatters.format_indian_number(y)}"
-                for x, y in zip(agg_df[x_axis], agg_df[col])
-            ]
+        # Primary Y-axis
+        fig.add_trace(go.Scatter(
+            x=agg_df[x_axis],
+            y=agg_df[primary_y],
+            name=primary_y,
+            mode="lines",
+            line=dict(color="blue"),
+            yaxis="y1",
+            hovertemplate=f"{primary_y}: %{{y:,.0f}}<extra></extra>"
+        ))
 
-            fig.add_trace(go.Scatter(
-                x=agg_df[x_axis],
-                y=agg_df[col],
-                mode="lines",
-                stackgroup="one",
-                name=col,
-                line_shape="spline",
-                hoverinfo="text",
-                text=hover_text,
-                fill="tonexty"
-            ))
+        # Secondary Y-axis
+        fig.add_trace(go.Scatter(
+            x=agg_df[x_axis],
+            y=agg_df[secondary_y],
+            name=secondary_y,
+            mode="lines",
+            line=dict(color="red", dash="dot"),
+            yaxis="y2",
+            hovertemplate=f"{secondary_y}: %{{y:,.0f}}<extra></extra>"
+        ))
 
+        # Layout with dual axes
         fig.update_layout(
-            title="Stacked Area Chart: Selected Metrics Over Time",
-            xaxis_title="Valuation Date",
-            yaxis_title="Aggregated Metric Values",
-            legend_title="Metric",
+            title="Dual Y-Axis Time Series",
+            xaxis=dict(title=x_axis),
+            yaxis=dict(title=primary_y, titlefont=dict(color="blue"), tickfont=dict(color="blue")),
+            yaxis2=dict(
+                title=secondary_y,
+                titlefont=dict(color="red"),
+                tickfont=dict(color="red"),
+                overlaying="y",
+                side="right"
+            ),
+            legend=dict(x=0.01, y=0.99),
             hovermode="x unified",
             template="plotly_white"
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        # Render chart
+        st.plotly_chart(fig, use_container_width=True, key=key)
 
     # ------------------- 🔹 SUNBURST CHART -------------------
     def sunburst_chart(self) -> None:

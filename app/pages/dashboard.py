@@ -12,49 +12,90 @@ from app.utils.loader import show_loader
 
 CHART_TYPES = ["Area"]
 
+# ────────────────────────────────
+# Caching with Session Integration
+# ────────────────────────────────
+
 @st.cache_data(ttl=3600)
+def _get_dashboard_metadata():
+    return db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
+
 def get_dashboard_metadata():
-    loader = show_loader("Loading filter metadata...")
-    data = db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
-    loader.empty()
-    return data
+    if "dashboard_metadata" not in st.session_state:
+        loader = show_loader("Loading filter metadata...")
+        st.session_state.dashboard_metadata = _get_dashboard_metadata()
+        loader.empty()
+    return st.session_state.dashboard_metadata
 
 @st.cache_data(ttl=3600)
+def _get_all_data(start_date, end_date):
+    return db.execute_query(DashboardQueries.GET_DASHBOARD_CHART_DATA, {
+        "start_date": start_date,
+        "end_date": end_date
+    })
+
 def get_all_data(start_date, end_date):
-    loader = show_loader("Loading data...")
-    data =  db.execute_query( DashboardQueries.GET_DASHBOARD_CHART_DATA,{"start_date": start_date, "end_date": end_date} )
-    loader.empty()
-    return data
+    cache_key = f"all_data_{start_date}_{end_date}"
+    if cache_key not in st.session_state:
+        loader = show_loader("Loading data...")
+        st.session_state[cache_key] = _get_all_data(start_date, end_date)
+        loader.empty()
+    return st.session_state[cache_key]
 
-def render_filter_form(metadata_df):
-    loader = show_loader("Loading filter form...")
-    categories = sorted(filter(None, metadata_df['category'].unique()))
-    subcategories = sorted(filter(None, metadata_df['subcategory'].unique()))
-    skus = sorted(filter(None, metadata_df['sku'].unique()))
-    last_date = metadata_df['last_date'].max()
+@st.cache_data(ttl=3600)
+def _get_filtered_data(start_date, end_date, category, subcategory, sku):
+    filters = []
+    params = {"start_date": start_date, "end_date": end_date}
 
-    with st.form(key="dashboard_form"):
-        col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5], gap="small")
+    if sku and sku != "None":
+        filters.append("AND whsku = :sku")
+        params["sku"] = sku
+    if category and category != "None":
+        filters.append("AND category = :category")
+        params["category"] = category
+    if subcategory and subcategory != "None":
+        filters.append("AND subcategory = :subcategory")
+        params["subcategory"] = subcategory
 
-        category = col1.selectbox("Category", ["None"] + categories)
-        subcategory = col2.selectbox("Subcategory", ["None"] + subcategories)
-        sku = col3.selectbox("SKU", ["None"] + skus)
-        start_date = col4.date_input("Start Date", value=datetime(2024, 6, 1))
-        end_date = col5.date_input("End Date", value=last_date)
+    filter_clause = "\n        ".join(filters)
+    query = DashboardQueries.GET_DASHBOARD_FILTERED_CHART_DATA.replace("{filters}", filter_clause)
 
-        # action_col1, action_col2, action_col3 = st.columns([2, 1, 1])
-        # plot_button = action_col1.form_submit_button("Generate Report", use_container_width=True)
-        # fetch_button = action_col2.form_submit_button("Fetch", use_container_width=True)
-        # edit_button = action_col3.form_submit_button("Edit Orders", use_container_width=True)
-    loader.empty()
-    return category, subcategory, sku, start_date, end_date, fetch_button
+    return db.execute_query(query, params)
 
+def get_filtered_data(start_date, end_date, category=None, subcategory=None, sku=None):
+    cache_key = f"filtered_{start_date}_{end_date}_{category}_{subcategory}_{sku}"
+    if cache_key not in st.session_state:
+        loader = show_loader("Loading filtered data...")
+        st.session_state[cache_key] = _get_filtered_data(start_date, end_date, category, subcategory, sku)
+        loader.empty()
+    return st.session_state[cache_key]
+
+@st.cache_data(ttl=3600)
 def run_dashboard_query(sku, start_date, end_date):
     query = DashboardQueries.MONTHLY_ORDERS_WITH_SKU if sku != "None" else DashboardQueries.MONTHLY_ORDERS_NO_SKU
     params = {"start_date": start_date, "end_date": end_date}
     if sku != "None":
         params["whsku"] = sku
     return query, params, db.execute_query(query, params)
+
+def render_filter_form(metadata_df):
+    loader = show_loader("Loading filter form...")
+
+    categories = sorted(filter(None, metadata_df['category'].unique()))
+    subcategories = sorted(filter(None, metadata_df['subcategory'].unique()))
+    skus = sorted(filter(None, metadata_df['sku'].unique()))
+    last_date = metadata_df['last_date'].max()
+
+    col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5], gap="small")
+
+    category = col1.selectbox("Category", ["None"] + categories, key="filter_category")
+    subcategory = col2.selectbox("Subcategory", ["None"] + subcategories, key="filter_subcategory")
+    sku = col3.selectbox("SKU", ["None"] + skus, key="filter_sku")
+    start_date = col4.date_input("Start Date", value=datetime(2025, 3, 1), key="filter_start")
+    end_date = col5.date_input("End Date", value=last_date, key="filter_end")
+
+    loader.empty()
+    return category, subcategory, sku, start_date, end_date
 
 def render_report_tabs(start_date, end_date):
     tabs = st.tabs(st.session_state.report_tabs)
@@ -173,20 +214,34 @@ def show_dashboard():
 
     st.session_state.setdefault("report_tabs", [])
     st.session_state.setdefault("report_data", {})
-    st.session_state.setdefault("last_query", None)
+    st.session_state.setdefault("last_filters", {})
 
     metadata_df = get_dashboard_metadata()
-    category, subcategory, sku, start_date, end_date, plot_btn, fetch_btn, edit_btn = render_filter_form(metadata_df)
+    category, subcategory, sku, start_date, end_date = render_filter_form(metadata_df)
 
-    # Generate a dynamic tab name
-    tab_name = f"{'Central DSR'} | {start_date} → {end_date}"
+    current_filters = {
+        "category": category,
+        "subcategory": subcategory,
+        "sku": sku,
+        "start_date": start_date,
+        "end_date": end_date,
+    }
 
-    # Store data (replace or update)
-    st.session_state.report_tabs = [tab_name]
+    filters_changed = current_filters != st.session_state["last_filters"]
 
-    # Render the chart immediately
+    if filters_changed:
+        # Fetch filtered or unfiltered data
+        if (category, subcategory, sku) == ("None", "None", "None"):
+            df = get_all_data(start_date, end_date)
+        else:
+            df = get_filtered_data(start_date, end_date, category, subcategory, sku)
+
+        st.session_state["last_filters"] = current_filters
+        st.session_state["report_data"] = { "Central DSR": df }
+
+    # Always show latest chart data
+    st.session_state["report_tabs"] = ["Central DSR"]
     render_report_tabs(start_date, end_date)
 
-    if fetch_btn:
-        get_all_data(start_date, end_date)
+
 
