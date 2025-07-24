@@ -3,8 +3,6 @@ import streamlit as st
 from app.api.user_api import authenticate_user
 from app.auth.cookies import set_jwt_cookie, clear_jwt_cookie, get_jwt_from_cookie
 
-# Optional hardcoded email fallback
-user_email = "lakshay@bombayshavingcompany.com"
 def authenticate_from_cookie() -> bool:
     """Check JWT in cookie, decode and set session if valid."""
     token = get_jwt_from_cookie()
@@ -116,17 +114,18 @@ def show_login_page():
         if st.button("  Sign in with Google", key="google-login-btn"):
             st.login()
 
-        if st.user:
-            token = authenticate_user(user_email)
-            st.write("TOKEN: ",token)
-            if token:
-                set_jwt_cookie(token)
-                st.session_state.jwt_token = token
-                st.success("✅ Logged in successfully!")
-            else:
-                st.error("❌ Token generation failed.")
+    # Handle token generation only after login and user confirmed
+    if st.session_state.login_attempted and st.user:
+        user_email = st.user.email or "lakshay@bombayshavingcompany.com"
+        token = authenticate_user(user_email)
+        st.write(f"Token: {token}")
+        if token:
+            set_jwt_cookie(token)
+            st.session_state.jwt_token = token
+        else:
+            st.error("❌ Token generation failed.")
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Close background div
     st.markdown('</div>', unsafe_allow_html=True)
