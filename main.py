@@ -1,9 +1,12 @@
 import streamlit as st
 
+from app.auth.cookies import get_jwt_from_cookie, clear_jwt_cookie
+from app.auth.jwt_manager import decode_jwt
 from app.components.layout import render_layout
 from app.config import init_page_config
 from app.pages import dashboard, analytics, settings, sku_analytics, upload, pnl_analytics
 from app.constants import pages
+from app.pages.login import show_login_page
 from app.utils.global_css import apply_global_styles
 
 # Initialize config
@@ -20,8 +23,27 @@ def get_current_page():
         return page
     return st.session_state.get("current_page", pages.DASHBOARD)
 
+def authenticate_from_cookie():
+    """Check JWT in cookie, decode and set session if valid"""
+    token = get_jwt_from_cookie()
+    if not token:
+        return False
+
+    payload = decode_jwt(token)
+    if not payload:
+        return False
+
+    # Set session state with user info if not already set
+    st.session_state.jwt_token = token
+    st.session_state.user_email = payload.get("email")
+    st.session_state.user_role = payload.get("role")
+    return True
+
 def main():
     """Main application entry point"""
+    show_login_page()
+    st.stop()
+
     st.markdown(
         """<div id="app-container" style="margin: 0; padding: 0;">""",
         unsafe_allow_html=True

@@ -1,48 +1,36 @@
+# app/pages/login.py
 import streamlit as st
-from app.services.auth_service import AuthService
-from app.utils.session import SessionManager
+from app.api.user_api import authenticate_user
+from app.auth.cookies import clear_jwt_cookie, set_jwt_cookie
 
 
 def show_login_page():
-    # Initialize session
-    session_manager = SessionManager()
-    session_manager.init_session()
-
-    # Check if already authenticated
-    if st.session_state.get('authenticated', False):
-        if session_manager.check_session_validity():
-            st.switch_page("pages/dashboard.py")
-            return
-
     st.title("🔐 Login")
+    user_email = "lakshay@bombayshavingcompany.com"
 
-    auth_service = AuthService()
+    if st.session_state.get("login_error"):
+        st.error("❌ Login failed. Please try again.")
+        st.session_state.login_error = False  # Reset error
 
-    with st.container():
-        st.markdown("""
-            <div style='text-align: center'>
-                <h2>Welcome to Analytics Dashboard</h2>
-                <p>Please sign in to continue</p>
-            </div>
-        """, unsafe_allow_html=True)
+    if st.session_state.get("logged_out"):
+        st.success("✅ Successfully logged out.")
+        st.session_state.logged_out = False  # Reset message
 
-        if st.button("Sign in with Google", type="primary"):
-            try:
-                auth_url, state = auth_service.initialize_login()
-                st.session_state.auth_state = state
+    if st.button("Sign in with Google"):
+        st.login()
 
-                # Redirect to Google OAuth
-                st.markdown(f'''
-                    <meta http-equiv="refresh" content="0; url={auth_url}">
-                    <div style='text-align: center; padding: 20px;'>
-                        Redirecting to Google login...
-                        <br>
-                        <a href="{auth_url}" target="_self">Click here if not redirected</a>
-                    </div>
-                ''', unsafe_allow_html=True)
-            except Exception as e:
-                st.error(f"Login failed: {str(e)}")
+        # Check if user is logged in (after rerun)
+    if st.user and st.user.email:
+        # Authenticate using backend API
+        token = authenticate_user(user_email)
+        if token:
+            st.session_state.jwt_token = token
+            st.success("✅ Token retrieved successfully!")
 
+        else:
+            st.error("❌ Authentication failed!")
 
-if __name__ == "__main__":
-    show_login_page()
+        if st.session_state.get("jwt_token"):
+            if st.button("continue"):
+                st.switch_page("main.py")
+

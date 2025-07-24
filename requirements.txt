@@ -19,3 +19,13 @@ streamlit-lightweight-charts==0.7.20
 google-auth-oauthlib==1.0.0
 google-auth-httplib2==0.1.0
 google-api-python-client==2.86.0
+
+#api calls
+requests==2.32.4
+
+#jwt-decode
+python-jose==3.5.0
+PyJWT==2.10.1
+
+#cookie
+streamlit-javascript==0.1.5
