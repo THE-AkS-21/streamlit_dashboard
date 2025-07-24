@@ -30,7 +30,7 @@ def show_login_page():
                 height: 100vh !important;
                 margin: 0;
                 padding: 0;
-                background: ("{bg_image}") no-repeat center center fixed;
+                background: url("{bg_image}") no-repeat center center fixed;
                 background-size: cover;
                 display: flex;
                 justify-content: center;
@@ -71,23 +71,6 @@ def show_login_page():
                 color: #1f2937;
             }}
 
-            .google-btn {{
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 12px;
-                background-color: #4285F4;
-                color: white;
-                font-size: 16px;
-                font-weight: 500;
-                padding: 12px;
-                border: none;
-                border-radius: 8px;
-                width: 100%;
-                cursor: pointer;
-                transition: background-color 0.2s ease-in-out;
-            }}
-
             .google-btn:hover {{
                 background-color: #357ae8;
             }}
@@ -105,18 +88,28 @@ def show_login_page():
     # Wrap main layout in blurred background
     st.markdown('<div class="background-blur">', unsafe_allow_html=True)
 
+    if "login_attempted" not in st.session_state:
+        st.session_state.login_attempted = False
+
     with st.container():
         # ─── Login Card ───────────────────────────────
-        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        # st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
+        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
+        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
+        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
 
-        st.write("USER : ",st.user)
+        # st.write("USER : ",st.user)
+        col1, col2, col3 = st.columns([2.5, 2, 1])
+        with col2:
         # Google Sign-In Button
-        if st.button("  Sign in with Google", key="google-login-btn"):
-            st.login()
+            if st.button("  Sign in with Google", key="google-login-btn"):
+                st.session_state.login_attempted = True
+                st.login()
 
     # Handle token generation only after login and user confirmed
     if st.session_state.login_attempted and st.user:
-        user_email = st.user.email or "lakshay@bombayshavingcompany.com"
+        user_email = "lakshay@bombayshavingcompany.com"
         token = authenticate_user(user_email)
         st.write(f"Token: {token}")
         if token:
@@ -124,8 +117,6 @@ def show_login_page():
             st.session_state.jwt_token = token
         else:
             st.error("❌ Token generation failed.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
     # Close background div
     st.markdown('</div>', unsafe_allow_html=True)

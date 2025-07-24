@@ -4,7 +4,7 @@ from app.auth.cookies import get_jwt_from_cookie
 from app.auth.jwt_manager import decode_jwt
 from app.components.layout import render_layout
 from app.config import init_page_config
-from app.pages import dashboard, analytics, settings, sku_analytics, upload, pnl_analytics
+from app.pages import dashboard, analytics, settings
 from app.constants import pages
 from app.pages.login import show_login_page
 from app.utils.global_css import apply_global_styles
@@ -41,9 +41,10 @@ def authenticate_from_cookie() -> bool:
 
 def main():
     """Main application entry point"""
-    if not authenticate_from_cookie():
-        show_login_page()
-        st.stop()
+    if 'is_logged_in' not in st.session_state:
+        if not authenticate_from_cookie():
+            show_login_page()
+            st.stop()
 
     st.markdown(
         """<div id="app-container" style="margin: 0; padding: 0;">""",
