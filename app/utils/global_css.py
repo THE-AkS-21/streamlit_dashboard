@@ -14,15 +14,44 @@ def apply_global_styles():
         --text-secondary: #374151;
         --animation-speed: {config.animation_speed}s;
     }}
-    /* Reset + Layout Fixes */
-    header, footer {{ visibility: hidden; height: 0; }}
-    section.main {{ padding-top: 0 !important;}}
-    section.main, .block-container {{
-        padding-top: 0 !important;
+    /* ========== GLOBAL TOP SPACE FIXES ========== */
+    
+    /* Reset header/footer spacing and visibility */
+    header, footer {{
+        visibility: hidden;
+        height: 0;
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+    
+    /* Global main container resets */
+    section.main,
+    .block-container,
+    .custom-content,
+    .main,
+    .css-18e3th9,  /* fallback Streamlit class */
+    .content-wrapper {{
         margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
+    
+    /* First child spacing fixes */
+    .block-container > div:first-child,
+    .block-container h1:first-child,
+    .block-container div:first-child,
+    main > div:first-child,
+    main .block-container:first-child,
+    main .block-container > div:first-child,
+    section.main > div:first-child {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
     }}
 
-    
+    /* Optional: Extra negative margin if needed */
+    .content-wrapper {{
+        margin-top: -3rem !important; /* Adjust only if spacing still remains */
+    }}
+
     .filter-export-container {{
         background-color: #fafafa;
         padding: 1rem;
@@ -328,19 +357,29 @@ def apply_global_styles():
 
     /* ===== Content Area ===== */
     .custom-content {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    
+        /* Visual Debug Only - remove after spacing fixed */
         border: 2px dashed red;
-        left: 50px;
-        margin-left: 70px;
+    
         padding: 10px;
-        transition: margin-left var(--animation-speed) ease;
+        margin-left: 70px;
+        transition: margin-left var(--animation-speed, 0.3s) ease;
+        position: relative;
+        left: 0;
     }}
-
+    
+    /* Sidebar responsive layout */
     @media screen and (min-width: 770px) {{
         #app-container .custom-sidebar:hover + .custom-content {{
-            margin-left: 200px;
+        margin - left: 200px;
+        }}
+    
+        .custom-sidebar-expanded ~ .custom-content {{
+        margin - left: 250px !important;
         }}
     }}
-
     /* ===== Metric Cards ===== */
     .metric-card {{
         background: white;
@@ -549,6 +588,5 @@ def apply_global_styles():
             margin-top: 10px;
         }}
     }}
-
     </style>
     """, unsafe_allow_html=True)
