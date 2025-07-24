@@ -1,7 +1,10 @@
 import base64
+import time
 import streamlit as st
 from app.api.user_api import authenticate_user
 from app.auth.cookies import set_jwt_cookie, get_jwt_from_cookie
+from app.components.loading_screen import loading_screen
+
 
 def authenticate_from_cookie() -> bool:
     token = get_jwt_from_cookie()
@@ -89,30 +92,40 @@ def show_login_page():
     if "login_attempted" not in st.session_state:
         st.session_state.login_attempted = False
 
-    with st.container():
-        # ─── Login Card ───────────────────────────────
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
 
-        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
-        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
-        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
-        st.markdown("<br>", unsafe_allow_html=True)  # Add some vertical space
+    if "show_loader" not in st.session_state:
+        st.session_state.show_loader = False
 
-        col1, col2, col3 = st.columns([2.5, 2, 1])
-        with col2:
-        # Google Sign-In Button
-            if st.button("  Sign in with Google", key="google-login-btn"):
-                st.session_state.login_attempted = True
-                st.login()
+    if not st.session_state.authenticated and not st.session_state.show_loader:
+        with st.container():
+            # ─── Login Card ───────────────────────────────
+            st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+
+            col1, col2, col3 = st.columns([2.5, 2, 1])
+            with col2:
+            # Google Sign-In Button
+                if st.button("  Sign in with Google", key="google-login-btn"):
+                    st.session_state.login_attempted = True
+                    st.login()
 
     # Handle token generation only after login and user confirmed
-    if st.session_state.login_attempted and st.user:
+    if st.session_state.login_attempted and st.user and not st.session_state.authenticated:
         user_email = "lakshay@bombayshavingcompany.com"
         token = authenticate_user(user_email)
         if token:
             set_jwt_cookie(token)
             st.session_state.jwt_token = token
+            st.session_state.show_loader = True
         else:
             st.error("❌ Token generation failed.")
 
-    # Close background div
+        # ─── Loading Screen ───
+    if st.session_state.show_loader:
+        loading_screen()
+        time.sleep(3)
+        st.session_state.authenticated = True
+        st.session_state.show_loader = False
+        st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
