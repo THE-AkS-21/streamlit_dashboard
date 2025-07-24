@@ -1,36 +1,124 @@
-# app/pages/login.py
+import base64
 import streamlit as st
 from app.api.user_api import authenticate_user
-from app.auth.cookies import clear_jwt_cookie, set_jwt_cookie
+from app.auth.cookies import set_jwt_cookie
 
+# Optional hardcoded email fallback
+user_email = "lakshay@bombayshavingcompany.com"
+
+# Load local image and encode as base64
+def get_base64_bg(path):
+    with open(path, "rb") as img_file:
+        b64_string = base64.b64encode(img_file.read()).decode()
+    return f"data:image/png;base64,{b64_string}"
+
+# Get encoded image
+bg_image = get_base64_bg("app/assets/images/bg_cover.jpg")
 
 def show_login_page():
-    st.title("🔐 Login")
-    user_email = "lakshay@bombayshavingcompany.com"
+    st.set_page_config(page_title="Login", layout="wide")
 
-    if st.session_state.get("login_error"):
-        st.error("❌ Login failed. Please try again.")
-        st.session_state.login_error = False  # Reset error
+    # ─── Custom CSS for Layout and Styling ────────────────
+    st.markdown(f"""
+        <style>
+            html, body, [data-testid="stAppViewContainer"] {{
+                height: 100vh !important;
+                margin: 0;
+                padding: 0;
+                background: url("{bg_image}") no-repeat center center fixed;
+                background-size: cover;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }}
+            .background-blur::before {{
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: inherit;
+                backdrop-filter: blur(5px);
+                z-index: 0;
+            }}
 
-    if st.session_state.get("logged_out"):
-        st.success("✅ Successfully logged out.")
-        st.session_state.logged_out = False  # Reset message
+            .login-card {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1;
+                background: white;
+                padding: 3rem 2rem;
+                border-radius: 18px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+                width: 100%;
+                max-width: 400px;
+                text-align: center;
+                font-family: 'Segoe UI', sans-serif;
+            }}
 
-    if st.button("Sign in with Google"):
-        st.login()
+            .login-title {{
+                font-size: 26px;
+                font-weight: 600;
+                margin-bottom: 2.5rem;
+                color: #1f2937;
+            }}
 
-        # Check if user is logged in (after rerun)
-    if st.user and st.user.email:
-        # Authenticate using backend API
-        token = authenticate_user(user_email)
-        if token:
-            st.session_state.jwt_token = token
-            st.success("✅ Token retrieved successfully!")
+            .google-btn {{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                background-color: #4285F4;
+                color: white;
+                font-size: 16px;
+                font-weight: 500;
+                padding: 12px;
+                border: none;
+                border-radius: 8px;
+                width: 100%;
+                cursor: pointer;
+                transition: background-color 0.2s ease-in-out;
+            }}
 
-        else:
-            st.error("❌ Authentication failed!")
+            .google-btn:hover {{
+                background-color: #357ae8;
+            }}
 
-        if st.session_state.get("jwt_token"):
-            if st.button("continue"):
-                st.switch_page("main.py")
+            .google-icon {{
+                height: 20px;
+                width: 20px;
+                background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png');
+                background-size: cover;
+                background-repeat: no-repeat;
+            }}
+        </style>
+    """, unsafe_allow_html=True)
 
+    # Wrap main layout in blurred background
+    st.markdown('<div class="background-blur">', unsafe_allow_html=True)
+
+    with st.container():
+        # ─── Login Card ───────────────────────────────
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        # Google Sign-In Button
+        if st.button("  Sign in with Google", key="google-login-btn"):
+            st.login()
+
+        if st.user and st.user.email:
+            token = authenticate_user(user_email)
+            if token:
+                # set_jwt_cookie(token)
+                # st.session_state.jwt_token = token
+                # st.success("✅ Logged in successfully!")
+                if st.button("Continue"):
+                    st.switch_page("main.py")
+            else:
+                st.error("❌ Token generation failed.")
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Close background div
+    st.markdown('</div>', unsafe_allow_html=True)
