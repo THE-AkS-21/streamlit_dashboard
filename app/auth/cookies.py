@@ -7,7 +7,6 @@ COOKIE_PATH = "/"
 COOKIE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days
 
 # Create cookie controller instance (cached to persist across reruns)
-@st.cache_resource
 def get_cookie_controller():
     return CookieController()
 
