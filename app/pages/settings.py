@@ -41,22 +41,9 @@ def show_settings():
 
     st.markdown('<div class="button-container">', unsafe_allow_html=True)
 
-    # if st.button("🔒 Sign out", key="signout_btn"):
-    #     st.session_state.clear()
-    #     st.session_state.logged_out = True
-    #     st.switch_page("app/pages/login.py")
-    #     st.rerun()
-
     if st.button("🔒 Sign out", key="signout_btn"):
-        # Mark for logout and rerun — avoid clearing session state immediately
-        st.session_state.logged_out = True
-        st.rerun()  # Trigger rerun to clear safely on next run
-
-    # Handle post-logout session clearing and redirection
-    if st.session_state.get("logged_out"):
-        st.session_state.clear()
         clear_jwt_cookie()
-        st.logout()
-
+        st.session_state.clear()
+        st.rerun()
 
     st.markdown('</div></div></div>', unsafe_allow_html=True)
