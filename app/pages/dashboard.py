@@ -211,8 +211,6 @@ def render_report_tabs(start_date, end_date):
 
 def show_dashboard():
     apply_global_styles()
-    st.markdown("## Bombay Shaving Company Dashboard")
-
     st.session_state.setdefault("report_tabs", [])
     st.session_state.setdefault("report_data", {})
     st.session_state.setdefault("last_filters", {})
