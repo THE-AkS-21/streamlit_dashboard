@@ -62,6 +62,7 @@ def _get_filtered_data(start_date, end_date, category, subcategory, sku):
 
     return db.execute_query(query, params)
 
+@st.cache_data(ttl=3600)
 def get_filtered_data(start_date, end_date, category=None, subcategory=None, sku=None):
     cache_key = f"filtered_{start_date}_{end_date}_{category}_{subcategory}_{sku}"
     if cache_key not in st.session_state:
