@@ -29,3 +29,4 @@ PyJWT==2.10.1
 
 #cookie
 streamlit-javascript==0.1.5
+streamlit-cookies-controller==0.0.4

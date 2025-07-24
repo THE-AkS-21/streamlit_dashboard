@@ -18,10 +18,10 @@ def authenticate_user(email: str) -> str | None:
         return None
 
     # HEADERS
-    headers = {
-        "X-Origin":"Streamlit",
-        "X-User": email
-    }
+    # headers = {
+    #     "X-Origin":"Streamlit",
+    #     "X-User": email
+    # }
     # PAYLOAD
     payload = {
         "tenantId": 1,
@@ -29,7 +29,7 @@ def authenticate_user(email: str) -> str | None:
         "isSignInWithGoogle": True
     }
     try:
-        response = requests.post(api_url, json=payload, headers=headers)
+        response = requests.post(api_url, json=payload)
         response.raise_for_status()
 
         data = response.json()

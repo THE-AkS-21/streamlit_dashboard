@@ -1,10 +1,17 @@
 import base64
 import streamlit as st
 from app.api.user_api import authenticate_user
-from app.auth.cookies import set_jwt_cookie
+from app.auth.cookies import set_jwt_cookie, clear_jwt_cookie, get_jwt_from_cookie
 
 # Optional hardcoded email fallback
 user_email = "lakshay@bombayshavingcompany.com"
+def authenticate_from_cookie() -> bool:
+    """Check JWT in cookie, decode and set session if valid."""
+    token = get_jwt_from_cookie()
+    if not token:
+        return False
+    return True
+
 
 # Load local image and encode as base64
 def get_base64_bg(path):
@@ -25,7 +32,7 @@ def show_login_page():
                 height: 100vh !important;
                 margin: 0;
                 padding: 0;
-                background: url("{bg_image}") no-repeat center center fixed;
+                background: ("{bg_image}") no-repeat center center fixed;
                 background-size: cover;
                 display: flex;
                 justify-content: center;
@@ -103,18 +110,19 @@ def show_login_page():
     with st.container():
         # ─── Login Card ───────────────────────────────
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
+
+        st.write("USER : ",st.user)
         # Google Sign-In Button
         if st.button("  Sign in with Google", key="google-login-btn"):
             st.login()
 
-        if st.user and st.user.email:
+        if st.user:
             token = authenticate_user(user_email)
+            st.write("TOKEN: ",token)
             if token:
-                # set_jwt_cookie(token)
-                # st.session_state.jwt_token = token
-                # st.success("✅ Logged in successfully!")
-                if st.button("Continue"):
-                    st.switch_page("main.py")
+                set_jwt_cookie(token)
+                st.session_state.jwt_token = token
+                st.success("✅ Logged in successfully!")
             else:
                 st.error("❌ Token generation failed.")
 
