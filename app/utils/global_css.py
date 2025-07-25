@@ -283,7 +283,9 @@ def apply_global_styles():
         flex-direction: column;
         align-items: stretch;
     }}
-
+    .sidebar-footer {{
+        margin-top: auto; /* pushes this section to bottom if it's the last in flex */
+    }}
     .custom-sidebar a {{
         text-decoration: none !important;
         color: inherit;
@@ -314,7 +316,17 @@ def apply_global_styles():
         transform: translateX(3px);
         border-left: 4px solid var(--accent);
     }}
-
+    
+    .sidebar-logout {{
+        position: absolute;
+        bottom: 10px;
+        text-align: left;
+        padding: 10px 16px;
+        border-top: 1px solid #eee;
+    }}
+    .sidebar-logout:hover {{
+        background-color: #f0f0f0;
+    }}
     .sidebar-icon {{
         width: 28px;
         height: 28px;
@@ -327,7 +339,6 @@ def apply_global_styles():
         transition: all var(--animation-speed) ease;
         margin-right: 0;
     }}
-
     .sidebar-label {{
         display: inline-block;
         overflow: hidden;
@@ -361,7 +372,7 @@ def apply_global_styles():
         padding-top: 0 !important;
     
         /* Visual Debug Only - remove after spacing fixed */
-        border: 2px dashed red;
+        border: 2px dashed white;
     
         padding: 10px;
         margin-left: 70px;

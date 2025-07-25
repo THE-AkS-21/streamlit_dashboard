@@ -1,8 +1,9 @@
 import streamlit as st
-
+import time
 from app.auth.cookies import get_jwt_from_cookie
 from app.auth.jwt_manager import decode_jwt
 from app.components.layout import render_layout
+from app.components.loading_screen import loading_screen
 from app.config import init_page_config
 from app.constants import pages
 from app.pages import dashboard, analytics, settings
@@ -57,11 +58,18 @@ def render_page(page_name: str):
 def main():
     init_app()
 
-    # Handle login check
+    # # Handle login check
     if 'is_logged_in' not in st.session_state:
         if not authenticate_from_cookie():
             show_login_page()
+            if st.session_state.show_loader:
+                loading_screen()
+                time.sleep(3)
+                st.session_state.authenticated = True
+                st.session_state.show_loader = False
+                st.rerun()
             st.stop()
+
 
     # App container
     # st.markdown('<div id="app-container" style="margin: 0; padding: 0;">', unsafe_allow_html=True)

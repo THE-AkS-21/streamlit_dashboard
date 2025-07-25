@@ -1,5 +1,4 @@
 import base64
-import time
 import streamlit as st
 from app.api.user_api import authenticate_user
 from app.auth.cookies import set_jwt_cookie, get_jwt_from_cookie
@@ -112,20 +111,14 @@ def show_login_page():
 
     # Handle token generation only after login and user confirmed
     if st.session_state.login_attempted and st.user and not st.session_state.authenticated:
-        user_email = "lakshay@bombayshavingcompany.com"
-        token = authenticate_user(user_email)
+        user_email = st.user.email
+        token = authenticate_user(user_email) # api call
         if token:
-            set_jwt_cookie(token)
+            set_jwt_cookie(token) # cookie
             st.session_state.jwt_token = token
             st.session_state.show_loader = True
         else:
             st.error("❌ Token generation failed.")
 
         # ─── Loading Screen ───
-    if st.session_state.show_loader:
-        loading_screen()
-        time.sleep(3)
-        st.session_state.authenticated = True
-        st.session_state.show_loader = False
-        st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
