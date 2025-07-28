@@ -18,9 +18,7 @@ def _load_dashboard_metadata():
 
 def get_dashboard_metadata():
     if "dashboard_metadata" not in st.session_state:
-        loader = show_loader("Loading metadata...")
         st.session_state.dashboard_metadata = _load_dashboard_metadata()
-        loader.empty()
     return st.session_state.dashboard_metadata
 
 def get_filtered_data(category, subcategory, sku, start_date, end_date):
@@ -103,27 +101,50 @@ def render_metrics(df, start_date, end_date):
         st.warning("⚠️ No records found for the selected range.")
         return
 
-    if "metric_units" not in orders_df.columns:
-        orders_df["metric_units"] = orders_df.get("units", 0)
-    if "metric_asp" not in orders_df.columns:
-        orders_df["metric_asp"] = orders_df.get("asp", 0)
-    if "metric_offtake" not in orders_df.columns:
-        orders_df["metric_offtake"] = orders_df.get("offtake", 0)
+    # if "metric_units" not in orders_df.columns:
+    #     orders_df["metric_units"] = orders_df.get("units", 0)
+    # if "metric_asp" not in orders_df.columns:
+    #     orders_df["metric_asp"] = orders_df.get("asp", 0)
+    # if "metric_offtake" not in orders_df.columns:
+    #     orders_df["metric_offtake"] = orders_df.get("offtake", 0)
 
     # ─── Metrics ───
     num_days = (end_date - start_date).days + 1
 
     ChartComponent.metric_cards([
-        {"label": "TOTAL UNITS", "value": Formatters.number(orders_df["metric_units"].sum())},
-        {"label": "AVERAGE SELLING PRICE(ASP)", "value": Formatters.number(orders_df["metric_asp"].mean())},
-        {"label": "OFFTAKE", "value": Formatters.number(orders_df["metric_offtake"].sum())},
+        {"label": "TOTAL UNITS", "value": Formatters.number(orders_df["units"].sum())},
+        {"label": "AVERAGE SELLING PRICE", "value": Formatters.number(orders_df["asp"].mean())},
+        {"label": "OFFTAKE", "value": Formatters.number(orders_df["offtake"].sum())},
         {"label": "DAYS", "value": Formatters.number(num_days)},
     ])
 
-def render_metric_chart(df):
-    chart_df = df
-    y_axis = ["units"]
-    ChartComponent(chart_df).metric_chart("valuationdate", y_axis)
+def render_metric_chart(df, chart_type):
+    if df is None or df.empty:
+        st.error("No Data Found.")
+        return
+
+    df["valuationdate"] = pd.to_datetime(df["valuationdate"])
+
+    if chart_type == "bar":
+        # Aggregate units as sum per valuationdate
+        chart_df = (
+            df.groupby("valuationdate")[["units"]]
+            .sum()
+            .reset_index()
+        )
+        y_axis = ["units"]
+        ChartComponent(chart_df).metric_bar_chart("valuationdate", y_axis)
+
+    elif chart_type == "line":
+        # Aggregate asp as mean per valuationdate
+        chart_df = (
+            df.groupby("valuationdate")[["asp"]]
+            .mean()
+            .reset_index()
+        )
+        y_axis = ["asp"]
+        ChartComponent(chart_df).metric_line_chart("valuationdate", y_axis)
+
 
 def show_dashboard():
     apply_global_styles()
@@ -133,13 +154,6 @@ def show_dashboard():
     col_1, col_2 = st.columns([1, 3])
 
     with col_1:
-        st.markdown("""
-        <style>
-            .block-container .stSelectbox, .block-container button, .block-container form {
-                margin-top: 0.7rem;
-            }
-        </style>
-        """, unsafe_allow_html=True)
         # ── Inner Columns for Uniform Filter Layout ──
         f_col1, f_col2, f_col3 = st.columns(3)
 
@@ -163,11 +177,14 @@ def show_dashboard():
         filter_key = f"{filters[0]}_{filters[1]}_{filters[2]}_{filters[3]}_{filters[4]}"
 
         if "last_filter_key" not in st.session_state or st.session_state["last_filter_key"] != filter_key:
-            loader = show_loader("Fetching filtered data...")
             df = get_filtered_data(*filters)  # apply filters to get the df
+
+            # ── Convert all datetime64 columns to date ──
+            for col in df.select_dtypes(include=["datetime64[ns]"]).columns:
+                df[col] = df[col].dt.date
+
             st.session_state["filtered_data"] = df
             st.session_state["last_filter_key"] = filter_key
-            loader.empty()
 
         df = st.session_state.get("filtered_data", pd.DataFrame())
 
@@ -181,13 +198,18 @@ def show_dashboard():
                 mime="text/csv",
                 key="download_csv_btn"
             )
+
         render_metrics(df, filters[3], filters[4])
 
-
     with col_2:
-        tab1, tab2 = st.tabs(["UNITS", "OFFTAKE"])
+        tab1, tab2 = st.tabs(["UNITS", "ASP"])
 
         with tab1:
-            render_metric_chart(df)
+            with show_loader("Loading metric chart..."):
+                render_metric_chart(df, "bar")
+
+        with tab2:
+            with show_loader("Loading metric chart..."):
+                render_metric_chart(df, "line")
 
     render_chart_data(df)
