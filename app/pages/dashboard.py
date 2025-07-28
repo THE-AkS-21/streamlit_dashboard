@@ -70,9 +70,6 @@ def render_chart_data(df):
         st.warning("⚠️ No records found for the selected range.")
         return
 
-    if "value" not in orders_df.columns:
-        orders_df["value"] = orders_df.get("units", 0)
-
     tab1, tab2 = st.tabs(["DATA", "CHART"])
 
     with tab1:
@@ -86,7 +83,6 @@ def render_chart_data(df):
             y1_cols = st.multiselect("Select Y-Axis 1 (Left) Columns", options=numeric_columns, default=[col for col in ["units", "offtake"] if col in numeric_columns])
         with col_b:
             chart_type = st.selectbox("Chart Type", CHART_TYPES, key="dsr_chart_type")
-
         with col_c:
             y2_cols = st.multiselect("Select Y-Axis 2 (Right) Columns", options=numeric_columns, default=[col for col in ["asp"] if col in numeric_columns])
 
@@ -122,17 +118,10 @@ def render_metrics(df, start_date, end_date):
         {"label": "DAYS", "value": Formatters.number(num_days)},
     ])
 
-def render_dashboard_data(df, start_date, end_date):
-    orders_df = df
-    if orders_df is None or orders_df.empty:
-        st.warning("⚠️ No records found for the selected range.")
-        return
-
-    if "value" not in orders_df.columns:
-        orders_df["value"] = orders_df.get("units", 0)
-
-    # render_metrics(orders_df, start_date, end_date)
-    render_chart_data(orders_df)
+def render_metric_chart(df):
+    chart_df = df
+    y_axis = ["units"]
+    ChartComponent(chart_df).metric_chart("valuationdate", y_axis)
 
 def show_dashboard():
     apply_global_styles()
@@ -142,7 +131,13 @@ def show_dashboard():
     col_1, col_2 = st.columns([1, 3])
 
     with col_1:
-
+        st.markdown("""
+        <style>
+            .block-container .stSelectbox, .block-container button, .block-container form {
+                margin-top: 0.7rem;
+            }
+        </style>
+        """, unsafe_allow_html=True)
         # ── Inner Columns for Uniform Filter Layout ──
         f_col1, f_col2, f_col3 = st.columns(3)
 
@@ -188,6 +183,9 @@ def show_dashboard():
 
 
     with col_2:
-        pass
+        tab1, tab2 = st.tabs(["UNITS", "OFFTAKE"])
 
-    render_dashboard_data(df, filters[3], filters[4])
+        with tab1:
+            render_metric_chart(df)
+
+    render_chart_data(df)

@@ -51,6 +51,43 @@ class ChartComponent:
                 unsafe_allow_html=True
             )
 
+    # ------------------- 🔹 METRIC CHART -------------------
+
+    def metric_chart(self, x_axis: str, y_axis: list[str], key="metric_chart"):
+        df = self.df.copy()
+
+        # Convert date column to datetime
+        df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
+        df.dropna(subset=[x_axis], inplace=True)
+
+        # Group and aggregate
+        df_grouped = df.groupby(x_axis)[y_axis].sum().reset_index()
+
+        # Build bar chart
+        fig = go.Figure()
+        for col in y_axis:
+            fig.add_trace(go.Bar(
+                x=df_grouped[x_axis],
+                y=df_grouped[col],
+                name=col,
+                hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y}<extra></extra>"
+            ))
+
+        fig.update_layout(
+            title="Units by Valuation Date",
+            xaxis_title="Valuation Date",
+            yaxis_title="Units",
+            barmode="group",
+            hovermode="x unified",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+            )
+        )
+
+        st.plotly_chart(fig, use_container_width=True, key=key)
+
     # ------------------- 🔹 Multi Metrix Chart -------------------
 
     def multi_yaxis_line_chart(self, x_axis: str, y1_cols: list, y2_cols: list, key="multi_line_chart"):
