@@ -34,16 +34,23 @@ class ChartComponent:
         return self.df.copy(), None
 
     # ------------------- 🔹 METRIC CARDS -------------------
+
     @staticmethod
     def metric_cards(metrics: List[Dict[str, Any]]) -> None:
-        cols = st.columns(len(metrics))
-        for col, metric in zip(cols, metrics):
-            with col:
-                st.metric(
-                    label=metric["label"],
-                    value=metric["value"],
-                    delta=metric.get("delta")
-                )
+        for metric in metrics:
+            label = metric.get("label", "N/A")
+            value = metric.get("value", "N/A")
+
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <span class="metric-label">{label}:</span>
+                    <span class="metric-value">{value}</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
     # ------------------- 🔹 Multi Metrix Chart -------------------
 
     def multi_yaxis_line_chart(self, x_axis: str, y1_cols: list, y2_cols: list, key="multi_line_chart"):

@@ -2,7 +2,6 @@ from datetime import datetime
 import streamlit as st
 import pandas as pd
 
-from app.auth.cookies import get_jwt_from_cookie
 from app.components.aggrid_renderer import render_aggrid
 from app.database.connection import db
 from app.database.queries.dashboard_queries import DashboardQueries
@@ -96,17 +95,8 @@ def render_chart_data(df):
             return
 
         # chart_component = ChartComponent(df)
-
-        if chart_type == "Area":
-            ChartComponent(df).multi_yaxis_chart("valuationdate", y1_cols, y2_cols, plot_type=chart_type)
-
-        else:
-            melted_df = df.melt(id_vars=["valuationdate"], var_name="metric", value_name="value")
-            ChartComponent(melted_df).render_dynamic_chart(
-                x_axis="valuationdate",
-                y_axis="value",
-                chart_type=chart_type
-            )
+        ChartComponent(df).multi_yaxis_line_chart("valuationdate", y1_cols, y2_cols)
+        # ChartComponent(df).multi_yaxis_chart("valuationdate", y1_cols, y2_cols, plot_type=chart_type)
 
 def render_metrics(df, start_date, end_date):
 
@@ -115,15 +105,21 @@ def render_metrics(df, start_date, end_date):
         st.warning("⚠️ No records found for the selected range.")
         return
 
-    if "value" not in orders_df.columns:
-        orders_df["value"] = orders_df.get("units", 0)
+    if "metric_units" not in orders_df.columns:
+        orders_df["metric_units"] = orders_df.get("units", 0)
+    if "metric_asp" not in orders_df.columns:
+        orders_df["metric_asp"] = orders_df.get("asp", 0)
+    if "metric_offtake" not in orders_df.columns:
+        orders_df["metric_offtake"] = orders_df.get("offtake", 0)
 
     # ─── Metrics ───
     num_days = (end_date - start_date).days + 1
+
     ChartComponent.metric_cards([
-        {"label": "Total Units", "value": Formatters.number(orders_df["value"].sum())},
-        {"label": "Avg Daily Units", "value": Formatters.number(orders_df["value"].sum() / num_days)},
-        {"label": "Days", "value": Formatters.number(num_days)},
+        {"label": "TOTAL UNITS", "value": Formatters.number(orders_df["metric_units"].sum())},
+        {"label": "AVERAGE SELLING PRICE(ASP)", "value": Formatters.number(orders_df["metric_asp"].mean())},
+        {"label": "OFFTAKE", "value": Formatters.number(orders_df["metric_offtake"].sum())},
+        {"label": "DAYS", "value": Formatters.number(num_days)},
     ])
 
 def render_dashboard_data(df, start_date, end_date):
@@ -188,8 +184,10 @@ def show_dashboard():
                 mime="text/csv",
                 key="download_csv_btn"
             )
+        render_metrics(df, filters[3], filters[4])
+
 
     with col_2:
-        render_metrics(df, filters[3], filters[4])
+        pass
 
     render_dashboard_data(df, filters[3], filters[4])

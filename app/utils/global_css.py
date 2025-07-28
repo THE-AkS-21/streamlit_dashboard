@@ -372,9 +372,8 @@ def apply_global_styles():
         padding-top: 0 !important;
     
         /* Visual Debug Only - remove after spacing fixed */
-        border: 2px dashed white;
-    
-        padding: 10px;
+        border: 2px dashed red;
+        
         margin-left: 70px;
         transition: margin-left var(--animation-speed, 0.3s) ease;
         position: relative;
@@ -392,25 +391,33 @@ def apply_global_styles():
         }}
     }}
     /* ===== Metric Cards ===== */
+    
     .metric-card {{
         background: white;
-        padding: 1rem;
+        padding: 0.5rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
-        text-align: center;
+        padding-left: 2rem;
+        padding-right: 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }}
-
     .metric-label {{
         font-size: 0.8rem;
-        color: var(--text-secondary);
+        color: var(--text-secondary, #666);
+        text-align: left;
+        font-weight: 500;
     }}
 
     .metric-value {{
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: var(--text-main);
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-main, #111);
+        text-align: right;
     }}
+        
 
     /* ===== Buttons ===== */
     /* All Streamlit buttons */
@@ -584,8 +591,8 @@ def apply_global_styles():
             left: 0;
         }}
         .custom-content {{
-            margin: 50px 50px;
-            padding: 30px;
+            margin: 0 !important;
+            padding: 0 !important;
             transition: left var(--animation-speed) ease;
         }}
         .custom-sidebar.show + .custom-content {{
