@@ -1,4 +1,5 @@
 class DashboardQueries:
+
     MONTHLY_ORDERS_WITH_SKU = """
     WITH daily_orders AS (
         SELECT 
@@ -58,13 +59,24 @@ class DashboardQueries:
     ORDER BY category, subcategory, sku
     """
 
+    GET_DASHBOARD_FILTERED_CHART_DATA = """
+                                        WITH daily_orders \
+                                                 AS (SELECT valuationdate::date as order_date, SUM(units) as total_units \
+                                                     FROM bsc.centraldsrdumpv2 \
+                                                     WHERE valuationdate:: date BETWEEN CAST (:start_date AS DATE) AND CAST (:end_date AS DATE)
+                                            {filters}
+                                        GROUP BY valuationdate:: date
+                                            )
+                                        SELECT order_date as time,
+            total_units as value
+                                        FROM daily_orders
+                                        ORDER BY time ASC \
+                                        """
+
     GET_DASHBOARD_CHART_DATA = """
-                               SELECT valuationdate::date AS valuationdate, whsku AS sku, \
-                                      category, \
-                                      subcategory, \
-                                      units, \
-                                      offtake
-                               FROM bsc.centraldsrdumpv2
-                               WHERE valuationdate BETWEEN %(start_date)s AND %(end_date)s {sku_filter}
-                               ORDER BY valuationdate ASC \
-                               """
+    SELECT *
+    FROM bsc.centraldsrdumpv2
+    WHERE valuationdate::date BETWEEN CAST(:start_date AS DATE) AND CAST(:end_date AS DATE)
+    """
+
+

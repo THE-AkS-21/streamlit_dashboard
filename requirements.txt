@@ -1,5 +1,5 @@
 # Core App Dependencies
-streamlit==1.46.1
+streamlit==1.47.0
 pandas==2.3.1
 SQLAlchemy==2.0.41
 python-dotenv==1.1.1
@@ -15,7 +15,17 @@ st-aggrid==1.1.6
 extra-streamlit-components==0.1.56
 streamlit-lightweight-charts==0.7.20
 
+#jwt-decode
+python-jose==3.5.0
+PyJWT==2.10.1
+
 # Google Auth & API Integration
 google-auth-oauthlib==1.0.0
 google-auth-httplib2==0.1.0
 google-api-python-client==2.86.0
+
+#api calls
+requests==2.32.4
+
+#cookie
+streamlit-cookies-controller==0.0.4

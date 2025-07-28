@@ -1,28 +1,142 @@
 import streamlit as st
 import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder
-from app.components.export_controls import export_controls
+from st_aggrid.shared import JsCode
 
 
 def render_aggrid(data_df: pd.DataFrame):
     data_df = data_df.copy()
-    page_size: int = 50
+    page_size = 50
 
-    # Add Serial Number
-    if "S.No" not in data_df.columns:
-        data_df.insert(0, "S.No", range(1, len(data_df) + 1))
+    # ───── Configure AG Grid ─────
 
-    # All Columns
-    all_columns = list(data_df.columns)
+    #  Custom cellStyle
+    cm2_percentage_style = JsCode("""
+                    function(params) {
+                        const val = params.value;
+                        if (val >= 25) {
+                            return { fontWeight: 'bold', color: '#006400' }; // Dark Green
+                        } else if (val >= 20) {
+                            return { fontWeight: 'bold', color: '#228B22' }; // Forest Green
+                        } else if (val >= 15) {
+                            return { fontWeight: 'bold', color: '#32CD32' }; // Lime Green
+                        } else if (val >= 10) {
+                            return { fontWeight: 'bold', color: '#FFA500' }; // Orange
+                        } else if (val >= 5) {
+                            return { fontWeight: 'bold', color: '#FF4C4C' }; // Red
+                        } else {
+                            return { fontWeight: 'bold', color: '#8B0000' }; // Deep Dark Red
+                        }
+                    }
+                    """)
 
-    # ───── AG Grid Setup ─────
+    cm2_trend_renderer = JsCode("""
+                    function(params) {
+                        const val = params.value;
+                        if (val >= 25) {
+                            return '★ ' + val + '%';
+                        } else if(val>=20){
+                            return '⬆ ' + val + '%';
+                        }else if (val >= 15) {
+                            return '↗ ' + val + '%';
+                        } else if (val >= 10) {
+                            return '➡ ' + val + '%';
+                        } else if (val >= 5) {
+                            return '↘ ' + val + '%';
+                        } else {
+                            return '⬇ ' + val + '%';
+                        }
+                    }
+                    """)
+
+    cm1_percentage_style = JsCode("""
+                        function(params) {
+                            const val = params.value;
+                            if (val >= 50) {
+                                return { fontWeight: 'bold', color: '#006400' }; // Dark Green
+                            } else if (val >= 45) {
+                                return { fontWeight: 'bold', color: '#228B22' }; // Forest Green
+                            } else if (val >= 40) {
+                                return { fontWeight: 'bold', color: '#32CD32' }; // Lime Green
+                            } else if (val >= 35) {
+                                return { fontWeight: 'bold', color: '#FFA500' }; // Orange
+                            } else if (val >= 30) {
+                                return { fontWeight: 'bold', color: '#FF4C4C' }; // Red
+                            } else {
+                                return { fontWeight: 'bold', color: '#8B0000' }; // Deep Dark Red
+                            }
+                        }
+                        """)
+
+    cm1_trend_renderer = JsCode("""
+                        function(params) {
+                            const val = params.value;
+                            if (val >= 50) {
+                                return '★ ' + val + '%';
+                            } else if(val>=45){
+                                return '⬆ ' + val + '%';
+                            }else if (val >= 40) {
+                                return '↗ ' + val + '%';
+                            } else if (val >= 35) {
+                                return '➡ ' + val + '%';
+                            } else if (val > 25) {
+                                return '↘ ' + val + '%';
+                            } else {
+                                return '⬇ ' + val + '%';
+                            }
+                        }
+                        """)
+
+    gmgp_percentage_style = JsCode("""
+                        function(params) {
+                            const val = params.value;
+                            if (val >= 55) {
+                                return { fontWeight: 'bold', color: '#006400' }; // Dark Green
+                            } else if (val >= 50) {
+                                return { fontWeight: 'bold', color: '#228B22' }; // Forest Green
+                            } else if (val >= 45) {
+                                return { fontWeight: 'bold', color: '#32CD32' }; // Lime Green
+                            } else if (val >= 40) {
+                                return { fontWeight: 'bold', color: '#FFA500' }; // Orange
+                            } else if (val >= 35) {
+                                return { fontWeight: 'bold', color: '#FF4C4C' }; // Red
+                            } else {
+                                return { fontWeight: 'bold', color: '#8B0000' }; // Deep Dark Red
+                            }
+                        }
+                        """)
+
+    gmgp_trend_renderer = JsCode("""
+                        function(params) {
+                            const val = params.value;
+                            if (val >= 55) {
+                                return '★ ' + val + '%';
+                            } else if(val>=50){
+                                return '⬆ ' + val + '%';
+                            }else if (val >= 45) {
+                                return '↗ ' + val + '%';
+                            } else if (val >= 40) {
+                                return '➡ ' + val + '%';
+                            } else if (val > 30) {
+                                return '↘ ' + val + '%';
+                            } else {
+                                return '⬇ ' + val + '%';
+                            }
+                        }
+                        """)
+
     gb = GridOptionsBuilder.from_dataframe(data_df)
 
-    # Configure all columns
-    for col in all_columns:
+    for col in data_df.columns:
+        # Dynamically format header name
+        if col.lower().endswith("percentage"):
+            header_name = col[:-10].replace("_", " ").title() + " %"
+        else:
+            header_name = col.replace("_", " ").title()
+
         gb.configure_column(
             col,
-            headerName=col,
+            headerName=header_name,
             filter=True,
             sortable=True,
             resizable=True,
@@ -30,40 +144,42 @@ def render_aggrid(data_df: pd.DataFrame):
             minWidth=120
         )
 
-    # ✅ Enable Sidebar (columns & filters)
-    gb.configure_side_bar()
-    # ✅ Enable Sidebar (row grouping)
+    # Enable Sidebar (columns & filters)
+    # gb.configure_side_bar()
+
+    # Enable Sidebar (row grouping)
     gb.configure_default_column(groupable=True)
 
-
-
-    # ✅ Enable Floating Filters
     gb.configure_grid_options(floatingFilter=True)
 
-    # # ✅ Enable Basic grouping
-    # gb.configure_column("Category", rowGroup=True)
-    # gb.configure_column("SubCategory", rowGroup=True)
-    # gb.configure_column("whsku", rowGroup=True)
-
-    # ✅ Enable Row Selection
-    gb.configure_selection("multiple", use_checkbox=True)
-
-    # ✅ Enable Pagination
+    # Enable Pagination
     gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
 
-    # Render Grid
+    # Enable Cell Styling
+    gb.configure_column( "cm2percentage",headerName="CM2 %",cellStyle=cm2_percentage_style,pinned="left", cellRenderer=cm2_trend_renderer)
+    gb.configure_column("cm1percentage",headerName="CM1 %", cellStyle=cm1_percentage_style,pinned="left", cellRenderer=cm1_trend_renderer)
+    gb.configure_column("gmgppercentage",headerName="GMGP %", cellStyle=gmgp_percentage_style,pinned="left", cellRenderer=gmgp_trend_renderer)
+    gb.configure_column("valuationdate",pinned="left", headerClass="ag-header-bold")
+    # gb.configure_column("cm2percentage", pinned="left", headerClass="ag-header-bold")
+    # gb.configure_column("cm1percentage", pinned="left", headerClass="ag-header-bold")
+    # gb.configure_column("gmgppercentage", pinned="left", headerClass="ag-header-bold")
+
+
+    # Build the grid options
+    grid_options = gb.build()
+
+    # Add Icon Set
+    grid_options['parts'] = "iconSetAlpine"
+    grid_options['deltaRowDataMode'] = True
+    grid_options["animateRows"] = True
+
+    # ───── Render AG Grid ─────
     grid_response = AgGrid(
         data_df,
-        gridOptions=gb.build(),
-        theme="alpine",  # Or "material" | "balham" | "streamlit"
+        gridOptions=grid_options,
+        theme="alpine",
         height=600,
         allow_unsafe_jscode=True,
         enable_enterprise_modules=True,
-        fit_columns_on_grid_load=False
+        fit_columns_on_grid_load=False,
     )
-
-    selected_rows_df = pd.DataFrame(grid_response["selected_rows"]) if grid_response["selected_rows"] else pd.DataFrame()
-    return {
-        "full_data": data_df,
-        "selected_rows": selected_rows_df
-    }

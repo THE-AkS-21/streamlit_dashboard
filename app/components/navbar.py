@@ -1,5 +1,6 @@
 import streamlit as st
-from app.utils.icon_loader import load_icon
+from app.utils.icon_loader import load_icon, load_logo
+
 
 # @st.cache_resource(show_spinner=False)
 def render_navbar():
@@ -8,9 +9,9 @@ def render_navbar():
 
     st.markdown(f"""
         <div class="custom-navbar" >
-            <img src="{load_icon('menu.png')}" class="hamburger" id="hamburger-toggle">
+            <img src="{load_icon('menu.svg')}" class="hamburger" id="hamburger-toggle">
             <div class="navbar-left" style="display:flex; align-items:center; gap:10px;">
-                <img src="{load_icon('logo.png')}" class="navbar-logo">
+                <img src="{load_logo('logo.png')}" class="navbar-logo">
                 <p class="navbar-title">Bombay Shaving Company</p>
             </div>
         </div>
