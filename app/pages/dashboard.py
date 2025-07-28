@@ -73,7 +73,8 @@ def render_chart_data(df):
     tab1, tab2 = st.tabs(["DATA", "CHART"])
 
     with tab1:
-        render_aggrid(orders_df)
+        with show_loader("Loading data..."):
+            render_aggrid(orders_df)
 
     with tab2:
         numeric_columns = [col for col in orders_df.columns if pd.api.types.is_numeric_dtype(orders_df[col])]
@@ -91,7 +92,8 @@ def render_chart_data(df):
             return
 
         # chart_component = ChartComponent(df)
-        ChartComponent(df).multi_yaxis_line_chart("valuationdate", y1_cols, y2_cols)
+        with show_loader("Loading chart..."):
+            ChartComponent(df).multi_yaxis_line_chart("valuationdate", y1_cols, y2_cols)
         # ChartComponent(df).multi_yaxis_chart("valuationdate", y1_cols, y2_cols, plot_type=chart_type)
 
 def render_metrics(df, start_date, end_date):

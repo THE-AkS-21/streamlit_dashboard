@@ -40,7 +40,6 @@ class ChartComponent:
         for metric in metrics:
             label = metric.get("label", "N/A")
             value = metric.get("value", "N/A")
-
             st.markdown(
                 f"""
                 <div class="metric-card">
@@ -51,33 +50,29 @@ class ChartComponent:
                 unsafe_allow_html=True
             )
 
-    # ------------------- 🔹 METRIC CHART -------------------
+    # ------------------- 🔹 METRIC BAR CHART -------------------
 
-    def metric_chart(self, x_axis: str, y_axis: list[str], key="metric_chart"):
+    def metric_bar_chart(self, x_axis: str, y_axis: list[str], key="metric_unit_chart"):
         df = self.df.copy()
 
         # Convert date column to datetime
         df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
         df.dropna(subset=[x_axis], inplace=True)
-
-        # Group and aggregate
-        df_grouped = df.groupby(x_axis)[y_axis].sum().reset_index()
-
         # Build bar chart
         fig = go.Figure()
         for col in y_axis:
             fig.add_trace(go.Bar(
-                x=df_grouped[x_axis],
-                y=df_grouped[col],
+                x=df[x_axis],
+                y=df[col],
                 name=col,
                 hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y}<extra></extra>"
             ))
 
         fig.update_layout(
-            title="Units by Valuation Date",
             xaxis_title="Valuation Date",
             yaxis_title="Units",
             barmode="group",
+            height=350,
             hovermode="x unified",
             legend=dict(
                 orientation="h",
@@ -86,6 +81,82 @@ class ChartComponent:
             )
         )
 
+        st.plotly_chart(fig, use_container_width=True, key=key)
+
+    # ------------------- 🔹 METRIC LINE CHART -------------------
+
+    def metric_line_chart(self, x_axis: str, y_axis: list[str], key="metric_asp_chart"):
+        df = self.df.copy()
+
+        # Ensure datetime for x-axis
+        df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
+        df.dropna(subset=[x_axis], inplace=True)
+
+        # Create the figure
+        fig = go.Figure()
+
+        for col in y_axis:
+            fig.add_trace(go.Scatter(  # Fix: changed from go.line to go.Scatter for line plots
+                x=df[x_axis],
+                y=df[col],
+                name=col,
+                mode='lines+markers',  # Optional: to show points + line
+                hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y}<extra></extra>"
+            ))
+
+        # Chart layout with fixed height
+        fig.update_layout(
+            xaxis_title="Valuation Date",
+            yaxis_title="Metric",
+            height=350,
+            hovermode="x unified",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+            )
+        )
+
+        # Display chart in Streamlit
+        st.plotly_chart(fig, use_container_width=True, key=key)
+
+    # ------------------- 🔹 METRIC AREA CHART -------------------
+
+    def metric_area_chart(self, x_axis: str, y_axis: list[str], key="metric_area_chart"):
+        df = self.df.copy()
+
+        # Ensure datetime for x-axis
+        df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
+        df.dropna(subset=[x_axis], inplace=True)
+
+        # Create the figure
+        fig = go.Figure()
+
+        for col in y_axis:
+            fig.add_trace(go.Scatter(
+                x=df[x_axis],
+                y=df[col],
+                name=col,
+                mode='lines',
+                fill='tozeroy',  # This creates the area chart
+                hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y}<extra></extra>"
+            ))
+
+        # Chart layout with fixed height
+        fig.update_layout(
+            xaxis_title="Valuation Date",
+            yaxis_title="Metric",
+            height=350,
+            hovermode="x unified",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+            ),
+            margin=dict(t=40, b=40, l=40, r=40)
+        )
+
+        # Display chart in Streamlit
         st.plotly_chart(fig, use_container_width=True, key=key)
 
     # ------------------- 🔹 Multi Metrix Chart -------------------
@@ -102,24 +173,13 @@ class ChartComponent:
 
         fig = go.Figure()
 
-        # Format axis ticks in Indian format
-        def format_axis_ticks(series):
-            tickvals = series.round(-2).dropna().unique()
-            tickvals.sort()
-            ticktext = [Formatters.format_indian_number(val) for val in tickvals]
-            return tickvals, ticktext
-
-        # Y1 axis ticks
-        y1_vals, y1_text = format_axis_ticks(df[y1_cols[0]])
-        # Y2 axis ticks
-        y2_vals, y2_text = format_axis_ticks(df[y2_cols[0]])
-
-        # Plot Y1 (left axis) with formatted hover
+        # No custom tickvals/text — keep default scale on axis
+        # Just format hover text using Indian units
         for col in y1_cols:
             formatted = df[col].apply(Formatters.format_indian_number)
             fig.add_trace(go.Scatter(
                 x=df[x_axis],
-                y=df[col],
+                y=df[col],  # unformatted axis values
                 mode="lines+markers",
                 name=f"{col} (Y1)",
                 yaxis="y1",
@@ -134,7 +194,7 @@ class ChartComponent:
             formatted = df[col].apply(Formatters.format_indian_number)
             fig.add_trace(go.Scatter(
                 x=df[x_axis],
-                y=df[col],
+                y=df[col],  # unformatted axis values
                 mode="lines+markers",
                 name=f"{col} (Y2)",
                 yaxis="y2",
@@ -146,22 +206,19 @@ class ChartComponent:
                 )
             ))
 
-        # Layout
         fig.update_layout(
             title="Multi Y-Axis Line Chart",
             xaxis_title="Valuation Date",
             yaxis=dict(
-                title="Y1 Axis",
-                side="left",
-                tickvals=y1_vals.tolist(),
-                ticktext=y1_text
+                title="Units Axis",
+                side="left"
+                # Default tick formatting (raw scale)
             ),
             yaxis2=dict(
-                title="Y2 Axis",
+                title="Average Axis",
                 side="right",
-                overlaying="y",
-                tickvals=y2_vals.tolist(),
-                ticktext=y2_text
+                overlaying="y"
+                # Default tick formatting (raw scale)
             ),
             hovermode="x unified",
             legend=dict(

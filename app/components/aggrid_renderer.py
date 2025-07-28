@@ -156,10 +156,10 @@ def render_aggrid(data_df: pd.DataFrame):
     gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=page_size)
 
     # Enable Cell Styling
-    gb.configure_column( "cm2percentage",headerName="CM2 %",cellStyle=cm2_percentage_style, cellRenderer=cm2_trend_renderer)
-    gb.configure_column("cm1percentage",headerName="CM1 %", cellStyle=cm1_percentage_style, cellRenderer=cm1_trend_renderer)
-    gb.configure_column("gmgppercentage",headerName="GMGP %", cellStyle=gmgp_percentage_style, cellRenderer=gmgp_trend_renderer)
-    gb.configure_column("valuationdate", headerClass="ag-header-bold")
+    gb.configure_column( "cm2percentage",headerName="CM2 %",cellStyle=cm2_percentage_style,pinned="left", cellRenderer=cm2_trend_renderer)
+    gb.configure_column("cm1percentage",headerName="CM1 %", cellStyle=cm1_percentage_style,pinned="left", cellRenderer=cm1_trend_renderer)
+    gb.configure_column("gmgppercentage",headerName="GMGP %", cellStyle=gmgp_percentage_style,pinned="left", cellRenderer=gmgp_trend_renderer)
+    gb.configure_column("valuationdate",pinned="left", headerClass="ag-header-bold")
     # gb.configure_column("cm2percentage", pinned="left", headerClass="ag-header-bold")
     # gb.configure_column("cm1percentage", pinned="left", headerClass="ag-header-bold")
     # gb.configure_column("gmgppercentage", pinned="left", headerClass="ag-header-bold")

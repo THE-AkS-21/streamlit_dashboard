@@ -370,6 +370,8 @@ def apply_global_styles():
     .custom-content {{
         margin-top: 0 !important;
         padding-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
     
         /* Visual Debug Only - remove after spacing fixed */
         border: 2px dashed red;
@@ -394,7 +396,7 @@ def apply_global_styles():
     
     .metric-card {{
         background: white;
-        padding: 0.5rem;
+        padding: 0.2rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
@@ -403,6 +405,13 @@ def apply_global_styles():
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }}
+    
+    .metric-card:hover {{
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: scale(1.01);
+        background: #f8f9fc;
+        cursor: pointer;
     }}
     .metric-label {{
         font-size: 0.8rem;
