@@ -58,37 +58,32 @@ def render_page(page_name: str):
 def main():
     init_app()
 
-    # # Handle login check
-    if 'is_logged_in' not in st.session_state:
-        if not authenticate_from_cookie():
-            show_login_page()
-            if st.session_state.show_loader:
-                loading_screen()
-                time.sleep(3)
-                st.session_state.authenticated = True
-                st.session_state.show_loader = False
-                st.rerun()
-            st.stop()
-
+    # # # Handle login check
+    # if 'is_logged_in' not in st.session_state:
+    #     if not authenticate_from_cookie():
+    #         show_login_page()
+    #         if st.session_state.show_loader:
+    #             loading_screen()
+    #             time.sleep(3)
+    #             st.session_state.authenticated = True
+    #             st.session_state.show_loader = False
+    #             st.rerun()
+    #         st.stop()
 
     # App container
     # st.markdown('<div id="app-container" style="margin: 0; padding: 0;">', unsafe_allow_html=True)
 
         # App container + custom-content wrapper in a single tag
-    st.markdown(
-        """<div id="app-container" style="margin: 0; padding: 0;">
-               <div class="custom-content">""",
-        unsafe_allow_html=True
-    )
-    render_layout()  # Navbar + Sidebar
+    st.markdown('<div id="app-container" style="margin: 0; padding: 0;">', unsafe_allow_html=True)
+    st.markdown('<div class="custom-content-wrapper" style="margin: 0; padding: 0;">', unsafe_allow_html=True)
 
-    # # Main content area
-    # st.markdown('<div class="custom-content" style="margin: 0; padding: 0;">', unsafe_allow_html=True)
+    render_layout()  # Navbar + Sidebar
 
     current_page = get_current_page()
     render_page(current_page)
 
     # Close divs
+    st.markdown('</div></div>', unsafe_allow_html=True)
     st.markdown('</div></div>', unsafe_allow_html=True)
 
 

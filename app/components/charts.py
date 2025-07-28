@@ -207,7 +207,6 @@ class ChartComponent:
             ))
 
         fig.update_layout(
-            title="Multi Y-Axis Line Chart",
             xaxis_title="Valuation Date",
             yaxis=dict(
                 title="Units Axis",
@@ -235,6 +234,7 @@ class ChartComponent:
         st.plotly_chart(fig, use_container_width=True, key=key)
 
     # ------------------- 🔹 DYNAMIC CHART -------------------
+
     def render_dynamic_chart(self, x_axis: str, y_axis: str, chart_type: str = "Line") -> None:
         if not x_axis or not y_axis:
             st.warning("Please select both X and Y axes.")
