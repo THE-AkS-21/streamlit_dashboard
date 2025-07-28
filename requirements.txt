@@ -2,7 +2,6 @@
 streamlit==1.47.0
 pandas==2.3.1
 SQLAlchemy==2.0.41
-python-dotenv==1.1.1
 psycopg2-binary==2.9.10
 
 # Visualization
@@ -13,7 +12,6 @@ XlsxWriter==3.2.0
 # Streamlit Extensions
 st-aggrid==1.1.6
 extra-streamlit-components==0.1.56
-streamlit-lightweight-charts==0.7.20
 
 #jwt-decode
 python-jose==3.5.0
