@@ -1,10 +1,16 @@
+import numpy as np
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from streamlit_lightweight_charts import renderLightweightCharts
 from typing import List, Dict, Any
 from app.utils.formatters import Formatters
+
+
+def format_axis_ticks(series):
+    tickvals = np.linspace(series.min(), series.max(), num=5)
+    ticktext = [Formatters.format_indian_number(val) for val in tickvals]
+    return tickvals, ticktext
 
 class ChartComponent:
     def __init__(self, df: pd.DataFrame):
@@ -38,291 +44,94 @@ class ChartComponent:
                     value=metric["value"],
                     delta=metric.get("delta")
                 )
-
-    # ------------------- 🔹 LIGHTWEIGHT BASELINE CHART -------------------
-    @staticmethod
-    def render_lightweight_baseline_chart(df: pd.DataFrame, key="baseline_chart"):
-        if df.empty or not {"time", "value"}.issubset(df.columns):
-            st.warning("No valid data for baseline chart.")
-            return
-
-        df["time"] = pd.to_datetime(df["time"], errors="coerce")
-        df["value"] = pd.to_numeric(df["value"], errors="coerce")
-        df = df.dropna(subset=["time", "value"]).sort_values("time")
-
-        chart_data = [
-            {"time": int(row["time"].timestamp()), "value": row["value"]}
-            for _, row in df.iterrows()
-        ]
-
-        series = [{
-            "type": "Baseline",
-            "data": chart_data,
-            "options": {
-                "baseValue": {"type": "price", "price": df["value"].mean()},
-                "topLineColor": 'rgba(38, 166, 154, 1)',
-                "topFillColor1": 'rgba(38, 166, 154, 0.28)',
-                "topFillColor2": 'rgba(38, 166, 154, 0.05)',
-                "bottomLineColor": 'rgba(239, 83, 80, 1)',
-                "bottomFillColor1": 'rgba(239, 83, 80, 0.05)',
-                "bottomFillColor2": 'rgba(239, 83, 80, 0.28)'
-            }
-        }]
-
-        chart = {
-            "layout": {"textColor": 'black', "background": {"type": 'solid', "color": 'white'}},
-            "height": 400,
-            "timeScale": {"timeVisible": True}
-        }
-
-        renderLightweightCharts([{"chart": chart, "series": series}], key=key)
-
-    # ------------------- 🔹 TIME SERIES (LIGHTWEIGHT) -------------------
-    @staticmethod
-    def orders_chart(df: pd.DataFrame, key: str = "chart_1") -> None:
-        if df.empty or not {"time", "value"}.issubset(df.columns):
-            st.warning("No valid data for rendering chart.")
-            return
-
-        df["time"] = pd.to_datetime(df["time"], errors="coerce").dt.strftime('%Y-%m-%d')
-        df["value"] = pd.to_numeric(df["value"], errors="coerce")
-        df = df.dropna(subset=["time", "value"]).sort_values("time")
-
-        chart_data = df[["time", "value"]].to_dict("records")
-
-        renderLightweightCharts(
-            charts=[{
-                "chart": {
-                    "height": 400,
-                    "layout": {"textColor": "black", "background": {"type": "solid", "color": "white"}},
-                    "timeScale": {"timeVisible": True}
-                },
-                "series": [{
-                    "type": "Area",
-                    "data": chart_data,
-                    "options": {
-                        "topColor": "rgba(41, 98, 255, 0.3)",
-                        "bottomColor": "rgba(41, 98, 255, 0.0)",
-                        "lineColor": "#2962FF",
-                        "lineWidth": 2
-                    }
-                }]
-            }],
-            key=key
-        )
-
-    # ------------------- 🔹 UNITS OVER TIME -------------------
-    def units_over_time(self) -> None:
-        if not {"valuationdate", "units"}.issubset(self.df.columns):
-            st.warning("Required columns not found.")
-            return
-
-        df = self.df.copy()
-        df["valuationdate"] = pd.to_datetime(df["valuationdate"], errors="coerce")
-        df = df.dropna(subset=["valuationdate", "units"])
-        daily_units = df.groupby("valuationdate")["units"].sum().reset_index()
-
-        fig = px.line(daily_units, x="valuationdate", y="units", title="Units Over Time", markers=True)
-        st.plotly_chart(fig, use_container_width=True)
-
-    # ------------------- 🔹 BAR CHARTS -------------------
-    def _bar_chart(self, group_col: str, title: str) -> None:
-        if group_col not in self.df.columns:
-            st.warning(f"'{group_col}' column not found.")
-            return
-
-        df = self.df.dropna(subset=[group_col, 'units'])
-        agg_df = df.groupby(group_col)['units'].sum().reset_index()
-
-        fig = px.bar(agg_df, x=group_col, y='units', title=title, text='units')
-        fig.update_traces(textposition='auto')
-        st.plotly_chart(fig, use_container_width=True)
-
-    def units_by_category(self) -> None:
-        self._bar_chart("category", "Units by Category")
-
-    def units_by_subcategory(self) -> None:
-        self._bar_chart("subcategory", "Units by Subcategory")
-
-    # ------------------- 🔹 PIE CHART -------------------
-    def units_by_sku(self) -> None:
-        if not {"whsku", "units"}.issubset(self.df.columns):
-            st.warning("Required columns not found.")
-            return
-
-        df = self.df.dropna(subset=["whsku", "units"])
-        unique_skus = df["whsku"].unique().tolist()
-        selected_skus = st.multiselect("Select SKUs to display", unique_skus, default=unique_skus[:10])
-
-        if not selected_skus:
-            st.warning("Please select at least one SKU.")
-            return
-
-        agg_df = df[df["whsku"].isin(selected_skus)].groupby("whsku")["units"].sum().reset_index()
-        agg_df = agg_df.sort_values("units", ascending=False).head(20)
-
-        fig = px.pie(agg_df, names="whsku", values="units", title="Units by SKU", hole=0.3)
-        fig.update_traces(textinfo="label+percent+value", hovertemplate="SKU: %{label}<br>Units: %{value}<extra></extra>")
-        st.plotly_chart(fig, use_container_width=True)
-
-    # ------------------- 🔹 Combined ASP (Bar), Units & Offtake (Area) Lightweight Chart -------------------
-
-    def asp_units_offtake_chart(self, key="asp_units_offtake_chart") -> None:
-        """
-        Combines a Histogram and Area chart to visualize Units and Offtake (if available) over time per SKU.
-        """
-        if not {"valuationdate", "units", "whsku"}.issubset(self.df.columns):
-            st.warning("Required columns (valuationdate, units, whsku) not found.")
-            return
-
-        df = self.df.copy()
-        df["valuationdate"] = pd.to_datetime(df["valuationdate"], errors="coerce")
-        df["units"] = pd.to_numeric(df["units"], errors="coerce")
-
-        if "offtake" in df.columns:
-            df["offtake"] = pd.to_numeric(df["offtake"], errors="coerce")
-
-        df = df.dropna(subset=["valuationdate", "units", "whsku"])
-
-        # Filter by SKU selection
-        unique_skus = sorted(df["whsku"].dropna().unique())
-        selected_skus = st.multiselect("Select SKUs to display", unique_skus, default=unique_skus[:5],
-                                       key=f"{key}_skus")
-
-        if not selected_skus:
-            st.warning("Please select at least one SKU.")
-            return
-
-        df = df[df["whsku"].isin(selected_skus)]
-
-        # Aggregate units/offtake per day
-        agg_df = df.groupby(["valuationdate", "whsku"]).agg(
-            {"units": "sum", "offtake": "sum" if "offtake" in df.columns else "first"}).reset_index()
-
-        fig = px.histogram(
-            agg_df,
-            x="valuationdate",
-            y="units",
-            color="whsku",
-            barmode="stack",
-            nbins=30,
-            title="Units Sold (Histogram) + Offtake (Area if present)"
-        )
-
-        fig.update_traces(opacity=0.7, marker_line_width=0)
-
-        if "offtake" in agg_df.columns and not agg_df["offtake"].isna().all():
-            for sku in selected_skus:
-                sku_df = agg_df[agg_df["whsku"] == sku]
-                fig.add_scatter(
-                    x=sku_df["valuationdate"],
-                    y=sku_df["offtake"],
-                    mode="lines+markers",
-                    name=f"{sku} Offtake",
-                    yaxis="y2"
-                )
-
-            fig.update_layout(
-                yaxis2=dict(
-                    title="Offtake",
-                    overlaying="y",
-                    side="right",
-                    showgrid=False
-                )
-            )
-
-        fig.update_layout(xaxis_title="Date", yaxis_title="Units")
-        st.plotly_chart(fig, use_container_width=True)
-
     # ------------------- 🔹 Multi Metrix Chart -------------------
 
-    def multi_metric_time_series(self, x_axis: str = "valuationdate", key: str = "multi_metric_chart") -> None:
-
+    def multi_yaxis_line_chart(self, x_axis: str, y1_cols: list, y2_cols: list, key="multi_line_chart"):
         df = self.df.copy()
-
-        # Validate x_axis
-        if x_axis not in df.columns:
-            st.warning(f"'{x_axis}' column not found in data.")
-            return
-
-        # Ensure x_axis is datetime
         df[x_axis] = pd.to_datetime(df[x_axis], errors="coerce")
         df.dropna(subset=[x_axis], inplace=True)
 
-        # Select numeric columns (excluding IDs and serials)
-        numeric_cols = df.select_dtypes(include=["number"]).columns
-        numeric_cols = [col for col in numeric_cols if col.lower() not in {"s.no", "id"}]
+        # Group by date: sum for y1_cols, mean for y2_cols
+        agg_dict = {col: "sum" for col in y1_cols}
+        agg_dict.update({col: "mean" for col in y2_cols})
+        df = df.groupby(x_axis, as_index=False).agg(agg_dict)
 
-        if len(numeric_cols) < 2:
-            st.warning("Need at least 2 numeric columns for a dual-axis time series chart.")
-            return
-
-        # Aggregate data by x_axis
-        agg_df = df.groupby(x_axis, as_index=False)[numeric_cols].sum()
-
-        # Choose primary and secondary Y-axis columns
-        primary_y, secondary_y = numeric_cols[:2]
-
-        # Build figure
         fig = go.Figure()
 
-        # Primary Y-axis
-        fig.add_trace(go.Scatter(
-            x=agg_df[x_axis],
-            y=agg_df[primary_y],
-            name=primary_y,
-            mode="lines",
-            line=dict(color="blue"),
-            yaxis="y1",
-            hovertemplate=f"{primary_y}: %{{y:,.0f}}<extra></extra>"
-        ))
+        # Format axis ticks in Indian format
+        def format_axis_ticks(series):
+            tickvals = series.round(-2).dropna().unique()
+            tickvals.sort()
+            ticktext = [Formatters.format_indian_number(val) for val in tickvals]
+            return tickvals, ticktext
 
-        # Secondary Y-axis
-        fig.add_trace(go.Scatter(
-            x=agg_df[x_axis],
-            y=agg_df[secondary_y],
-            name=secondary_y,
-            mode="lines",
-            line=dict(color="red", dash="dot"),
-            yaxis="y2",
-            hovertemplate=f"{secondary_y}: %{{y:,.0f}}<extra></extra>"
-        ))
+        # Y1 axis ticks
+        y1_vals, y1_text = format_axis_ticks(df[y1_cols[0]])
+        # Y2 axis ticks
+        y2_vals, y2_text = format_axis_ticks(df[y2_cols[0]])
 
-        # Layout with dual axes
+        # Plot Y1 (left axis) with formatted hover
+        for col in y1_cols:
+            formatted = df[col].apply(Formatters.format_indian_number)
+            fig.add_trace(go.Scatter(
+                x=df[x_axis],
+                y=df[col],
+                mode="lines+markers",
+                name=f"{col} (Y1)",
+                yaxis="y1",
+                text=formatted,
+                hovertemplate=(
+                    "<b>%{x|%d %b %Y}</b><br>"
+                    f"{col} (Y1): %{{text}}<extra></extra>"
+                )
+            ))
+
+        for col in y2_cols:
+            formatted = df[col].apply(Formatters.format_indian_number)
+            fig.add_trace(go.Scatter(
+                x=df[x_axis],
+                y=df[col],
+                mode="lines+markers",
+                name=f"{col} (Y2)",
+                yaxis="y2",
+                line=dict(dash="dot"),
+                text=formatted,
+                hovertemplate=(
+                    "<b>%{x|%d %b %Y}</b><br>"
+                    f"{col} (Y2): %{{text}}<extra></extra>"
+                )
+            ))
+
+        # Layout
         fig.update_layout(
-            title="Dual Y-Axis Time Series",
-            xaxis=dict(title=x_axis),
-            yaxis=dict(title=primary_y, titlefont=dict(color="blue"), tickfont=dict(color="blue")),
-            yaxis2=dict(
-                title=secondary_y,
-                titlefont=dict(color="red"),
-                tickfont=dict(color="red"),
-                overlaying="y",
-                side="right"
+            title="Multi Y-Axis Line Chart",
+            xaxis_title="Valuation Date",
+            yaxis=dict(
+                title="Y1 Axis",
+                side="left",
+                tickvals=y1_vals.tolist(),
+                ticktext=y1_text
             ),
-            legend=dict(x=0.01, y=0.99),
+            yaxis2=dict(
+                title="Y2 Axis",
+                side="right",
+                overlaying="y",
+                tickvals=y2_vals.tolist(),
+                ticktext=y2_text
+            ),
             hovermode="x unified",
-            template="plotly_white"
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            ),
+            margin=dict(t=40, b=40, l=40, r=40),
+            height=500
         )
 
-        # Render chart
         st.plotly_chart(fig, use_container_width=True, key=key)
-
-    # ------------------- 🔹 SUNBURST CHART -------------------
-    def sunburst_chart(self) -> None:
-        chart_data, error = self.prepare_chart_data("Sunburst")
-        if error:
-            st.warning(error)
-            return
-
-        fig = px.sunburst(
-            chart_data,
-            path=["Category", "Subcategory", "SKU"],
-            values="Units",
-            title="Sunburst Chart: Category > Subcategory > SKU"
-        )
-        fig.update_traces(textinfo="label+percent+value", hovertemplate="<b>%{label}</b><br>Units: %{value}<extra></extra>")
-        st.plotly_chart(fig, use_container_width=True)
 
     # ------------------- 🔹 DYNAMIC CHART -------------------
     def render_dynamic_chart(self, x_axis: str, y_axis: str, chart_type: str = "Line") -> None:
