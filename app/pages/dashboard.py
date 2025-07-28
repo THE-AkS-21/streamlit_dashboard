@@ -1,172 +1,193 @@
 from datetime import datetime
 import streamlit as st
+import pandas as pd
 
+from app.components.aggrid_renderer import render_aggrid
 from app.database.connection import db
 from app.database.queries.dashboard_queries import DashboardQueries
 from app.components.charts import ChartComponent
 from app.utils.formatters import Formatters
 from app.utils.global_css import apply_global_styles
+from app.utils.loader import show_loader
 
+CHART_TYPES = ["Area", "Line", "Bar", "Scatter", "Spline", "Step", "Dot", "Combo"]
 
-@st.cache_data(ttl=3600, show_spinner="🔄 Loading filter metadata...")
-def get_dashboard_metadata():
+@st.cache_data(ttl=3600, show_spinner=False)
+def _load_dashboard_metadata():
     return db.execute_query(DashboardQueries.GET_DASHBOARD_FILTER_METADATA)
+
+def get_dashboard_metadata():
+    if "dashboard_metadata" not in st.session_state:
+        loader = show_loader("Loading metadata...")
+        st.session_state.dashboard_metadata = _load_dashboard_metadata()
+        loader.empty()
+    return st.session_state.dashboard_metadata
+
+def get_filtered_data(category, subcategory, sku, start_date, end_date):
+    filters = {
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+
+    base_query = """
+        SELECT * FROM bsc.centraldsrdumpv2
+        WHERE valuationdate BETWEEN :start_date AND :end_date
+    """
+
+    if sku != "None":
+        base_query += " AND whsku = :sku"
+        filters["sku"] = sku
+    elif subcategory != "None":
+        base_query += " AND subcategory = :subcategory"
+        filters["subcategory"] = subcategory
+    elif category != "None":
+        base_query += " AND category = :category"
+        filters["category"] = category
+
+    return db.execute_query(base_query, filters)
+
+def render_filter_form(metadata_df):
+    categories = sorted(filter(None, metadata_df['category'].dropna().unique()))
+    subcategories = sorted(filter(None, metadata_df['subcategory'].dropna().unique()))
+    skus = sorted(filter(None, metadata_df['sku'].dropna().unique()))
+    last_date = metadata_df['last_date'].max()
+
+    with st.popover("FILTERS"):
+
+        col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5], gap="small")
+
+        category = col1.selectbox("Category", ["None"] + categories, key="filter_category")
+        subcategory = col2.selectbox("Subcategory", ["None"] + subcategories, key="filter_subcategory")
+        sku = col3.selectbox("SKU", ["None"] + skus, key="filter_sku")
+        start_date = col4.date_input("Start Date", value=datetime(2025, 3, 1), key="filter_start")
+        end_date = col5.date_input("End Date", value=last_date, key="filter_end")
+
+        return category, subcategory, sku, start_date, end_date
+
+def render_chart_data(df):
+    orders_df = df
+    if orders_df is None or orders_df.empty:
+        st.warning("⚠️ No records found for the selected range.")
+        return
+
+    tab1, tab2 = st.tabs(["DATA", "CHART"])
+
+    with tab1:
+        with show_loader("Loading data..."):
+            render_aggrid(orders_df)
+
+    with tab2:
+        numeric_columns = [col for col in orders_df.columns if pd.api.types.is_numeric_dtype(orders_df[col])]
+        col_a, col_b, col_c = st.columns([3, 2, 3])
+
+        with col_a:
+            y1_cols = st.multiselect("Select Y-Axis 1 (Left) Columns", options=numeric_columns, default=[col for col in ["units", "offtake"] if col in numeric_columns])
+        with col_b:
+            chart_type = st.selectbox("Chart Type", CHART_TYPES, key="dsr_chart_type")
+        with col_c:
+            y2_cols = st.multiselect("Select Y-Axis 2 (Right) Columns", options=numeric_columns, default=[col for col in ["asp"] if col in numeric_columns])
+
+        if df.empty:
+            st.warning("⚠️ Data is empty after cleanup.")
+            return
+
+        # chart_component = ChartComponent(df)
+        with show_loader("Loading chart..."):
+            ChartComponent(df).multi_yaxis_line_chart("valuationdate", y1_cols, y2_cols)
+        # ChartComponent(df).multi_yaxis_chart("valuationdate", y1_cols, y2_cols, plot_type=chart_type)
+
+def render_metrics(df, start_date, end_date):
+
+    orders_df = df
+    if orders_df is None or orders_df.empty:
+        st.warning("⚠️ No records found for the selected range.")
+        return
+
+    if "metric_units" not in orders_df.columns:
+        orders_df["metric_units"] = orders_df.get("units", 0)
+    if "metric_asp" not in orders_df.columns:
+        orders_df["metric_asp"] = orders_df.get("asp", 0)
+    if "metric_offtake" not in orders_df.columns:
+        orders_df["metric_offtake"] = orders_df.get("offtake", 0)
+
+    # ─── Metrics ───
+    num_days = (end_date - start_date).days + 1
+
+    ChartComponent.metric_cards([
+        {"label": "TOTAL UNITS", "value": Formatters.number(orders_df["metric_units"].sum())},
+        {"label": "AVERAGE SELLING PRICE(ASP)", "value": Formatters.number(orders_df["metric_asp"].mean())},
+        {"label": "OFFTAKE", "value": Formatters.number(orders_df["metric_offtake"].sum())},
+        {"label": "DAYS", "value": Formatters.number(num_days)},
+    ])
+
+def render_metric_chart(df):
+    chart_df = df
+    y_axis = ["units"]
+    ChartComponent(chart_df).metric_chart("valuationdate", y_axis)
 
 def show_dashboard():
     apply_global_styles()
-    st.markdown("## Bombay Shaving Company Dashboard")
-
-    # Initialize session state
-    st.session_state.setdefault("report_tabs", [])
-    st.session_state.setdefault("report_data", {})
-    st.session_state.setdefault("last_query", None)
 
     metadata_df = get_dashboard_metadata()
-    categories = sorted([c for c in metadata_df['category'].unique() if c])
-    subcategories = sorted([sc for sc in metadata_df['subcategory'].unique() if sc])
-    skus = sorted([s for s in metadata_df['sku'].unique() if s])
-    last_date = metadata_df['last_date'].max()
 
-    with st.container():
-        with st.form(key="dashboard_form"):
-            col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5], gap="small")
-            category = col1.selectbox("Category", ["None"] + categories, index=0)
-            subcategory = col2.selectbox("Subcategory", ["None"] + subcategories, index=0)
-            sku = col3.selectbox("SKU", ["None"] + skus, index=0)
-            start_date = col4.date_input("Start Date", value=datetime(2024, 6, 1))
-            end_date = col5.date_input("End Date", value=last_date)
+    col_1, col_2 = st.columns([1, 3])
 
-            action_col1, action_col2, action_col3 = st.columns([2, 1, 1])
-            plot_button = action_col1.form_submit_button("Generate Report", use_container_width=True)
-            fetch_button = action_col2.form_submit_button("Fetch", use_container_width=True)
-            edit_button = action_col3.form_submit_button("Edit Orders", use_container_width=True)
+    with col_1:
+        st.markdown("""
+        <style>
+            .block-container .stSelectbox, .block-container button, .block-container form {
+                margin-top: 0.7rem;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        # ── Inner Columns for Uniform Filter Layout ──
+        f_col1, f_col2, f_col3 = st.columns(3)
 
-    query_params = {"start_date": start_date, "end_date": end_date}
-    if sku != "None":
-        query_params["whsku"] = sku
+        # ── Filter Form ──
+        with f_col1:
+            filters = render_filter_form(metadata_df)
 
-    query_to_run = (
-        DashboardQueries.MONTHLY_ORDERS_WITH_SKU
-        if sku != "None"
-        else DashboardQueries.MONTHLY_ORDERS_NO_SKU
-    )
+        # ── Group By Dropdown ──
+        with f_col2:
+            group_by_option = st.selectbox(
+                "",
+                options=["Day", "Month", "Year"],
+                index=0,
+                key="group_by"
+            )
 
-    def run_query_and_get_data():
-        data_df = db.execute_query(query_to_run, query_params)
-        return data_df if not data_df.empty else None
+        # ── Download Button ──
+        with f_col3:
+            download_btn_placeholder = st.empty()
 
-    # ───── Fetch button logic with banner ─────
-    if fetch_button:
-        st.cache_data.clear()
+        filter_key = f"{filters[0]}_{filters[1]}_{filters[2]}_{filters[3]}_{filters[4]}"
 
-        if st.session_state.get("last_query"):
-            refreshed_df = run_query_and_get_data()
-            if refreshed_df is not None:
-                for tname in st.session_state.report_tabs:
-                    st.session_state.report_data[tname] = refreshed_df
-                st.success("✅ Data refreshed successfully for all existing reports.")
-                st.rerun()
-            else:
-                st.error("❌ No data found for the current filters.")
-        else:
-            refreshed_df = run_query_and_get_data()
-            if refreshed_df is not None:
-                st.success("✅ Data fetched and cache cleared — no active reports yet.")
-            else:
-                st.info("ℹ️ Cache cleared — but no data found for the current selection.")
+        if "last_filter_key" not in st.session_state or st.session_state["last_filter_key"] != filter_key:
+            loader = show_loader("Fetching filtered data...")
+            df = get_filtered_data(*filters)  # apply filters to get the df
+            st.session_state["filtered_data"] = df
+            st.session_state["last_filter_key"] = filter_key
+            loader.empty()
 
-    # ───── Plot button: always create a new tab ─────
-    if plot_button:
-        orders_df = run_query_and_get_data()
-        if orders_df is not None:
-            tab_name = f"{sku if sku != 'None' else 'All SKUs'} | {start_date} → {end_date} | #{len(st.session_state.report_tabs)+1}"
-            st.session_state.report_tabs.append(tab_name)
-            st.session_state.report_data[tab_name] = orders_df
-            st.session_state["last_query"] = (query_to_run, query_params)
-            st.rerun()  # instant tab creation on click
-        else:
-            st.error("❌ No data found to generate report.")
+        df = st.session_state.get("filtered_data", pd.DataFrame())
 
-    # ───── Active Tabs rendering ─────
-    if st.session_state.report_tabs:
-        tabs = st.tabs(st.session_state.report_tabs)
-        # inside your tabs loop:
-        for i, tname in enumerate(st.session_state.report_tabs):
-            orders_df = st.session_state.report_data.get(tname)
-            if orders_df is None:
-                continue
-
-            with tabs[i]:
-                # Top header: tab name + close button in one row
-                col1, col2 = st.columns([10, 1])
-                with col1:
-                    st.markdown(f"### {tname}")
-                with col2:
-                    if st.button("❌", key=f"close_{tname}", use_container_width=True):
-                        st.session_state.report_tabs.remove(tname)
-                        st.session_state.report_data.pop(tname)
-                        st.rerun()
-
-                # Metrics Row
-                col1, col2, col3 = st.columns(3)
-                metrics = [
-                    {"label": "Total Units", "value": Formatters.number(orders_df['value'].sum())},
-                    {"label": "Avg Daily Units", "value": Formatters.number(orders_df['value'].mean())},
-                    {"label": "Days", "value": Formatters.number(len(orders_df))},
-                ]
-                for j, col in enumerate([col1, col2, col3]):
-                    with col:
-                        st.markdown(f"""
-                            <div class="metric-card">
-                                <div class="metric-label">{metrics[j]['label']}</div>
-                                <div class="metric-value">{metrics[j]['value']}</div>
-                            </div>
-                        """, unsafe_allow_html=True)
-
-                # Chart
-                ChartComponent.orders_chart(orders_df, key=f"{tname}_chart")
-                st.caption("""
-                    💡 **Chart Tips:**
-                    - Hover for values
-                    - Click & drag to zoom
-                    - Double-click to reset
-                    - Scroll to navigate timeline
-                """)
-
-                st.download_button(
-                    label="📥 Download CSV Report",
-                    data=orders_df.to_csv(index=False),
-                    file_name=f"orders_data_{tname}.csv",
-                    mime="text/csv",
-                    use_container_width=True
-                )
-
-    # ───── Edit Orders ─────
-    if edit_button:
-        orders_df = run_query_and_get_data()
-        if orders_df is not None:
-            st.markdown("### Edit Orders Data")
-            edited_df = st.data_editor(orders_df, num_rows="dynamic", use_container_width=True)
-            if st.button("💾 Save Changes", use_container_width=True):
-                try:
-                    for _, row in edited_df.iterrows():
-                        db.execute_query(
-                            DashboardQueries.UPDATE_ORDER_VALUE,
-                            {
-                                "orderdate": row["time"],
-                                "whsku": sku if sku != "None" else row.get("sku"),
-                                "value": row["value"],
-                            }
-                        )
-                    st.success("✅ Changes saved successfully!")
-                except Exception as e:
-                    st.error(f"❌ Error saving changes: `{str(e)}`")
-
-    if not any([fetch_button, plot_button, edit_button]):
-        st.info("""
-            👋 **Welcome to the BSC Orders Dashboard!**
-            - Select filters  
-            - Click **Fetch**, **Generate Report** or **Edit Orders**
-        """)
+        # Place download button (only if df is not empty)
+        if not df.empty:
+            csv = df.to_csv(index=False).encode("utf-8")
+            download_btn_placeholder.download_button(
+                label=" Download ",
+                data=csv,
+                file_name="filtered_data.csv",
+                mime="text/csv",
+                key="download_csv_btn"
+            )
+        render_metrics(df, filters[3], filters[4])
 
 
+    with col_2:
+        tab1, tab2 = st.tabs(["UNITS", "OFFTAKE"])
+
+        with tab1:
+            render_metric_chart(df)
+
+    render_chart_data(df)

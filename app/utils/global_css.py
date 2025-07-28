@@ -14,6 +14,163 @@ def apply_global_styles():
         --text-secondary: #374151;
         --animation-speed: {config.animation_speed}s;
     }}
+    /* ========== GLOBAL TOP SPACE FIXES ========== */
+    
+    /* Reset header/footer spacing and visibility */
+    header, footer {{
+        visibility: hidden;
+        height: 0;
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+    
+    /* Global main container resets */
+    section.main,
+    .block-container,
+    .custom-content,
+    .main,
+    .css-18e3th9,  /* fallback Streamlit class */
+    .content-wrapper {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
+    
+    /* First child spacing fixes */
+    .block-container > div:first-child,
+    .block-container h1:first-child,
+    .block-container div:first-child,
+    main > div:first-child,
+    main .block-container:first-child,
+    main .block-container > div:first-child,
+    section.main > div:first-child {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
+
+    /* Optional: Extra negative margin if needed */
+    .content-wrapper {{
+        margin-top: -3rem !important; /* Adjust only if spacing still remains */
+    }}
+
+    .filter-export-container {{
+        background-color: #fafafa;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #d3d3d3;
+        margin-bottom: 1rem;
+    }}
+    .dropdown-box {{
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }}
+    .dropdown-button {{
+        width: 100%;
+        padding: 8px 12px;
+        background-color: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        text-align: left;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }}
+    .dropdown-content {{
+        display: block;
+        position: absolute;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 10px;
+        margin-top: 4px;
+        z-index: 999;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+    }}
+    .dropdown-checkbox {{
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+    }}
+    .dropdown-search {{
+        width: 100%;
+        padding: 6px 8px;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+    }}
+    .dropdown-box {{
+        background-color: #ffffff;
+        border: 1px solid #d3d3d3;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-top: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.3s ease;
+        opacity: 0;
+    }}    
+    .dropdown-box.open {{
+        max-height: 500px;
+        opacity: 1;
+        padding: 12px 14px;
+    }}    
+    .dropdown-box.closed {{
+        max-height: 0;
+        opacity: 0;
+        padding: 0px;
+    }}
+
+    /* Grid Customizations */
+    .ag-theme-alpine .ag-header-cell, 
+    .ag-theme-alpine .ag-cell {{
+        text-align: center;
+    }}
+    .ag-theme-alpine .ag-header-cell-label {{
+        justify-content: center;
+    }}
+
+    /* Filter Export Container */
+    .filter-export-container {{
+        background-color: #fafafa;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #d3d3d3;
+        margin-bottom: 1.25rem;
+    }}
+
+    /* Column Filter Styling */
+    .stMultiSelect>label {{
+        font-weight: 500;
+    }}
+    .stCheckbox>div {{
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }}
+
+    /* Button Style Override */
+    .stButton>button {{
+        border-radius: 6px;
+        background-color: #f1f5f9;
+        color: #111827;
+        padding: 8px 20px;
+        border: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }}
+    .stButton>button:hover {{
+        background-color: #2962FF;
+        color: white;
+        border-color: #2962FF;
+        transform: scale(0.98);
+    }}
+    h2 {{
+        color: #2962FF;
+        font-weight: 600;
+    }}
 
     /* ===== General Reset (Only for markdown blocks) ===== */
     header, footer {{
@@ -126,7 +283,9 @@ def apply_global_styles():
         flex-direction: column;
         align-items: stretch;
     }}
-
+    .sidebar-footer {{
+        margin-top: auto; /* pushes this section to bottom if it's the last in flex */
+    }}
     .custom-sidebar a {{
         text-decoration: none !important;
         color: inherit;
@@ -157,7 +316,17 @@ def apply_global_styles():
         transform: translateX(3px);
         border-left: 4px solid var(--accent);
     }}
-
+    
+    .sidebar-logout {{
+        position: absolute;
+        bottom: 10px;
+        text-align: left;
+        padding: 10px 16px;
+        border-top: 1px solid #eee;
+    }}
+    .sidebar-logout:hover {{
+        background-color: #f0f0f0;
+    }}
     .sidebar-icon {{
         width: 28px;
         height: 28px;
@@ -170,7 +339,6 @@ def apply_global_styles():
         transition: all var(--animation-speed) ease;
         margin-right: 0;
     }}
-
     .sidebar-label {{
         display: inline-block;
         overflow: hidden;
@@ -200,38 +368,65 @@ def apply_global_styles():
 
     /* ===== Content Area ===== */
     .custom-content {{
-        left: 50px;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    
+        /* Visual Debug Only - remove after spacing fixed */
+        border: 2px dashed red;
+        
         margin-left: 70px;
-        padding: 30px;
-        transition: margin-left var(--animation-speed) ease;
+        transition: margin-left var(--animation-speed, 0.3s) ease;
+        position: relative;
+        left: 0;
     }}
-
+    
+    /* Sidebar responsive layout */
     @media screen and (min-width: 770px) {{
         #app-container .custom-sidebar:hover + .custom-content {{
-            margin-left: 200px;
+        margin - left: 200px;
+        }}
+    
+        .custom-sidebar-expanded ~ .custom-content {{
+        margin - left: 250px !important;
         }}
     }}
-
     /* ===== Metric Cards ===== */
+    
     .metric-card {{
         background: white;
-        padding: 1rem;
+        padding: 0.2rem;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
-        text-align: center;
+        padding-left: 2rem;
+        padding-right: 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }}
-
+    
+    .metric-card:hover {{
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: scale(1.01);
+        background: #f8f9fc;
+        cursor: pointer;
+    }}
     .metric-label {{
         font-size: 0.8rem;
-        color: var(--text-secondary);
+        color: var(--text-secondary, #666);
+        text-align: left;
+        font-weight: 500;
     }}
 
     .metric-value {{
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: var(--text-main);
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-main, #111);
+        text-align: right;
     }}
+        
 
     /* ===== Buttons ===== */
     /* All Streamlit buttons */
@@ -347,7 +542,6 @@ def apply_global_styles():
     
     /* Analytics container padding */
     .analytics-container {{
-        margin-top: 30px;
         height: 100%;
         width: 100%;
     }}
@@ -406,8 +600,8 @@ def apply_global_styles():
             left: 0;
         }}
         .custom-content {{
-            margin: 50px 50px;
-            padding: 30px;
+            margin: 0 !important;
+            padding: 0 !important;
             transition: left var(--animation-speed) ease;
         }}
         .custom-sidebar.show + .custom-content {{
@@ -421,6 +615,5 @@ def apply_global_styles():
             margin-top: 10px;
         }}
     }}
-
     </style>
     """, unsafe_allow_html=True)
