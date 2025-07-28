@@ -11,7 +11,7 @@ from app.utils.formatters import Formatters
 from app.utils.global_css import apply_global_styles
 from app.utils.loader import show_loader
 
-CHART_TYPES = ["Area"]
+CHART_TYPES = ["Area", "Line", "Bar", "Scatter", "Spline", "Step", "Dot", "Combo"]
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def _load_dashboard_metadata():
@@ -53,21 +53,64 @@ def render_filter_form(metadata_df):
     skus = sorted(filter(None, metadata_df['sku'].dropna().unique()))
     last_date = metadata_df['last_date'].max()
 
-    col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5], gap="small")
+    with st.popover("FILTERS"):
 
-    category = col1.selectbox("Category", ["None"] + categories, key="filter_category")
-    subcategory = col2.selectbox("Subcategory", ["None"] + subcategories, key="filter_subcategory")
-    sku = col3.selectbox("SKU", ["None"] + skus, key="filter_sku")
-    start_date = col4.date_input("Start Date", value=datetime(2025, 3, 1), key="filter_start")
-    end_date = col5.date_input("End Date", value=last_date, key="filter_end")
+        col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5], gap="small")
 
-    return category, subcategory, sku, start_date, end_date
+        category = col1.selectbox("Category", ["None"] + categories, key="filter_category")
+        subcategory = col2.selectbox("Subcategory", ["None"] + subcategories, key="filter_subcategory")
+        sku = col3.selectbox("SKU", ["None"] + skus, key="filter_sku")
+        start_date = col4.date_input("Start Date", value=datetime(2025, 3, 1), key="filter_start")
+        end_date = col5.date_input("End Date", value=last_date, key="filter_end")
 
-def render_dashboard_data(df, start_date, end_date):
+        return category, subcategory, sku, start_date, end_date
+
+def render_chart_data(df):
+    orders_df = df
+    if orders_df is None or orders_df.empty:
+        st.warning("⚠️ No records found for the selected range.")
+        return
+
+    if "value" not in orders_df.columns:
+        orders_df["value"] = orders_df.get("units", 0)
+
+    tab1, tab2 = st.tabs(["DATA", "CHART"])
+
+    with tab1:
+        render_aggrid(orders_df)
+
+    with tab2:
+        numeric_columns = [col for col in orders_df.columns if pd.api.types.is_numeric_dtype(orders_df[col])]
+        col_a, col_b, col_c = st.columns([3, 2, 3])
+
+        with col_a:
+            y1_cols = st.multiselect("Select Y-Axis 1 (Left) Columns", options=numeric_columns, default=[col for col in ["units", "offtake"] if col in numeric_columns])
+        with col_b:
+            chart_type = st.selectbox("Chart Type", CHART_TYPES, key="dsr_chart_type")
+
+        with col_c:
+            y2_cols = st.multiselect("Select Y-Axis 2 (Right) Columns", options=numeric_columns, default=[col for col in ["asp"] if col in numeric_columns])
+
+        if df.empty:
+            st.warning("⚠️ Data is empty after cleanup.")
+            return
+
+        # chart_component = ChartComponent(df)
+
+        if chart_type == "Area":
+            ChartComponent(df).multi_yaxis_chart("valuationdate", y1_cols, y2_cols, plot_type=chart_type)
+
+        else:
+            melted_df = df.melt(id_vars=["valuationdate"], var_name="metric", value_name="value")
+            ChartComponent(melted_df).render_dynamic_chart(
+                x_axis="valuationdate",
+                y_axis="value",
+                chart_type=chart_type
+            )
+
+def render_metrics(df, start_date, end_date):
 
     orders_df = df
-    token = get_jwt_from_cookie()
-    st.write(f"Token: {token}")
     if orders_df is None or orders_df.empty:
         st.warning("⚠️ No records found for the selected range.")
         return
@@ -83,78 +126,70 @@ def render_dashboard_data(df, start_date, end_date):
         {"label": "Days", "value": Formatters.number(num_days)},
     ])
 
-    # ─── AG Grid ───
-    st.markdown("#### AG-Grid")
-    render_aggrid(orders_df)
-
-    # ─── Chart Controls ───
-    st.markdown("#### Chart")
-    numeric_columns = [col for col in orders_df.columns if pd.api.types.is_numeric_dtype(orders_df[col])]
-    col_a, col_b = st.columns([4, 2])
-
-    with col_a:
-        selected_columns = st.multiselect(
-            "Select Columns", options=numeric_columns,
-            default=["asp", "units", "offtake"],
-            key="select_columns"
-        )
-    with col_b:
-        chart_type = st.selectbox("Chart Type", CHART_TYPES, key="dsr_chart_type")
-
-    # ─── Render Chart when filters change ───
-    chart_df_key = f"chart_df_{'_'.join(selected_columns)}_{chart_type}"
-    if chart_df_key not in st.session_state:
-        valuation_dates = pd.to_datetime(orders_df.get("valuationdate"), errors="coerce")
-        df = pd.DataFrame({"valuationdate": valuation_dates})
-        for col in selected_columns:
-            df[col] = pd.to_numeric(orders_df.get(col, []), errors="coerce")
-        df.dropna(subset=["valuationdate"] + selected_columns, inplace=True)
-        st.session_state[chart_df_key] = df
-
-    df = st.session_state[chart_df_key]
-
-    if df.empty:
-        st.warning("⚠️ Data is empty after cleanup.")
+def render_dashboard_data(df, start_date, end_date):
+    orders_df = df
+    if orders_df is None or orders_df.empty:
+        st.warning("⚠️ No records found for the selected range.")
         return
 
-    chart_component = ChartComponent(df)
+    if "value" not in orders_df.columns:
+        orders_df["value"] = orders_df.get("units", 0)
 
-    if chart_type == "Area":
-        chart_component.multi_metric_time_series(
-            x_axis="valuationdate",
-            key="multi_metric"
-        )
-    else:
-        melted_df = df.melt(id_vars=["valuationdate"], var_name="metric", value_name="value")
-        ChartComponent(melted_df).render_dynamic_chart(
-            x_axis="valuationdate",
-            y_axis="value",
-            chart_type=chart_type
-        )
-
-    # ─── Download Button ───
-    st.download_button(
-        label="📥 Download CSV",
-        data=df.to_csv(index=False),
-        file_name="chart_data.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
+    # render_metrics(orders_df, start_date, end_date)
+    render_chart_data(orders_df)
 
 def show_dashboard():
     apply_global_styles()
 
     metadata_df = get_dashboard_metadata()
-    filters = render_filter_form(metadata_df)
 
-    filter_key = f"{filters[0]}_{filters[1]}_{filters[2]}_{filters[3]}_{filters[4]}"
+    col_1, col_2 = st.columns([1, 3])
 
-    if "last_filter_key" not in st.session_state or st.session_state["last_filter_key"] != filter_key:
-        loader = show_loader("Fetching filtered data...")
-        df = get_filtered_data(*filters)
-        st.session_state["filtered_data"] = df
-        st.session_state["last_filter_key"] = filter_key
-        loader.empty()
+    with col_1:
 
-    df = st.session_state.get("filtered_data", pd.DataFrame())
+        # ── Inner Columns for Uniform Filter Layout ──
+        f_col1, f_col2, f_col3 = st.columns(3)
+
+        # ── Filter Form ──
+        with f_col1:
+            filters = render_filter_form(metadata_df)
+
+        # ── Group By Dropdown ──
+        with f_col2:
+            group_by_option = st.selectbox(
+                "",
+                options=["Day", "Month", "Year"],
+                index=0,
+                key="group_by"
+            )
+
+        # ── Download Button ──
+        with f_col3:
+            download_btn_placeholder = st.empty()
+
+        filter_key = f"{filters[0]}_{filters[1]}_{filters[2]}_{filters[3]}_{filters[4]}"
+
+        if "last_filter_key" not in st.session_state or st.session_state["last_filter_key"] != filter_key:
+            loader = show_loader("Fetching filtered data...")
+            df = get_filtered_data(*filters)  # apply filters to get the df
+            st.session_state["filtered_data"] = df
+            st.session_state["last_filter_key"] = filter_key
+            loader.empty()
+
+        df = st.session_state.get("filtered_data", pd.DataFrame())
+
+        # Place download button (only if df is not empty)
+        if not df.empty:
+            csv = df.to_csv(index=False).encode("utf-8")
+            download_btn_placeholder.download_button(
+                label=" Download ",
+                data=csv,
+                file_name="filtered_data.csv",
+                mime="text/csv",
+                key="download_csv_btn"
+            )
+
+    with col_2:
+        render_metrics(df, filters[3], filters[4])
+
     render_dashboard_data(df, filters[3], filters[4])
