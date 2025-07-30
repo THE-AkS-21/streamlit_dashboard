@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "parcel src/index.html",
-    "build": "parcel build src/index.html --dist-dir dist --public-url ./ && node generate-manifest.js"
-  },
+      "build": "npm run build:aggrid && npm run build:chart && node generate-manifest.js",
+      "build:aggrid": "parcel build src/aggrid/index.tsx --dist-dir dist/aggrid --public-url ./",
+      "build:chart": "parcel build src/chart/index.tsx --dist-dir dist/chart --public-url ./"
+    },
   "keywords": [],
   "author": "",
   "source": "src/index.jsx",
