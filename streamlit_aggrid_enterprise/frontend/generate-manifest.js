@@ -1,22 +1,22 @@
-// frontend/generate-manifest.js
 const fs = require("fs");
 const path = require("path");
 
-const distDir = path.join(__dirname, "dist");
-const manifest = {};
+function createManifest(distDir) {
+  const manifest = {};
+  const files = fs.readdirSync(distDir);
 
-fs.readdirSync(distDir).forEach((file) => {
-  if (file.endsWith(".js") && file.startsWith("frontend.")) {
-    manifest["main.js"] = file;
+  for (const file of files) {
+    if (file.endsWith(".js")) manifest["main.js"] = file;
+    if (file.endsWith(".css")) manifest["style.css"] = file;
   }
-  if (file.endsWith(".css") && file.startsWith("frontend.")) {
-    manifest["style.css"] = file;
-  }
-});
 
-fs.writeFileSync(
-  path.join(distDir, "manifest.json"),
-  JSON.stringify(manifest, null, 2)
-);
+  const manifestPath = path.join(distDir, "manifest.json");
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  console.log(`✅ manifest.json generated in ${distDir}`);
+}
 
-console.log("✅ Hashed manifest.json generated!");
+const aggridPath = path.join(__dirname, "dist/aggrid");
+const chartPath = path.join(__dirname, "dist/chart");
+
+if (fs.existsSync(aggridPath)) createManifest(aggridPath);
+if (fs.existsSync(chartPath)) createManifest(chartPath);
