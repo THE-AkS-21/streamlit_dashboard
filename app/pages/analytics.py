@@ -1,7 +1,8 @@
 import streamlit as st
 from datetime import date
 import time
-from app.components.aggrid_renderer import render_aggrid
+from streamlit_aggrid_bridge.MyAgGridComponent import render_aggrid
+# from app.components.aggrid_renderer import render_aggrid
 from app.components.export_controls import export_controls
 from app.database.connection import db
 from app.database.queries.analytics_queries import AnalyticsQueries

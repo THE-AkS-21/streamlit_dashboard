@@ -5,7 +5,8 @@ import time
 from app.database.connection import db
 from app.database.queries.sku_analytics_queries import SkuAnalyticsQueries
 from app.utils.global_css import apply_global_styles
-from app.components.aggrid_renderer import render_aggrid
+from streamlit_aggrid_bridge.MyAgGridComponent import render_aggrid
+# from app.components.aggrid_renderer import render_aggrid
 from app.components.export_controls import export_controls
 
 

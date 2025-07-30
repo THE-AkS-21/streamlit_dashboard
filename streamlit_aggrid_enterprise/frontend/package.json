@@ -1,0 +1,29 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html --dist-dir dist --public-url ./ && node generate-manifest.js"
+  },
+  "keywords": [],
+  "author": "",
+  "source": "src/index.jsx",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "ag-charts-community": "^12.0.2",
+    "ag-charts-react": "^12.0.2",
+    "ag-grid-community": "^34.0.2",
+    "ag-grid-enterprise": "^34.0.2",
+    "ag-grid-react": "^34.0.2",
+    "dayjs": "^1.11.13",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "streamlit-component-lib": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/react-dom": "^19.1.6",
+    "parcel": "^2.15.4"
+  }
+}

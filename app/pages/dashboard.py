@@ -1,8 +1,8 @@
 from datetime import datetime
 import streamlit as st
 import pandas as pd
-
-from app.components.aggrid_renderer import render_aggrid
+from streamlit_aggrid_bridge.MyAgGridComponent import render_aggrid
+# from app.components.aggrid_renderer import render_aggrid
 from app.database.connection import db
 from app.database.queries.dashboard_queries import DashboardQueries
 from app.components.charts import ChartComponent
