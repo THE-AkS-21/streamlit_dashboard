@@ -1,7 +1,7 @@
 from datetime import datetime
 import streamlit as st
 import pandas as pd
-from streamlit_aggrid_bridge.MyAgGridComponent import render_aggrid
+from streamlit_aggrid_bridge.MyAgGridComponent import render_aggrid, render_chart
 # from app.components.aggrid_renderer import render_aggrid
 from app.database.connection import db
 from app.database.queries.dashboard_queries import DashboardQueries
@@ -91,7 +91,8 @@ def render_chart_data(df):
 
         # chart_component = ChartComponent(df)
         with show_loader("Loading chart..."):
-            ChartComponent(df).multi_yaxis_line_chart("valuationdate", y1_cols, y2_cols)
+            render_chart(df)
+            # ChartComponent(df).multi_yaxis_line_chart("valuationdate", y1_cols, y2_cols)
         # ChartComponent(df).multi_yaxis_chart("valuationdate", y1_cols, y2_cols, plot_type=chart_type)
 
 def render_metrics(df, start_date, end_date):
@@ -144,7 +145,6 @@ def render_metric_chart(df, chart_type):
         )
         y_axis = ["asp"]
         ChartComponent(chart_df).metric_line_chart("valuationdate", y_axis)
-
 
 def show_dashboard():
     apply_global_styles()
