@@ -1,52 +1,76 @@
+# 📊 BSC Streamlit Dashboard
 
-# 📊 Streamlit Dashboard Project Description Template
+A modern, responsive **Streamlit-based analytics dashboard** for **Bombay Shaving Company** operations. It tracks and visualizes order performance across SKU, category, subcategory, and date ranges from a **PostgreSQL** data source.
 
-I’m building a **Streamlit-based dashboard project** for **[your brand/product/company name]** called **[Project Name]**.  
-Below are the complete details of the project so you can assist me precisely:
+---
 
-## 📖 Project Description:
-A modern responsive **Streamlit dashboard** for Bombay Shaving Company operations to track and visualize order performance (by SKU, category, subcategory, and date range) using a **PostgreSQL data source**. It includes:
-- Custom collapsible **sidebar**
-- Fixed **navbar with toolbar**
-- **Dashboard** page with filters, charts, metrics, and export options
-- Clean, modern UI with custom CSS
-- **Caching for improved query performance**
-- Streamlit UI config overrides for:
-  - No default sidebar
-  - No deploy button
-  - No Streamlit header/footer
-  - No heading link icons
-  - Zero top margin before page content  
-  - Optimized mobile responsiveness
+## 📖 Description
 
-## 📌 Project Objective  
-- Build an interactive, modern, responsive analytics dashboard using **Streamlit** for visualizing **[type of data — e.g., order trends, financial metrics, marketing analytics]**.
+This dashboard delivers high-performance analytics and sleek UI components, tailored for tracking product orders. It includes:
 
-## 🗂️ Project Features
+- 📁 Custom collapsible **sidebar**
+- 📌 Fixed **navbar** with **toolbar**
+- 📊 Filterable **dashboard** with metrics, charts, and exports
+- 🧠 **Caching** for faster data load
+- 🧼 **UI overrides** for clean, branded visuals
 
-- Modern **navbar + collapsible sidebar** layout
-- Dynamic **toolbar dropdowns**
-- Responsive layout with mobile hamburger menu
-- Dashboard filters: **category, subcategory, SKU, date range**
-- Metrics cards and Plotly charts
-- Chart exportable via CSV
-- Centralized **icon loader and formatters**
-- Clean **caching** with `st.cache_data` and `st.cache_resource`
+---
 
-## 📌 Tech Stack:
+## 🎯 Objective
+
+Build an interactive, mobile-friendly analytics dashboard to explore **daily sales trends**, **category-wise performance**, and **SKU-level metrics**.
+
+---
+
+## 🔧 Key Features
+
+- Fully custom layout with top navbar and collapsible sidebar
+- Interactive filters (category, subcategory, SKU, date)
+- Metrics cards + Plotly and lightweight chart visualizations
+- Export raw data to CSV
+- Centralized icons, styles, and formatters
+- SQLAlchemy database integration (PostgreSQL)
+- Modular code and scalable architecture
+
+---
+
+## 🛠️ Tech Stack
+
 - **Python 3.12**
 - **Streamlit 1.46.1**
 - **Pandas 2.3.1**
 - **SQLAlchemy 2.0.41**
 - **Plotly 5.18.0**
-- **psycopg2-binary 2.9.10**
-- **python-dotenv 1.1.1**
-- **Google OAuth via google-auth-oauthlib & google-api-python-client**
-- **extra-streamlit-components**
-- **streamlit-lightweight-charts**
+- **PostgreSQL** (via psycopg2)
+- **OAuth**: Google API client + auth libraries
+
+---
+
+## 📁 Project Structure
+
+```
+streamlit_dashboard/
+├── .streamlit/
+├── app/
+│   ├── components/         # Navbar, sidebar, layout, charts
+│   ├── constants/          # Page constants
+│   ├── database/           # PostgreSQL connection + queries
+│   ├── pages/              # Dashboard, login, analytics, settings
+│   ├── utils/              # Icons, formatters, CSS utilities
+│   ├── assets/icons/       # UI icons (home, settings, etc.)
+│   └── config.py           # Streamlit UI config
+├── tests/                  # Test scripts (TBD)
+├── main.py                 # App entrypoint
+├── config.py               # Database config
+├── requirements.txt
+├── .env
+```
+
+---
 
 ## 📦 Requirements
-```
+
+```text
 streamlit==1.46.1
 pandas==2.3.1
 SQLAlchemy==2.0.41
@@ -129,44 +153,35 @@ streamlit_dashboard/
 - Download CSV reports
 - Data from **PostgreSQL via SQLAlchemy**
 
-## ⚙️ Streamlit Configuration:
-- `st.set_page_config()`
-- CSS overrides to:
-  - Remove Streamlit header/footer and sidebar controls
-  - Set `padding-top: 0rem` on `.block-container`
-  - Remove link icons from markdown headings
-  - Fix content area margins and responsiveness
-  - Custom styles for navbar, sidebar, toolbar, charts, and metric cards
+---
 
-## 💾 Caching:
-- **@st.cache_data** for metadata and queries (ttl=3600s)
-- **@st.cache_resource** for one-time sidebar, navbar, layout render caching
+## 🧠 Caching Strategy
 
-## 📜 Database:
-- **PostgreSQL**
-- Table: `your_table`
-- Queries via `DashboardQueries`
+- `@st.cache_data`: for database queries (ttl=3600s)
+- `@st.cache_resource`: for layout components
 
-## 📁 Files I’ve implemented  
-- main.py  
-- app/components/navbar.py  
-- app/components/sidebar.py  
-- app/components/layout.py  
-- app/pages/dashboard.py  
-- app/utils/icon_loader.py  
-- app/utils/formatters.py  
-- app/config.py
+---
 
-## ✅ Custom Requirements
+## ⚙️ Streamlit Config
 
-- Sidebar labels **animate opacity on hover**
-- Sidebar icons **do not shrink** on collapse
-- **No top space** above main content area (starts exactly after navbar)
-- Sidebar labels change color to **BSC blue** on hover
-- **Mobile-friendly hamburger toggle** to open sidebar
-- Smooth **margin transitions** for content area sync
+```python
+import streamlit as st
 
-## 🛠️ Configurations
+st.set_page_config(
+    layout="wide",
+    initial_sidebar_state="collapsed",
+    page_title="BSC Dashboard",
+    page_icon="📊"
+)
+```
+
+- CSS overrides via `global_css.py`
+- Hides Streamlit branding & icons
+- Custom padding and margins
+- Icon loading from `assets/icons`
+
+---
+
 
 - Custom `st.set_page_config` with
   - `wide` layout
@@ -183,6 +198,14 @@ streamlit_dashboard/
 - `st.cache_data` for data fetching
 - `st.cache_resource` for sidebar and navbar rendering
 
+## 🗃️ Database
+
+- PostgreSQL
+- ORM: SQLAlchemy
+- Queries organized in `dashboard_queries.py`
+
+---
+
 ## 📈 Future Scope
 
 - Add **Google OAuth** based user authentication
@@ -194,15 +217,42 @@ streamlit_dashboard/
 - Role-based access control system
 
 ---
-## 📌 How to Run
 
-1️⃣ Install requirements
+## ✅ How to Run
+
+### 1. Setup Virtual Environment
+```bash
+// mac/linux
+python3 -m venv venv
+source venv/bin/activate
+
+// Windws
+python -m venv venv
+& .\venv\Scripts\Activate.ps1
+```
+or 
+```bash
+// mac/linux
+
+//Make it Executable
+chmod +x setup.sh
+//Run it 
+./setup.sh
+```
+```shell
+//Windows
+//Run it
+.\setup.ps1
+```
+### 2. Install dependencies
 
 ```bash
-  pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-2️⃣ Set env variables in `.env`
+### 2. Setup environment variables
+
+Create a `.env` file:
 
 ```env
 DB_HOST=localhost
@@ -213,8 +263,30 @@ DB_PASSWORD=your_password
 DEBUG=True
 ```
 
-3️⃣ Run Streamlit
+### 3. Run Streamlit
 
 ```bash
-  streamlit run main.py
+streamlit run main.py
 ```
+
+---
+
+## 🚀 Roadmap
+
+- Google OAuth login
+- Dashboard export (PNG, PDF)
+- Inventory & customer analytics modules
+- Role-based access control (RBAC)
+- Multi-language and dark mode
+
+---
+
+## 💼 License
+
+This project is confidential and developed for internal analytics.
+
+---
+
+## 🤝 Contributions
+
+Feel free to fork, PR, or raise issues if collaborating internally.
