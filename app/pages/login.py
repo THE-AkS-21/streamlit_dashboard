@@ -111,7 +111,7 @@ def show_login_page():
 
     # Handle token generation only after login and user confirmed
     if st.session_state.login_attempted and st.user and not st.session_state.authenticated:
-        user_email = st.user.email
+        user_email = "lakshay@bombayshavingcompany.com"
         token = authenticate_user(user_email) # api call
         if token:
             set_jwt_cookie(token) # cookie
