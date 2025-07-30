@@ -164,7 +164,7 @@ def show_dashboard():
         # ── Group By Dropdown ──
         with f_col2:
             group_by_option = st.selectbox(
-                "",
+                label="",
                 options=["Day", "Month", "Year"],
                 index=0,
                 key="group_by"
