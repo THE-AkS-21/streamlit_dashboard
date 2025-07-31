@@ -426,8 +426,7 @@ def apply_global_styles():
         font-weight: 500;
         color: var(--text-main, #111);
         text-align: right;
-    }}
-        
+    }}  
 
     /* ===== Buttons ===== */
     /* All Streamlit buttons */

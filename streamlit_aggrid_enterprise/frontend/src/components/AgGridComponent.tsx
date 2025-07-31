@@ -1,13 +1,12 @@
 import React, { useRef, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { ModuleRegistry } from "ag-grid-community";
+import {ModuleRegistry, themeMaterial} from "ag-grid-community";
 import { IntegratedChartsModule } from "ag-grid-enterprise";
 import { AgChartsEnterpriseModule } from "ag-charts-enterprise";
 
-
-
 import "ag-grid-enterprise";
-import "ag-grid-community/styles/ag-grid.css";
+import myTheme from "../styles/agGridTheme";
+// import "ag-grid-community/styles/ag-grid.css";
 // import "ag-grid-community/styles/ag-theme-alpine.css";
 // import "ag-grid-community/styles/ag-theme-quartz.css"; // Uncomment if you prefer Quartz
 
@@ -112,24 +111,25 @@ const AgGridApp = () => {
   }, [rowData]);
 
   return (
-    <div className="ag-theme-alpine" style={{ height: 600, width: "100%" }}>
+    <div style={{ height: 600, width: "100%" }}>
       <AgGridReact
         ref={gridRef}
         rowData={rowData}
         columnDefs={columnDefs}
+        theme={myTheme}
         defaultColDef={{
           editable: true,
           sortable: true,
           resizable: true,
           filter: true,
+          enableCharts: true,
           enableRowGroup: true,
           enableValue: true,
-          suppressHeaderMenuButton: true
+          suppressHeaderMenuButton: false
         }}
-        enableCharts={true}
         cellSelection={true}
         animateRows={true}
-        suppressAggFuncInHeader={true}
+        suppressAggFuncInHeader={false}
         pagination={true}
         paginationPageSize={50}
         rowGroupPanelShow="always"
@@ -147,7 +147,7 @@ const AgGridApp = () => {
               toolPanel: "agFiltersToolPanel",
             },
           ],
-          defaultToolPanel: "columns",
+          // defaultToolPanel: "columns",
         }}
         popupParent={document.body}
       />

@@ -12,8 +12,10 @@ type ChartDataPoint = {
 };
 
 const ChartApp = () => {
+
   const rowData = window.gridData || [];
 
+  // const rowData = data || [];
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
 
   useEffect(() => {
