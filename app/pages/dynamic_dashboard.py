@@ -15,19 +15,18 @@ def _load_dashboard_metadata(start_date: str, end_date: str):
     return db.execute_query(query, params)
 
 def get_dashboard_metadata(start_date: str, end_date: str):
-    meta_key = f"dashboard_metadata_{start_date}_{end_date}"
-
-    if meta_key not in st.session_state:
-        st.session_state[meta_key] = _load_dashboard_metadata(start_date, end_date)
-
-    return st.session_state[meta_key]
+    key = f"dashboard_metadata_{start_date}_{end_date}"
+    if key not in st.session_state:
+        st.session_state[key] = _load_dashboard_metadata(start_date, end_date)
+    return st.session_state[key]
 
 def render_content():
     render = Render()
 
-    #---------------------START INJECTING COMPONENTS--------------------------#
+    #------------------------ADD CONTENT-----------------------------#
 
-    render.title('BOMBAY SHAVING COMPANY')
+    render.title("BOMBAY SHAVING COMPANY")
+
     render.filter()
     render.metric()
     render.grid()
@@ -35,23 +34,12 @@ def render_content():
 def show_dynamic_dashboard():
     apply_global_styles()
 
-    # Step 1: Get or set default filter dates in session
-    if "filter_start" not in st.session_state:
-        st.session_state["filter_start"] = DEFAULT_START_DATE
-    if "filter_end" not in st.session_state:
-        st.session_state["filter_end"] = datetime.today().date()
+    st.session_state.setdefault("filter_start", DEFAULT_START_DATE)
+    st.session_state.setdefault("filter_end", DEFAULT_END_DATE)
 
     start_date = st.session_state["filter_start"]
     end_date = st.session_state["filter_end"]
 
-    # Step 2: Load dashboard metadata based on current filter dates
-    metadata_df = get_dashboard_metadata(start_date, end_date)
-    st.session_state["metadata_df"] = metadata_df
-
-    # Step 3: Store start and end range from metadata if needed
-    if "start_date" not in st.session_state:
-        st.session_state["start_date"] = DEFAULT_START_DATE
-    if "end_date" not in st.session_state:
-        st.session_state["end_date"] = DEFAULT_END_DATE
+    st.session_state["metadata_df"] = get_dashboard_metadata(start_date, end_date)
 
     render_content()
