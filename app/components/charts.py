@@ -85,10 +85,10 @@ class ChartComponent:
                     padding-right: 1rem;
                     padding-bottom: 1rem;
                     border-radius: 10px;
-                    justify-content: flex-start; /* ⬅️ aligns items from left to right */
+                    justify-content: flex-start; 
                     align-items: center;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-                    overflow-x: auto; /* ⬅️ horizontal scroll if cards overflow */
+                    overflow-x: auto; 
                 }
                 .dynamic-metric-card-container:hover {
                     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);  /* Tailwind's blue-500 */
@@ -104,10 +104,10 @@ class ChartComponent:
                     padding-left: 2rem;
                     padding-right: 3rem;
                     display: flex;
-                    flex-direction: column;        /* ⬅️ Stack children vertically */
-                    justify-content: center;       /* ⬅️ Center vertically */
+                    flex-direction: column;        
+                    justify-content: center;       
                     align-items: center;
-                    flex-shrink: 0;  /* ⬅️ Prevents cards from shrinking in overflow */
+                    flex-shrink: 0;  
                 }
                 .dynamic-metric-card:hover {
                     box-shadow: 0 4px 12px rgba(173, 216, 230, 0.6);
@@ -163,7 +163,6 @@ class ChartComponent:
                 {cards_html}
             </div>
             """
-
         # Render using components.html()
         components.html(full_html, height=250)  # adjust height if needed
 
