@@ -40,7 +40,6 @@ const AgGridApp = () => {
         return {
           ...base,
           headerName: "CM2 %",
-          pinned: "left",
           cellStyle: percentageColorStyle([25, 20, 15, 10, 5], [
             "#006400",
             "#228B22",
@@ -58,7 +57,6 @@ const AgGridApp = () => {
         return {
           ...base,
           headerName: "CM1 %",
-          pinned: "left",
           cellStyle: percentageColorStyle([50, 45, 40, 35, 30], [
             "#006400",
             "#228B22",
@@ -76,7 +74,6 @@ const AgGridApp = () => {
         return {
           ...base,
           headerName: "GMGP %",
-          pinned: "left",
           cellStyle: percentageColorStyle([55, 50, 45, 40, 35], [
             "#006400",
             "#228B22",
