@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from typing import List, Dict, Any
+import streamlit.components.v1 as components  # ✅ Correct — lets you use components.html()
 from app.utils.formatters import Formatters
 
 
@@ -65,6 +66,106 @@ class ChartComponent:
                 """,
                 unsafe_allow_html=True
             )
+
+    # ------------------- 🔹 DYNAMIC METRIC CARDS -------------------
+    @staticmethod
+    def dynamic_metric_cards(metrics: List[Dict[str, Any]]) -> None:
+        style = """
+            <style>
+                .dynamic-metric-card-container {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 1rem;
+                    background: white;
+                    flex-wrap: nowrap;  /* Optional: disable wrapping */
+                    height: 150px;
+                    width: 100%;
+                    padding-top: 1rem;
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                    padding-bottom: 1rem;
+                    border-radius: 10px;
+                    justify-content: flex-start; /* ⬅️ aligns items from left to right */
+                    align-items: center;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+                    overflow-x: auto; /* ⬅️ horizontal scroll if cards overflow */
+                }
+                .dynamic-metric-card-container:hover {
+                    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);  /* Tailwind's blue-500 */
+                    transform: scale(1.01);
+                }
+                .dynamic-metric-card {
+                    background: white;
+                    padding: 0.2rem;
+                    height: 150px;
+                    width: 200px;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+                    padding-left: 2rem;
+                    padding-right: 3rem;
+                    display: flex;
+                    flex-direction: column;        /* ⬅️ Stack children vertically */
+                    justify-content: center;       /* ⬅️ Center vertically */
+                    align-items: center;
+                    flex-shrink: 0;  /* ⬅️ Prevents cards from shrinking in overflow */
+                }
+                .dynamic-metric-card:hover {
+                    box-shadow: 0 4px 12px rgba(173, 216, 230, 0.6);
+                    transform: scale(1.01);
+                    background: #f8f9fc;
+                    cursor: pointer;
+                }
+                .dynamic-metric-label {
+                    font-size: 1rem;
+                    color: var(--text-secondary, #666);
+                    font-weight: 500;
+                    text-align: centre;
+                }
+                .dynamic-metric-label:hover{
+                    transform: scale(1.01);
+                    color: var(--accent, #004B87);
+                }
+                .dynamic-metric-value {
+                    font-size: 2rem;
+                    font-weight: 500;
+                    color: var(--text-main, #111);
+                    text-align: centre;
+                }
+                .dynamic-metric-value:hover{
+                    transform: scale(1.01);
+                    color: var(--accent, #00AEEF);
+                }
+                .dynamic-metric-card-container::-webkit-scrollbar {
+                    height: 3px;
+                }
+                .dynamic-metric-card-container::-webkit-scrollbar-thumb {
+                    background-color: rgba(59, 130, 246, 0.4);
+                    border-radius: 4px;
+                }
+            </style>
+            """
+        # Build cards HTML
+        cards_html = ""
+        for metric in metrics:
+            label = metric.get("label", "N/A")
+            value = metric.get("value", "N/A")
+            cards_html += f"""
+                    <div class="dynamic-metric-card">
+                        <span class="dynamic-metric-label">{label}</span>
+                        <span class="dynamic-metric-value">{value}</span>
+                    </div>
+                """
+
+        # Wrap in full HTML with CSS
+        full_html = f"""
+            {style}
+            <div class="dynamic-metric-card-container">
+                {cards_html}
+            </div>
+            """
+
+        # Render using components.html()
+        components.html(full_html, height=250)  # adjust height if needed
 
     # ------------------- 🔹 METRIC BAR CHART -------------------
 
