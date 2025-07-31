@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import ChartComponent from "../components/ChartComponent";
+import AgChart from "../components/ChartComponent";
 
 // AG Grid Enterprise Setup
 import { ModuleRegistry } from "ag-grid-community";
@@ -16,4 +16,4 @@ const gridData: any = (window as any).gridData || [];
 
 const container: HTMLElement = document.getElementById("root")!;
 const root = createRoot(container);
-root.render(<ChartComponent data={gridData} />);
+root.render(<AgChart data={gridData} />);
