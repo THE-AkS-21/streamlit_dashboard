@@ -13,6 +13,10 @@ def render_sidebar(page):
                 <img src="{load_icon('dashboard.svg')}" class="sidebar-icon">
                 <span class="sidebar-label">Dashboard</span>
             </a>
+            <a href="/?page=dynamic_dashboard" target="_self" class="sidebar-item {'current-page' if page == 'dynamic_dashboard' else ''}">
+                <img src="{load_icon('dynamic_dashboard.svg')}" class="sidebar-icon">
+                <span class="sidebar-label">DYNAMIC</span>
+            </a>
             <a href="/?page=Analytics" target="_self" class="sidebar-item {'current-page' if page == 'Analytics' else ''}">
                 <img src="{load_icon('analytics.svg')}" class="sidebar-icon">
                 <span class="sidebar-label">Analytics</span>

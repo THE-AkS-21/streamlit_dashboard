@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import time
-from app.components.aggrid_renderer import render_aggrid
+# from app.components.aggrid_renderer import render_aggrid
 
 def show_upload():
     st.title("IMPORT")

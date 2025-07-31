@@ -50,6 +50,22 @@ class ChartComponent:
                 unsafe_allow_html=True
             )
 
+    # ------------------- 🔹 CUSTOM METRIC CARDS -------------------
+    @staticmethod
+    def custom_metric_cards(metrics: List[Dict[str, Any]]) -> None:
+        for metric in metrics:
+            label = metric.get("label", "N/A")
+            value = metric.get("value", "N/A")
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <span class="metric-label">{label}:</span>
+                    <span class="metric-value">{value}</span>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
     # ------------------- 🔹 METRIC BAR CHART -------------------
 
     def metric_bar_chart(self, x_axis: str, y_axis: list[str], key="metric_unit_chart"):

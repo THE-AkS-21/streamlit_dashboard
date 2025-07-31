@@ -6,7 +6,7 @@ from app.components.layout import render_layout
 from app.components.loading_screen import loading_screen
 from app.config import init_page_config
 from app.constants import pages
-from app.pages import dashboard, analytics, settings
+from app.pages import dashboard, analytics, settings, dynamic_dashboard, upload
 from app.pages.login import show_login_page
 from app.utils.global_css import apply_global_styles
 
@@ -49,6 +49,10 @@ def render_page(page_name: str):
         dashboard.show_dashboard()
     elif page_name == pages.ANALYTICS:
         analytics.show_analytics()
+    elif page_name == pages.DYNAMIC_DASHBOARD:
+        dynamic_dashboard.show_dynamic_dashboard()
+    elif page_name == pages.UPLOAD:
+        upload.show_upload()
     elif page_name == pages.SETTINGS:
         settings.show_settings()
     else:

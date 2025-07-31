@@ -51,12 +51,9 @@ class DashboardQueries:
     """
 
     GET_DASHBOARD_FILTER_METADATA = """
-    SELECT DISTINCT category, 
-        subcategory, 
-        whsku AS sku, 
-        MAX(valuationdate::date) OVER () AS last_date
+    SELECT *
     FROM bsc.centraldsrdumpv2
-    ORDER BY category, subcategory, sku
+    WHERE valuationdate::date BETWEEN CAST(:start_date AS DATE) AND CAST(:end_date AS DATE)
     """
 
     GET_DASHBOARD_FILTERED_CHART_DATA = """
