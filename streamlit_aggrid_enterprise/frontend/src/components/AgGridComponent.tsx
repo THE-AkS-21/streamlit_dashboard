@@ -8,7 +8,8 @@ import { AgChartsEnterpriseModule } from "ag-charts-enterprise";
 
 import "ag-grid-enterprise";
 import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
+// import "ag-grid-community/styles/ag-theme-alpine.css";
+// import "ag-grid-community/styles/ag-theme-quartz.css"; // Uncomment if you prefer Quartz
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([
@@ -98,7 +99,6 @@ const AgGridApp = () => {
               day: "numeric",
             });
           },
-          pinned: "left",
           headerClass: "ag-header-bold",
         };
       }
