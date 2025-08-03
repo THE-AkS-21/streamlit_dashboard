@@ -91,7 +91,7 @@ class Render:
             {"label": "DAYS", "value": Formatters.number(num_days)},
         ])
 
-    def grid(self):
+    def grid_chart(self):
         df = st.session_state.get("filtered_data", pd.DataFrame())
         if df.empty:
             st.warning("⚠️ No records found.")
@@ -106,21 +106,160 @@ class Render:
         with tab2:
             self.chart()
 
+    def grid(self):
+        df = st.session_state.get("filtered_data", pd.DataFrame())
+        if df.empty:
+            st.warning("⚠️ No records found.")
+            return
+
+        with show_loader("Loading data..."):
+            render_aggrid(df)
+
     def chart(self):
         df = st.session_state.get("filtered_data", pd.DataFrame())
         if df.empty:
             st.warning("⚠️ No records to chart.")
             return
 
-        numeric_columns = df.select_dtypes(include=["number"]).columns.tolist()
-        col_a, col_b, col_c = st.columns([3, 2, 3])
-
-        with col_a:
-            y1_cols = st.multiselect("Select Y-Axis 1 (Left)", numeric_columns, default=["units", "offtake"])
-        with col_b:
-            chart_type = st.selectbox("Chart Type", ["Area", "Line", "Bar", "Scatter", "Spline", "Step", "Dot", "Combo"])
-        with col_c:
-            y2_cols = st.multiselect("Select Y-Axis 2 (Right)", numeric_columns, default=["asp"])
+        # numeric_columns = [col for col in df.columns if pd.api.types.is_numeric_dtype(df[col])]
+        # col_a, col_b, col_c = st.columns([3, 2, 3])
+        #
+        # with col_a:
+        #     y1_cols = st.multiselect("Select Y-Axis 1 (Left)", numeric_columns, default=["units", "offtake"], key="y_axis_left_")
+        # with col_b:
+        #     chart_type = st.selectbox("Chart Type", ["Area", "Line", "Bar", "Scatter", "Spline", "Step", "Dot", "Combo"])
+        # with col_c:
+        #     y2_cols = st.multiselect("Select Y-Axis 2 (Right)", numeric_columns, default=["asp"], key="y_axis_right_")
 
         with show_loader("Rendering chart..."):
             render_chart(df)
+
+    @staticmethod
+    def compare_charts(dataframe_1, dataframe_2):
+        df_1 = dataframe_1.copy()
+        df_2 = dataframe_2.copy()
+
+        # Get common columns
+        common_columns = list(set(df_1.columns).intersection(df_2.columns))
+
+        # Multiselect to choose which columns to filter on
+        selected_cols = st.multiselect(
+            "Select common columns to filter",
+            options=common_columns,
+            default=[]
+        )
+
+        # Apply filters dynamically
+        filters = {}
+        for col in selected_cols:
+            unique_values = sorted(pd.concat([df_1[col], df_2[col]]).dropna().unique())
+            selected_values = st.multiselect(f"Filter by values in '{col}'", unique_values)
+            if selected_values:
+                filters[col] = selected_values
+
+        # Apply filters to both DataFrames
+        for col, values in filters.items():
+            df_1 = df_1[df_1[col].isin(values)]
+            df_2 = df_2[df_2[col].isin(values)]
+
+
+        # col_1, col_2 = st.columns([1, 1])
+        #
+        # with col_1:
+        #     with show_loader("Loading data..."):
+        #         render_chart(df_1)
+        #
+        # with col_2:
+        #     with show_loader("Loading data..."):
+        #         render_chart(df_2)
+
+    @staticmethod
+    def compare_grids(dataframe_1, dataframe_2):
+        df_1 = dataframe_1.copy()
+        df_2 = dataframe_2.copy()
+
+        # Get common columns
+        common_columns = list(set(df_1.columns).intersection(df_2.columns))
+
+        # Multiselect to choose which columns to filter on
+        selected_cols = st.multiselect(
+            "Select common columns to filter",
+            options=common_columns,  # Uses the list directly
+            default=[]
+        )
+
+        # Apply filters dynamically
+        filters = {}
+        for col in selected_cols:
+            unique_values = sorted(pd.concat([df_1[col], df_2[col]]).dropna().unique())
+            selected_values = st.multiselect(f"Filter by values in '{col}'", unique_values)
+            if selected_values:
+                filters[col] = selected_values
+
+        # Apply filters to both DataFrames
+        for col, values in filters.items():
+            df_1 = df_1[df_1[col].isin(values)]
+            df_2 = df_2[df_2[col].isin(values)]
+
+        col_1, col_2 = st.columns([1, 1])
+
+        with col_1:
+            with show_loader("Loading data..."):
+                render_aggrid(df_1)
+
+        with col_2:
+            with show_loader("Loading data..."):
+                render_aggrid(df_2)
+
+    @staticmethod
+    def compare_grids_charts(dataframe_1, dataframe_2):
+        df_1 = dataframe_1.copy()
+        df_2 = dataframe_2.copy()
+
+        # Get common columns
+        common_columns = list(set(df_1.columns).intersection(df_2.columns))
+
+        # Multiselect to choose which columns to filter on
+        selected_cols = st.multiselect(
+            "Select common columns to filter",
+            options=common_columns,  # Uses the list directly
+            default=[]
+        )
+
+        # Apply filters dynamically
+        filters = {}
+        for col in selected_cols:
+            unique_values = sorted(pd.concat([df_1[col], df_2[col]]).dropna().unique())
+            selected_values = st.multiselect(f"Filter by values in '{col}'", unique_values)
+            if selected_values:
+                filters[col] = selected_values
+
+        # Apply filters to both DataFrames
+        for col, values in filters.items():
+            df_1 = df_1[df_1[col].isin(values)]
+            df_2 = df_2[df_2[col].isin(values)]
+
+        col_1, col_2 = st.columns([1, 1])
+
+        with col_1:
+
+            tab1, tab2 = st.tabs(["DATA", "CHART"])
+
+            with tab1:
+                with show_loader("Loading data..."):
+                    render_aggrid(df_1)
+
+            with tab2:
+                pass
+                # self.chart()
+
+        with col_2:
+            tab1, tab2 = st.tabs(["DATA", "CHART"])
+
+            with tab1:
+                with show_loader("Loading data..."):
+                    render_aggrid(df_1)
+
+            with tab2:
+                pass
+                # self.chart()

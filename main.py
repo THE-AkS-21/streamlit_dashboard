@@ -88,7 +88,6 @@ def main():
 
     # Close divs
     st.markdown('</div></div>', unsafe_allow_html=True)
-    st.markdown('</div></div>', unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
