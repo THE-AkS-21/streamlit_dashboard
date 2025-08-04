@@ -30,16 +30,27 @@ def get_filtered_data(category, subcategory, sku, start_date, end_date):
     return db.execute_query(query, filters)
 
 class Render:
-    def __init__(self):
-        self.df = st.session_state.get("filtered_data")
+    def __init__(self, page_key: str, start_date, end_date):
+        self.page_key = page_key # Added page_key to self
+        self.df = st.session_state.get(f"{self.page_key}_filtered_data")
         if self.df is None or self.df.empty:
-            st.warning("⚠️ No Data Found")
+            # Build the key dynamically using the provided dates
+            key = f"dashboard_metadata_{start_date}_{end_date}"
+
+            # Check if the key actually exists before trying to access it
+            if key in st.session_state:
+                st.session_state[f"{self.page_key}_filtered_data"] = st.session_state[key]
+            else:
+                # Handle the case where the metadata hasn't been loaded yet
+                st.warning("Metadata not found. Please ensure data is loaded before rendering.")
+                st.session_state[f"{self.page_key}_filtered_data"] = pd.DataFrame()  # Initialize as empty
 
     def title(self, title):
         st.title(title)
 
     def filter(self):
-        metadata_df = st.session_state["metadata_df"]
+
+        metadata_df = st.session_state[f"{self.page_key}_filtered_data"]
 
         categories = sorted(metadata_df['category'].dropna().unique())
         subcategories = sorted(metadata_df['subcategory'].dropna().unique())
@@ -47,36 +58,36 @@ class Render:
         max_date = DEFAULT_END_DATE
 
         # Load session defaults or assign fallbacks
-        start_date = st.session_state.get("filter_start", DEFAULT_START_DATE)
-        end_date = st.session_state.get("filter_end", max_date)
+        start_date = st.session_state.get(f"{self.page_key}_filter_start", DEFAULT_START_DATE)
+        end_date = st.session_state.get(f"{self.page_key}_filter_end", max_date)
 
         col1, col2, col3, col4, col5 = st.columns([1.5, 1.5, 2, 1.5, 1.5], gap="small")
 
-        category = col1.selectbox("Category", ["None"] + categories, key="filter_category")
-        subcategory = col2.selectbox("Subcategory", ["None"] + subcategories, key="filter_subcategory")
-        sku = col3.selectbox("SKU", ["None"] + skus, key="filter_sku")
-        col4.date_input("Start Date", value=start_date, key="filter_start")
-        col5.date_input("End Date", value=end_date, key="filter_end")
+        category = col1.selectbox("Category", ["None"] + categories, key=f"{self.page_key}_filter_category")
+        subcategory = col2.selectbox("Subcategory", ["None"] + subcategories, key=f"{self.page_key}_filter_subcategory")
+        sku = col3.selectbox("SKU", ["None"] + skus, key=f"{self.page_key}_filter_sku")
+        col4.date_input("Start Date", value=start_date, key=f"{self.page_key}_filter_start")
+        col5.date_input("End Date", value=end_date, key=f"{self.page_key}_filter_end")
 
         # Read current filter values from session_state
-        start_date = st.session_state["filter_start"]
-        end_date = st.session_state["filter_end"]
+        start_date = st.session_state[f"{self.page_key}_filter_start"]
+        end_date = st.session_state[f"{self.page_key}_filter_end"]
 
         filters = (category, subcategory, sku, start_date, end_date)
         filter_key = f"{category}_{subcategory}_{sku}_{start_date}_{end_date}"
 
-        if st.session_state.get("last_filter_key") != filter_key:
+        if st.session_state.get(f"{self.page_key}_last_filter_key") != filter_key:
             df = get_filtered_data(*filters)
 
             # Clean up date columns
             for col in df.select_dtypes(include=["datetime64[ns]"]).columns:
                 df[col] = df[col].dt.date
 
-            st.session_state["filtered_data"] = df
-            st.session_state["last_filter_key"] = filter_key
+            st.session_state[f"{self.page_key}_filtered_data"] = df
+            st.session_state[f"{self.page_key}_last_filter_key"] = filter_key
 
     def metric(self):
-        df = st.session_state.get("filtered_data", pd.DataFrame())
+        df = st.session_state.get(f"{self.page_key}_filtered_data", pd.DataFrame())
         if df.empty:
             st.warning("⚠️ No data to calculate metrics.")
             return
@@ -92,7 +103,7 @@ class Render:
         ])
 
     def grid_chart(self):
-        df = st.session_state.get("filtered_data", pd.DataFrame())
+        df = st.session_state.get(f"{self.page_key}_filtered_data", pd.DataFrame())
         if df.empty:
             st.warning("⚠️ No records found.")
             return
@@ -107,7 +118,7 @@ class Render:
             self.chart()
 
     def grid(self):
-        df = st.session_state.get("filtered_data", pd.DataFrame())
+        df = st.session_state.get(f"{self.page_key}_filtered_data", pd.DataFrame())
         if df.empty:
             st.warning("⚠️ No records found.")
             return
@@ -116,7 +127,7 @@ class Render:
             render_aggrid(df)
 
     def chart(self):
-        df = st.session_state.get("filtered_data", pd.DataFrame())
+        df = st.session_state.get(f"{self.page_key}_filtered_data", pd.DataFrame())
         if df.empty:
             st.warning("⚠️ No records to chart.")
             return
@@ -136,8 +147,8 @@ class Render:
 
     @staticmethod
     def compare_charts(dataframe_1, dataframe_2):
-        df_1 = dataframe_1.copy()
-        df_2 = dataframe_2.copy()
+        df_1 = dataframe_1
+        df_2 = dataframe_2
 
         # Get common columns
         common_columns = list(set(df_1.columns).intersection(df_2.columns))
@@ -175,8 +186,8 @@ class Render:
 
     @staticmethod
     def compare_grids(dataframe_1, dataframe_2):
-        df_1 = dataframe_1.copy()
-        df_2 = dataframe_2.copy()
+        df_1 = dataframe_1
+        df_2 = dataframe_2
 
         # Get common columns
         common_columns = list(set(df_1.columns).intersection(df_2.columns))
@@ -213,8 +224,8 @@ class Render:
 
     @staticmethod
     def compare_grids_charts(dataframe_1, dataframe_2):
-        df_1 = dataframe_1.copy()
-        df_2 = dataframe_2.copy()
+        df_1 = dataframe_1
+        df_2 = dataframe_2
 
         # Get common columns
         common_columns = list(set(df_1.columns).intersection(df_2.columns))
