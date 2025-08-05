@@ -1,108 +1,113 @@
 // src/ChartApp.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { AgCharts } from 'ag-charts-react';
+import { AgChartOptions, AgCartesianSeriesOptions } from 'ag-charts-community';
 import dayjs from 'dayjs';
 
-type ChartDataPoint = {
-  name: string;
-  units: number;
-  offtake: number;
-  asp: number;
+// Define interfaces for clear type-checking
+interface ChartDataPoint {
   valuationdate: string;
-};
+  [key: string]: any; // Allow any other keys for dynamic data
+}
+
+interface SeriesConfig {
+  yKey: string;
+  type: 'line' | 'bar' | 'area' | 'scatter';
+  yName?: string;
+  yAxisKey?: 'leftAxis' | 'rightAxis';
+}
+
+// A palette of colors for dynamic series
+const COLOR_PALETTE = ['#2196f3', '#ef5350', '#66bb6a', '#ffca28', '#ab47bc', '#78909c'];
 
 const ChartApp = () => {
+  // --- 1. Read Data and Configuration from Window ---
+  const rowData: any[] = (window as any).gridData || [];
 
-  const rowData = window.gridData || [];
+  // Read series configuration from window, with a fallback to a default
+  const seriesConfig: SeriesConfig[] = (window as any).chartConfig || [
+    { yKey: 'units', type: 'bar', yName: 'Units', yAxisKey: 'leftAxis' },
+    { yKey: 'asp', type: 'line', yName: 'ASP (₹)', yAxisKey: 'rightAxis' },
+  ];
 
-  // const rowData = data || [];
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
 
+  // --- 2. Process Raw Data (Unchanged) ---
   useEffect(() => {
     if (rowData?.length > 0) {
-      const transformed = rowData.map((row) => ({
-        valuationdate: row.valuationdate
-          ? dayjs(Number(row.valuationdate)).format('YYYY-MM-DD')
-          : 'N/A',
-        name: row.sku || row.name || 'N/A',
-        units: Number(row.units) || 0,
-        offtake: Number(row.offtake) || 0,
-        asp: Number(row.asp) || 0,
-      }));
+      const transformed = rowData.map((row) => {
+        const point: ChartDataPoint = {
+          valuationdate: row.valuationdate ? dayjs(Number(row.valuationdate)).format('YYYY-MM-DD') : 'N/A',
+        };
+        // Dynamically add all yKeys from the config to the data point
+        seriesConfig.forEach(config => {
+          point[config.yKey] = Number(row[config.yKey]) || 0;
+        });
+        return point;
+      });
       setChartData(transformed);
     }
-  }, [rowData]);
+  }, [rowData, seriesConfig]);
 
-  const chartOptions = useMemo(() => ({
-    title: {
-      text: 'Units, Offtake, and ASP over Time',
-      fontSize: 18,
-    },
-    data: chartData,
-    series: [
-      {
-        type: 'bar',
+
+  // --- 3. Dynamically Generate Chart Options ---
+  const chartOptions = useMemo<AgChartOptions>(() => {
+    // Generate series based on the config array
+    const dynamicSeries: AgCartesianSeriesOptions[] = seriesConfig.map((config, index) => {
+      const color = COLOR_PALETTE[index % COLOR_PALETTE.length];
+      return {
+        type: config.type,
         xKey: 'valuationdate',
-        yKey: 'units',
-        yName: 'Units',
-        yAxisKey: 'leftAxis',
-        fill: '#2196f3',
+        yKey: config.yKey,
+        yName: config.yName || config.yKey, // Fallback yName to yKey
+        yAxisKey: config.yAxisKey || 'leftAxis', // Default to left axis
+        stroke: color, // For lines
+        fill: color,   // For bars/areas
+        marker: { enabled: config.type === 'line' },
         tooltip: {
-          renderer: ({ datum }) => ({ content: `Units: ${datum.units}` }),
+          renderer: ({ datum }) => ({
+            content: `${config.yName || config.yKey}: ${datum[config.yKey]}`,
+          }),
         },
-      },
-      {
-        type: 'bar',
-        xKey: 'valuationdate',
-        yKey: 'offtake',
-        yName: 'Offtake',
-        yAxisKey: 'leftAxis',
-        fill: '#66bb6a',
-        tooltip: {
-          renderer: ({ datum }) => ({ content: `Offtake: ${datum.offtake}` }),
-        },
-      },
-      {
-        type: 'line',
-        xKey: 'valuationdate',
-        yKey: 'asp',
-        yName: 'ASP (₹)',
-        yAxisKey: 'rightAxis',
-        stroke: '#ef5350',
-        marker: { enabled: true },
-        tooltip: {
-          renderer: ({ datum }) => ({ content: `ASP: ₹${datum.asp}` }),
-        },
-      },
-    ],
-    axes: [
-      {
+      };
+    });
+
+    // Generate axes based on which ones are needed by the series
+    const requiredYAxes = new Set(seriesConfig.map(s => s.yAxisKey || 'leftAxis'));
+    const dynamicAxes = [
+      { // Bottom (X) axis is always required
         type: 'category',
         position: 'bottom',
-        title: { text: 'Valuation Date' },
-        label: {
-          rotation: 45,
-        },
+        title: { text: 'Date' },
+        label: { rotation: 45, avoidCollisions: true },
       },
-      {
+    ];
+
+    if (requiredYAxes.has('leftAxis')) {
+      dynamicAxes.push({
         type: 'number',
         key: 'leftAxis',
         position: 'left',
-        title: { text: 'Units & Offtake' },
-      },
-      {
+        title: { text: 'Primary Value' },
+      });
+    }
+    if (requiredYAxes.has('rightAxis')) {
+      dynamicAxes.push({
         type: 'number',
         key: 'rightAxis',
         position: 'right',
-        title: { text: 'ASP (₹)' },
-      },
-    ],
-    legend: {
-      position: 'bottom',
-      item: { marker: { shape: 'circle' } },
-    },
-    padding: { top: 20, bottom: 40 },
-  }), [chartData]);
+        title: { text: 'Secondary Value (e.g., ASP)' },
+      });
+    }
+
+    return {
+      title: { text: 'Dynamic Chart' },
+      data: chartData,
+      series: dynamicSeries,
+      axes: dynamicAxes,
+      legend: { position: 'bottom' },
+    };
+  }, [chartData, seriesConfig]);
 
   return (
     <div style={{ height: 1000, width: '100%', marginTop: '2rem' }}>

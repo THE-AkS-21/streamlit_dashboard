@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from typing import List, Dict, Any
 import streamlit.components.v1 as components  # ✅ Correct — lets you use components.html()
 from app.utils.formatters import Formatters
+from streamlit_aggrid_bridge.MyAgGridComponent import render_chart
 
 
 def format_axis_ticks(series):
@@ -50,6 +51,100 @@ class ChartComponent:
                 """,
                 unsafe_allow_html=True
             )
+
+    # ------------------- 🔹 METRIC CARDS -------------------
+
+    @staticmethod
+    def charts_metric(metrics: List[Dict[str, Any]]) -> None:
+        style = """
+                        <style>
+                            .dynamic-chart-metric-container {
+                                display: flex;
+                                flex-direction: row;
+                                gap: 1rem;
+                                background: white;
+                                flex-wrap: nowrap;  /* Optional: disable wrapping */
+                                height: 150px;
+                                width: 100%;
+                                padding-top: 1rem;
+                                padding-left: 1rem;
+                                padding-right: 1rem;
+                                padding-bottom: 1rem;
+                                border-radius: 10px;
+                                justify-content: flex-start; 
+                                align-items: center;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+                                overflow-x: auto; 
+                            }
+                            .dynamic-chart-metric-container:hover {
+                                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);  /* Tailwind's blue-500 */
+                                transform: scale(1.01);
+                            }
+                            .dynamic-chart-metric-card {
+                                background: white;
+                                padding: 0.2rem;
+                                height: 150px;
+                                width: 200px;
+                                border-radius: 10px;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+                                padding-left: 2rem;
+                                padding-right: 3rem;
+                                display: flex;
+                                flex-direction: column;        
+                                justify-content: center;       
+                                align-items: center;
+                                flex-shrink: 0;  
+                            }
+                            .dynamic-chart-metric-card:hover {
+                                box-shadow: 0 4px 12px rgba(173, 216, 230, 0.6);
+                                transform: scale(1.01);
+                                background: #f8f9fc;
+                                cursor: pointer;
+                            }
+                            .dynamic-chart-metric-label {
+                                font-size: 1rem;
+                                color: var(--text-secondary, #666);
+                                font-weight: 500;
+                                text-align: centre;
+                            }
+                            .dynamic-chart-metric-label:hover{
+                                transform: scale(1.01);
+                                color: var(--accent, #004B87);
+                            }
+                            .dynamic-chart-metric-value {
+                                font-size: 2rem;
+                                font-weight: 500;
+                                color: var(--text-main, #111);
+                                text-align: centre;
+                            }
+                            .dynamic-chart-metric-value:hover{
+                                transform: scale(1.01);
+                                color: var(--accent, #00AEEF);
+                            }
+                            .dynamic-chart-metric-container::-webkit-scrollbar {
+                                height: 3px;
+                            }
+                            .dynamic-chart-metric-container::-webkit-scrollbar-thumb {
+                                background-color: rgba(59, 130, 246, 0.4);
+                                border-radius: 4px;
+                            }
+                        </style>
+                        """
+        # Build cards HTML
+        cards_html = ""
+        for metric in metrics:
+            cards_html += f"""<div class='dynamic-chart-metric-card'>
+                        render_chart()
+                        """
+        # Wrap in full HTML with CSS
+        full_html = f"""
+                    {style}
+                    <div class="dynamic-metric-card-container">
+                        {cards_html}
+                    </div>
+                    """
+        # Render using components.html()
+        components.html(full_html, height=250)  # adjust height if needed
 
     # ------------------- 🔹 CUSTOM METRIC CARDS -------------------
     @staticmethod

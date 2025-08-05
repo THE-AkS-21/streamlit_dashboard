@@ -31,15 +31,15 @@ def get_filtered_data(category, subcategory, sku, start_date, end_date):
 
 class Render:
     def __init__(self, page_key: str, start_date, end_date):
+        # Build the key dynamically using the provided dates
+        self.key = f"dashboard_metadata_{start_date}_{end_date}"
         self.page_key = page_key # Added page_key to self
         self.df = st.session_state.get(f"{self.page_key}_filtered_data")
         if self.df is None or self.df.empty:
-            # Build the key dynamically using the provided dates
-            key = f"dashboard_metadata_{start_date}_{end_date}"
 
             # Check if the key actually exists before trying to access it
-            if key in st.session_state:
-                st.session_state[f"{self.page_key}_filtered_data"] = st.session_state[key]
+            if self.key in st.session_state:
+                st.session_state[f"{self.page_key}_filtered_data"] = st.session_state[self.key]
             else:
                 # Handle the case where the metadata hasn't been loaded yet
                 st.warning("Metadata not found. Please ensure data is loaded before rendering.")
@@ -50,7 +50,7 @@ class Render:
 
     def filter(self):
 
-        metadata_df = st.session_state[f"{self.page_key}_filtered_data"]
+        metadata_df = st.session_state[self.key]
 
         categories = sorted(metadata_df['category'].dropna().unique())
         subcategories = sorted(metadata_df['subcategory'].dropna().unique())
@@ -145,34 +145,16 @@ class Render:
         with show_loader("Rendering chart..."):
             render_chart(df)
 
+    def chart_metric(self):
+        df = st.session_state.get(f"{self.page_key}_filtered_data", pd.DataFrame())
+        if df.empty:
+            st.warning("⚠️ No data to calculate metrics.")
+            return
+
     @staticmethod
     def compare_charts(dataframe_1, dataframe_2):
         df_1 = dataframe_1
         df_2 = dataframe_2
-
-        # Get common columns
-        common_columns = list(set(df_1.columns).intersection(df_2.columns))
-
-        # Multiselect to choose which columns to filter on
-        selected_cols = st.multiselect(
-            "Select common columns to filter",
-            options=common_columns,
-            default=[]
-        )
-
-        # Apply filters dynamically
-        filters = {}
-        for col in selected_cols:
-            unique_values = sorted(pd.concat([df_1[col], df_2[col]]).dropna().unique())
-            selected_values = st.multiselect(f"Filter by values in '{col}'", unique_values)
-            if selected_values:
-                filters[col] = selected_values
-
-        # Apply filters to both DataFrames
-        for col, values in filters.items():
-            df_1 = df_1[df_1[col].isin(values)]
-            df_2 = df_2[df_2[col].isin(values)]
-
 
         # col_1, col_2 = st.columns([1, 1])
         #
@@ -189,28 +171,28 @@ class Render:
         df_1 = dataframe_1
         df_2 = dataframe_2
 
-        # Get common columns
-        common_columns = list(set(df_1.columns).intersection(df_2.columns))
-
-        # Multiselect to choose which columns to filter on
-        selected_cols = st.multiselect(
-            "Select common columns to filter",
-            options=common_columns,  # Uses the list directly
-            default=[]
-        )
-
-        # Apply filters dynamically
-        filters = {}
-        for col in selected_cols:
-            unique_values = sorted(pd.concat([df_1[col], df_2[col]]).dropna().unique())
-            selected_values = st.multiselect(f"Filter by values in '{col}'", unique_values)
-            if selected_values:
-                filters[col] = selected_values
-
-        # Apply filters to both DataFrames
-        for col, values in filters.items():
-            df_1 = df_1[df_1[col].isin(values)]
-            df_2 = df_2[df_2[col].isin(values)]
+        # # Get common columns
+        # common_columns = list(set(df_1.columns).intersection(df_2.columns))
+        #
+        # # Multiselect to choose which columns to filter on
+        # selected_cols = st.multiselect(
+        #     "Select common columns to filter",
+        #     options=common_columns,  # Uses the list directly
+        #     default=[]
+        # )
+        #
+        # # Apply filters dynamically
+        # filters = {}
+        # for col in selected_cols:
+        #     unique_values = sorted(pd.concat([df_1[col], df_2[col]]).dropna().unique())
+        #     selected_values = st.multiselect(f"Filter by values in '{col}'", unique_values)
+        #     if selected_values:
+        #         filters[col] = selected_values
+        #
+        # # Apply filters to both DataFrames
+        # for col, values in filters.items():
+        #     df_1 = df_1[df_1[col].isin(values)]
+        #     df_2 = df_2[df_2[col].isin(values)]
 
         col_1, col_2 = st.columns([1, 1])
 
@@ -227,29 +209,6 @@ class Render:
         df_1 = dataframe_1
         df_2 = dataframe_2
 
-        # Get common columns
-        common_columns = list(set(df_1.columns).intersection(df_2.columns))
-
-        # Multiselect to choose which columns to filter on
-        selected_cols = st.multiselect(
-            "Select common columns to filter",
-            options=common_columns,  # Uses the list directly
-            default=[]
-        )
-
-        # Apply filters dynamically
-        filters = {}
-        for col in selected_cols:
-            unique_values = sorted(pd.concat([df_1[col], df_2[col]]).dropna().unique())
-            selected_values = st.multiselect(f"Filter by values in '{col}'", unique_values)
-            if selected_values:
-                filters[col] = selected_values
-
-        # Apply filters to both DataFrames
-        for col, values in filters.items():
-            df_1 = df_1[df_1[col].isin(values)]
-            df_2 = df_2[df_2[col].isin(values)]
-
         col_1, col_2 = st.columns([1, 1])
 
         with col_1:
@@ -269,8 +228,9 @@ class Render:
 
             with tab1:
                 with show_loader("Loading data..."):
-                    render_aggrid(df_1)
+                    render_aggrid(df_2)
 
             with tab2:
                 pass
                 # self.chart()
+

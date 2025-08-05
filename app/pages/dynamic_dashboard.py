@@ -21,15 +21,28 @@ def get_dashboard_metadata(start_date: str, end_date: str):
     return st.session_state[key]
 
 def render_content():
-    render = Render()
+    st.session_state.setdefault("filter_start", DEFAULT_START_DATE)
+    st.session_state.setdefault("filter_end", DEFAULT_END_DATE)
 
+    # Now it is safe to access the keys
+    start_date = st.session_state["filter_start"]
+    end_date = st.session_state["filter_end"]
+
+    # Now, instantiate Render by passing the dates
+    render = Render(page_key="dynamic_dashboard", start_date=start_date, end_date=end_date)
+    metadata = _load_dashboard_metadata(start_date, end_date)
     #------------------------ADD CONTENT-----------------------------#
 
     render.title("BOMBAY SHAVING COMPANY")
 
     render.filter()
     render.metric()
-    render.grid()
+    # render.grid()
+    # render.plot_chart()
+    render.compare_grids(metadata,metadata)
+    # render.compare_charts(metadata, metadata)
+    # render.compare_grids_charts(metadata, metadata)
+    # render.grid()
 
 def show_dynamic_dashboard():
     apply_global_styles()
