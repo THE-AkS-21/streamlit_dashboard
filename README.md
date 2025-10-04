@@ -1,7 +1,7 @@
 
 # 📊 Streamlit Dashboard Project Description Template
 
-I’m building a **Streamlit-based dashboard project** for **[your brand/product/company name]** called **[Project Name]**.  
+I’m building a **Analytical Dashboard Project** for **Business Analytics** using **Python** and **Streamlit**.  
 Below are the complete details of the project so you can assist me precisely:
 
 ## 📖 Project Description:
